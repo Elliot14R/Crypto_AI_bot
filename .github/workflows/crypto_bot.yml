@@ -34,10 +34,12 @@ jobs:
           echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
           echo "CRYPTOPANIC_KEY=${{ secrets.CRYPTOPANIC_KEY }}" >> .env
 
-      # 5. Download the actual AI model from GitHub Releases (Fixes KeyError 118)
+    # 5. Download the actual AI model from GitHub Releases (Authenticated)
       - name: Download AI Model
-        run: wget -O pro_crypto_ai_model.pkl "https://github.com/Elliot14R/Crypto_AI_bot/releases/download/v1.0-model/pro_crypto_ai_model.pkl"
-
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v1.0-model -p "pro_crypto_ai_model.pkl"
+        
       # 6. Run a SINGLE scan
       - name: Run live scan
         run: python run_scan_once.py
