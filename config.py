@@ -43,9 +43,9 @@ FEATURES = [
     "rsi_1h", "adx_1h", "trend_1h",
 ]
 
-MIN_CONFIDENCE    = 65
-MIN_ADX           = 20
-MIN_SCORE         = 3
+MIN_CONFIDENCE    = 10
+MIN_ADX           = 0
+MIN_SCORE         = 0
 
 ATR_STOP_MULT     = 1.5
 ATR_TARGET1_MULT  = 2.0
