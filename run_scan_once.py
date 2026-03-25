@@ -116,15 +116,21 @@ def scan_symbol(symbol, pipeline):
         if df_entry.empty or len(df_entry) < 10:
             return
 
-        row_entry   = df_entry.iloc[-1]
+        # Use .copy() so we can safely attach new columns to this row
+        row_entry   = df_entry.iloc[-1].copy()
         row_confirm = df_confirm.iloc[-1] if not df_confirm.empty else pd.Series(dtype=float)
         row_trend   = df_trend.iloc[-1]   if not df_trend.empty   else pd.Series(dtype=float)
+
+        # Attach the missing 1-hour features the AI model requires
+        row_entry['rsi_1h']   = row_confirm.get('rsi', 50)
+        row_entry['adx_1h']   = row_confirm.get('adx', 0)
+        row_entry['trend_1h'] = row_confirm.get('trend', 0)
 
         all_features = pipeline["all_features"]
         selector     = pipeline["selector"]
         ensemble     = pipeline["ensemble"]
 
-        missing = [f for f in all_features if f not in df_entry.columns]
+        missing = [f for f in all_features if f not in df_entry.columns and f not in row_entry.index]
         if missing:
             log.warning(f"  {symbol}: Missing features {missing}")
             return
