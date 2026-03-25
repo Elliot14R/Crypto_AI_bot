@@ -17,6 +17,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
+          
+      # 2. Force download the actual AI model (Fixes KeyError 118)
+      - name: Pull LFS files
+        run: git lfs pull
+
+      # 3. Setup Python (or whatever your next step is named)
+       - name: Set up Python
 
       # 2. Set up Python
       - name: Set up Python 3.11
