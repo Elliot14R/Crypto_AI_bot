@@ -501,6 +501,9 @@ def _cancel_remaining_orders(exchange, symbol: str, order_ids: dict, trade: dict
 # ════════════════════════════════════════════════════════════════
 # SIGNAL GENERATION
 # ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
+# SIGNAL GENERATION
+# ════════════════════════════════════════════════════════════════
 
 def generate_signal(symbol: str, pipeline: dict) -> dict | None:
     """
@@ -515,17 +518,28 @@ def generate_signal(symbol: str, pipeline: dict) -> dict | None:
         if df_entry.empty or len(df_entry) < 50:
             return None
 
-        row_entry   = df_entry.iloc[-1]
+        # .copy() prevents Pandas warnings when we add the 1h features
+        row_entry   = df_entry.iloc[-1].copy()
         row_confirm = df_confirm.iloc[-1] if not df_confirm.empty else pd.Series(dtype=float)
         row_trend   = df_trend.iloc[-1]   if not df_trend.empty   else pd.Series(dtype=float)
+
+        # ─── INJECT 1-HOUR FEATURES FOR THE AI MODEL ───
+        row_entry["rsi_1h"] = row_confirm.get("rsi", 50.0)
+        row_entry["adx_1h"] = row_confirm.get("adx", 0.0)
+        
+        # Calculate 1h trend (1 = uptrend, -1 = downtrend) based on EMAs
+        e20_1h = row_confirm.get("ema20", 0)
+        e50_1h = row_confirm.get("ema50", 0)
+        row_entry["trend_1h"] = 1 if e20_1h > e50_1h else (-1 if e20_1h < e50_1h else 0)
+        # ────────────────────────────────────────────────
 
         all_features = pipeline["all_features"]
         selector     = pipeline["selector"]
         ensemble     = pipeline["ensemble"]
 
-        missing = [f for f in all_features if f not in df_entry.columns]
+        missing = [f for f in all_features if f not in row_entry.index]
         if missing:
-            log.warning(f"  {symbol}: Missing features {missing[:5]}")
+            log.warning(f"    {symbol}: Missing features {missing[:5]}")
             return None
 
         X_raw      = pd.DataFrame([row_entry[all_features].values], columns=all_features)
@@ -562,47 +576,8 @@ def generate_signal(symbol: str, pipeline: dict) -> dict | None:
         }
 
     except Exception as e:
-        log.error(f"  Signal generation failed for {symbol}: {e}")
+        log.error(f"    Signal generation failed for {symbol}: {e}")
         return None
-
-
-def _quality_score(row_entry, row_confirm, row_trend, signal, confidence):
-    score, reasons = 0, []
-    if confidence >= 75:
-        score += 1
-        reasons.append(f"High AI confidence ({confidence:.0f}%)")
-    elif confidence >= 65:
-        reasons.append(f"AI confidence ({confidence:.0f}%)")
-    adx = row_entry.get("adx", 0)
-    if adx > 25:
-        score += 1
-        reasons.append(f"Strong trend ADX {adx:.0f}")
-    elif adx > 20:
-        score += 1
-        reasons.append(f"Moderate trend ADX {adx:.0f}")
-    rsi = row_entry.get("rsi", 50)
-    if signal == "BUY" and rsi < 40:
-        score += 1
-        reasons.append(f"RSI oversold ({rsi:.0f})")
-    elif signal == "SELL" and rsi > 60:
-        score += 1
-        reasons.append(f"RSI overbought ({rsi:.0f})")
-    e20, e50, e200 = row_entry.get("ema20", 0), row_entry.get("ema50", 0), row_entry.get("ema200", 0)
-    if signal == "BUY" and e20 > e50 > e200:
-        score += 1
-        reasons.append("EMA uptrend 20>50>200")
-    elif signal == "SELL" and e20 < e50 < e200:
-        score += 1
-        reasons.append("EMA downtrend 20<50<200")
-    if signal == "BUY" and row_confirm.get("ema20", 0) > row_confirm.get("ema50", 0):
-        score += 1
-        reasons.append("1h EMA confirms uptrend")
-    elif signal == "SELL" and row_confirm.get("ema20", 0) < row_confirm.get("ema50", 0):
-        score += 1
-        reasons.append("1h EMA confirms downtrend")
-    return score, reasons
-
-
 # ════════════════════════════════════════════════════════════════
 # TELEGRAM ALERTS
 # ════════════════════════════════════════════════════════════════
