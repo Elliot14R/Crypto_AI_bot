@@ -100,6 +100,10 @@ def load_trades() -> dict:
         if Path(TRADES_FILE).exists():
             with open(TRADES_FILE, "r") as f:
                 return json.load(f)
+        else:
+            # Create an empty file so GitHub Actions cache doesn't complain
+            with open(TRADES_FILE, "w") as f:
+                json.dump({}, f)
     except (json.JSONDecodeError, IOError) as e:
         log.warning(f"Could not read {TRADES_FILE}: {e}")
     return {}
