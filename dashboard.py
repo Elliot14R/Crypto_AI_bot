@@ -8,7 +8,7 @@ from datetime import datetime
 st.set_page_config(
     page_title="CryptoBot AI Dashboard",
     page_icon="🤖",
-    layout="wide",
+    layout="wide",f
     initial_sidebar_state="expanded"
 )
 
@@ -49,15 +49,19 @@ st.markdown("""
 # ─── EXCHANGE CONNECTION ─────────────────────────────────────────
 @st.cache_resource(ttl=60)
 def init_exchange():
-    """Initialize Binance Testnet using Streamlit Secrets"""
+    """Initialize Binance connection with a proxy/US-friendly bypass"""
     try:
         exchange = ccxt.binance({
             "apiKey": st.secrets["BINANCE_API_KEY"],
             "secret": st.secrets["BINANCE_SECRET"],
             "enableRateLimit": True,
-            "options": {"defaultType": "spot"}
         })
+        
+        # This tells CCXT to use the US-friendly endpoint for public data
+        # while keeping your Testnet credentials for the private account data
+        exchange.urls['api']['public'] = 'https://api.binance.us/api/v3'
         exchange.set_sandbox_mode(True)
+        
         return exchange
     except Exception as e:
         st.error(f"Failed to initialize exchange: {e}")
