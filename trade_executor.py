@@ -543,6 +543,7 @@ def generate_signal(symbol: str, pipeline: dict) -> dict | None:
             return None
 
         X_raw      = pd.DataFrame([row_entry[all_features].values], columns=all_features)
+        X_raw.fillna(0, inplace=True)
         X_sel      = selector.transform(X_raw)
         pred       = ensemble.predict(X_sel)[0]
         prob       = ensemble.predict_proba(X_sel)[0]
