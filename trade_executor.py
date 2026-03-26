@@ -133,11 +133,24 @@ def is_trade_allowed(symbol: str, trades: dict) -> tuple:
 # ════════════════════════════════════════════════════════════════
 
 def get_data(symbol: str, interval: str) -> pd.DataFrame:
-    """Fetch OHLCV data from Binance public API."""
-    url    = "https://api.binance.com/api/v3/klines"
+    """Fetch OHLCV data strictly from the Binance ecosystem."""
     params = {"symbol": symbol, "interval": interval, "limit": LIVE_LIMIT}
-    resp   = requests.get(url, params=params, timeout=15)
-    resp.raise_for_status()
+    
+    try:
+        # Try Binance Global first
+        url = "https://api.binance.com/api/v3/klines"
+        resp = requests.get(url, params=params, timeout=10)
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        # 451 means IP Blocked (GitHub Actions uses US-based servers)
+        if e.response is not None and e.response.status_code == 451:
+            # Fallback to the official Binance.US endpoint 
+            url = "https://api.binance.us/api/v3/klines"
+            resp = requests.get(url, params=params, timeout=10)
+            resp.raise_for_status()
+        else:
+            raise e
+            
     df = pd.DataFrame(resp.json()).iloc[:, :6]
     df.columns = ["open_time", "open", "high", "low", "close", "volume"]
     for c in ["open", "high", "low", "close", "volume"]:
