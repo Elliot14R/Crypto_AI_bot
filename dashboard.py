@@ -69,7 +69,7 @@ exchange = init_exchange()
 with st.sidebar:
     st.markdown("### Navigation")
     menu = st.radio(
-        "",
+        "Navigation Menu",
         ["Dashboard", "Signals", "Market", "Paper Trading", "Configuration"],
         label_visibility="collapsed"
     )
