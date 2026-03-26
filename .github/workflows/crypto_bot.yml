@@ -1,50 +1,65 @@
-name: Crypto AI Bot - Live Scanner
+name: Crypto AI Bot — Execution Engine
 
 on:
   schedule:
-    # Runs every 15 minutes (matches your SCAN_INTERVAL_MIN = 15)
-    - cron: '0,15,30,45 * * * *'
-  workflow_dispatch:   # allows manual trigger from GitHub UI
+    # Runs exactly at minutes 0, 15, 30, and 45 past the hour
+    - cron: '0,15,30,45 * * * *'    
+  workflow_dispatch:        # Manual trigger from GitHub UI anytime
 
 jobs:
-  run-scanner:
+  run-executor:
     runs-on: ubuntu-latest
     timeout-minutes: 12    # safety: kill if hangs before next 15m window
 
     steps:
-      # 1. Checkout your repo (LFS disabled to avoid bandwidth limits)
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Set up Python 3.11
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'           # caches dependencies = faster runs
+          cache: 'pip'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # 4. Write .env file from GitHub Secrets (keeps tokens safe)
-      - name: Create .env file
+      - name: Create .env file from secrets
         run: |
-          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
-          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
-          echo "CRYPTOPANIC_KEY=${{ secrets.CRYPTOPANIC_KEY }}" >> .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"       >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}"   >> .env
+          echo "CRYPTOPANIC_KEY=${{ secrets.CRYPTOPANIC_KEY }}"     >> .env
+          echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"     >> .env
+          echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"       >> .env
 
-    # 5. Download the actual AI model from GitHub Releases (Authenticated)
+      # Download the actual AI model from GitHub Releases (Authenticated)
       - name: Download AI Model
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release download v1.0-model -p "pro_crypto_ai_model.pkl" --clobber
-        
-      # 6. Run a SINGLE scan
-      - name: Run live scan
-        run: python run_scan_once.py
 
-      # 7. Upload bot log as artifact (optional — helps debugging)
+      # Restore trades.json from previous run (persists state between runs)
+      - name: Restore trade state
+        uses: actions/cache@v4
+        with:
+          path: trades.json
+          key: trades-state-${{ github.run_id }}
+          restore-keys: |
+            trades-state-
+
+      # Run the new Execution Engine (Replaces run_scan_once.py)
+      - name: Run execution scan
+        run: python trade_executor.py
+
+      # Save updated trades.json so next run knows about open trades
+      - name: Save trade state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: trades.json
+          key: trades-state-${{ github.run_id }}
+
+      # Upload logs
       - name: Upload log
         if: always()
         uses: actions/upload-artifact@v4
