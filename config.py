@@ -3,10 +3,8 @@
 
 SYMBOLS = [
 <<<<<<< Updated upstream
-    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT",
-    "XRPUSDT", "ADAUSDT", "AVAXUSDT", "SUIUSDT",
-    "DOTUSDT", "LINKUSDT", "MATICUSDT", "NEARUSDT",
-    "APTUSDT", "ARBUSDT", "INJUSDT"
+    
+    "ADAUSDT", "ARBUSDT", "INJUSDT",
 =======
     # 👑 The "Big Three" (Most reliable for AI patterns)
     "BTCUSDT", "ETHUSDT", "BNBUSDT", 
