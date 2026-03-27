@@ -5,7 +5,7 @@ SYMBOLS = [
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT",
     "XRPUSDT", "ADAUSDT", "AVAXUSDT", "SUIUSDT",
     "DOTUSDT", "LINKUSDT", "MATICUSDT", "NEARUSDT",
-    "APTUSDT", "ARBUSDT",
+    "APTUSDT", "ARBUSDT", "INJUSDT"
 ]
 
 TIMEFRAME_ENTRY   = "15m"           # 15m is far more reliable than 3m
