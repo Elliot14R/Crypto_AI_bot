@@ -2,10 +2,24 @@
 # Updated for Automated Testnet Execution
 
 SYMBOLS = [
+<<<<<<< Updated upstream
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT",
     "XRPUSDT", "ADAUSDT", "AVAXUSDT", "SUIUSDT",
     "DOTUSDT", "LINKUSDT", "MATICUSDT", "NEARUSDT",
     "APTUSDT", "ARBUSDT", "INJUSDT"
+=======
+    # 👑 The "Big Three" (Most reliable for AI patterns)
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", 
+
+    # ⚡ High-Liquidity Layer 1s (Strong ADX trends)
+    "SOLUSDT", "AVAXUSDT", "NEARUSDT", "SUIUSDT", "APTUSDT",
+
+    # 🏛️ Institutional Alts (Respect EMAs and RSI levels)
+    "LINKUSDT", "DOTUSDT", "UNIUSDT", "AAVEUSDT", "XRPUSDT",
+
+    # 🤖 AI & Oracles
+    "FETUSDT", "RENDERUSDT", "TAOUSDT"
+>>>>>>> Stashed changes
 ]
 
 TIMEFRAME_ENTRY   = "15m"           # 15m is far more reliable than 3m
