@@ -2,10 +2,8 @@
 # Updated for Automated Testnet Execution
 
 SYMBOLS = [
-<<<<<<< Updated upstream
     
     "ADAUSDT", "ARBUSDT", "INJUSDT",
-=======
     # 👑 The "Big Three" (Most reliable for AI patterns)
     "BTCUSDT", "ETHUSDT", "BNBUSDT", 
 
@@ -17,7 +15,6 @@ SYMBOLS = [
 
     # 🤖 AI & Oracles
     "FETUSDT", "RENDERUSDT", "TAOUSDT"
->>>>>>> Stashed changes
 ]
 
 TIMEFRAME_ENTRY   = "15m"           # 15m is far more reliable than 3m
