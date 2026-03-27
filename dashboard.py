@@ -34,7 +34,7 @@ def get_live_prices(symbols):
     try:
         for sym in symbols:
             try:
-                r = requests.get("https://api.binance.com/api/v3/ticker/price",
+                r = requests.get("https://www.google.com/search?q=https://data-api.binance.vision/api/v3/ticker/price"),
                                  params={"symbol":sym}, timeout=5)
                 prices[sym] = float(r.json()["price"])
             except Exception: prices[sym] = None
