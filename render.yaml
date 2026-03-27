@@ -1,0 +1,20 @@
+# render.yaml — Free cloud deployment config for dashboard API
+# Deploy at: https://render.com (free tier, no credit card needed)
+
+services:
+  - type: web
+    name: cryptobot-dashboard
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn dashboard_api:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: BINANCE_API_KEY
+        sync: false
+      - key: BINANCE_SECRET
+        sync: false
+      - key: CRYPTOPANIC_KEY
+        sync: false
