@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoBot AI — Live Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #080c10;
+    --bg2:      #0d1117;
+    --bg3:      #141b24;
+    --border:   #1e2d3d;
+    --border2:  #243447;
+    --text:     #c9d8e8;
+    --text2:    #6b8299;
+    --text3:    #3d5268;
+    --green:    #00d97e;
+    --green2:   #00ff9440;
+    --red:      #ff4d6d;
+    --red2:     #ff4d6d30;
+    --amber:    #f5a623;
+    --amber2:   #f5a62325;
+    --blue:     #4d9fff;
+    --blue2:    #4d9fff20;
+    --purple:   #a78bfa;
+    --cyan:     #22d3ee;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Scanline overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+    50%      { opacity: 0.5; box-shadow: 0 0 2px var(--green); }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--green);
+    color: var(--green);
+    background: var(--green2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .status-badge.offline {
+    border-color: var(--red);
+    color: var(--red);
+    background: var(--red2);
+  }
+
+  .last-update {
+    color: var(--text3);
+    font-size: 11px;
+  }
+
+  /* ── Main Layout ── */
+  .main { padding: 20px 28px; }
+
+  /* ── Stat cards ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border2); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.green::before  { background: var(--green); }
+  .stat-card.red::before    { background: var(--red); }
+  .stat-card.amber::before  { background: var(--amber); }
+  .stat-card.blue::before   { background: var(--blue); }
+  .stat-card.purple::before { background: var(--purple); }
+  .stat-card.cyan::before   { background: var(--cyan); }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    font-family: var(--sans);
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  .stat-value.green  { color: var(--green); }
+  .stat-value.red    { color: var(--red); }
+  .stat-value.amber  { color: var(--amber); }
+
+  /* ── Grid layout ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Panel ── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+
+  .panel-title {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .panel-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  .panel-body { padding: 16px; }
+
+  /* ── Trade cards ── */
+  .trade-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .trade-card:hover {
+    border-color: var(--border2);
+    transform: translateX(2px);
+  }
+
+  .trade-card.buy  { border-left: 3px solid var(--green); }
+  .trade-card.sell { border-left: 3px solid var(--red); }
+
+  .trade-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .trade-symbol {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  .trade-dir {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .trade-dir.buy  { background: var(--green2); color: var(--green); border: 1px solid var(--green); }
+  .trade-dir.sell { background: var(--red2);   color: var(--red);   border: 1px solid var(--red); }
+
+  .trade-pnl {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--sans);
+  }
+
+  .trade-pnl.pos { color: var(--green); }
+  .trade-pnl.neg { color: var(--red); }
+
+  .trade-prices {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .price-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 9px;
+  }
+
+  .price-label {
+    font-size: 9px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+  }
+
+  .price-val {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .price-val.live  { color: var(--cyan); }
+  .price-val.entry { color: var(--blue); }
+  .price-val.sl    { color: var(--red); }
+  .price-val.tp    { color: var(--green); }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    margin-bottom: 10px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    transition: width 0.8s ease;
+  }
+
+  /* ── Trade meta row ── */
+  .trade-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .trade-conf {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .conf-bar {
+    width: 50px; height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .conf-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 2px;
+  }
+
+  .btn-close {
+    font-size: 10px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+    transition: background 0.15s;
+  }
+
+  .btn-close:hover { background: var(--red2); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+
+  .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
+  .empty-state .msg  { font-size: 12px; line-height: 1.6; }
+
+  /* ── History table ── */
+  .history-table { width: 100%; border-collapse: collapse; }
+
+  .history-table th {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .history-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .history-table tr:last-child td { border-bottom: none; }
+
+  .history-table tr:hover td { background: var(--bg3); }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .tag.buy   { background: var(--green2); color: var(--green); }
+  .tag.sell  { background: var(--red2);   color: var(--red); }
+  .tag.win   { background: var(--green2); color: var(--green); }
+  .tag.loss  { background: var(--red2);   color: var(--red); }
+
+  /* ── Log panel ── */
+  .log-panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    height: 260px;
+    overflow-y: auto;
+    padding: 10px 14px;
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--text2);
+  }
+
+  .log-panel::-webkit-scrollbar { width: 4px; }
+  .log-panel::-webkit-scrollbar-track { background: var(--bg); }
+  .log-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .log-line { display: block; }
+  .log-line.signal { color: var(--green); }
+  .log-line.error  { color: var(--red); }
+  .log-line.warn   { color: var(--amber); }
+  .log-line.info   { color: var(--text2); }
+
+  /* ── Scan button ── */
+  .btn-scan {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 7px 16px;
+    background: var(--blue2);
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    border-radius: 5px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: background 0.15s;
+  }
+
+  .btn-scan:hover    { background: #4d9fff35; }
+  .btn-scan:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-scan.running  { border-color: var(--amber); color: var(--amber); background: var(--amber2); }
+
+  /* ── Mini chart (sparkline) ── */
+  .sparkline {
+    width: 100%;
+    height: 60px;
+    margin-top: 8px;
+  }
+
+  /* ── Symbols watchlist ── */
+  .symbol-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .sym-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    transition: border-color 0.2s;
+  }
+
+  .sym-item:hover { border-color: var(--border2); }
+  .sym-item.active { border-color: var(--green); background: var(--green2); }
+
+  .sym-name { font-weight: 500; color: var(--text); }
+  .sym-price { color: var(--text2); font-size: 10px; }
+  .sym-chg.up   { color: var(--green); font-size: 10px; }
+  .sym-chg.down { color: var(--red);   font-size: 10px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .main { padding: 14px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .trade-prices { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel   { animation: fadeIn 0.4s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+  .stat-card:nth-child(5) { animation-delay: 0.25s; }
+  .stat-card:nth-child(6) { animation-delay: 0.30s; }
+
+  .blink { animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── Config note ── */
+  .config-note {
+    background: var(--amber2);
+    border: 1px solid var(--amber);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--amber);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .config-note span { flex: 1; }
+  .config-note a { color: var(--amber); text-decoration: underline; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    CryptoBot <span style="color:var(--text2);font-weight:400;margin-left:4px">AI Dashboard</span>
+  </div>
+  <div class="header-right">
+    <span class="last-update" id="lastUpdate">Connecting...</span>
+    <span class="status-badge offline" id="statusBadge">OFFLINE</span>
+    <button class="btn-scan" id="scanBtn" onclick="triggerScan()">▶ Scan Now</button>
+  </div>
+</header>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+
+  <!-- Config note — shown until API is connected -->
+  <div class="config-note" id="configNote">
+    <span>⚙️ <strong>Setup:</strong> Edit <code>API_BASE</code> in this file to point to your running <code>dashboard_api.py</code>.
+    Default: <code>http://localhost:5000</code> — or your Render.com URL after deployment.
+    <a onclick="document.getElementById('configNote').style.display='none'">Dismiss</a></span>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-row">
+    <div class="stat-card green">
+      <div class="stat-label">Open Trades</div>
+      <div class="stat-value" id="openTrades">—</div>
+      <div class="stat-sub" id="maxTrades">of 3 max</div>
+    </div>
+    <div class="stat-card cyan">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value cyan" id="winRate">—</div>
+      <div class="stat-sub" id="winsLosses">— wins / — losses</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Total PnL</div>
+      <div class="stat-value" id="totalPnl">—</div>
+      <div class="stat-sub">USDT (closed trades)</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Model Accuracy</div>
+      <div class="stat-value" style="color:var(--blue)">73.1%</div>
+      <div class="stat-sub">XGB + RF + GB ensemble</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Total Trades</div>
+      <div class="stat-value" style="color:var(--purple)" id="totalClosed">—</div>
+      <div class="stat-sub">paper testnet</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Scanning</div>
+      <div class="stat-value" style="color:var(--amber);font-size:14px">15 pairs</div>
+      <div class="stat-sub">every 1h auto</div>
+    </div>
+  </div>
+
+  <!-- Open Trades + Watchlist -->
+  <div class="grid-2" style="margin-bottom:16px">
+
+    <!-- Open Trades -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Open Trades</span>
+        <span class="panel-badge" id="openCount">0 active</span>
+      </div>
+      <div class="panel-body" id="openTradesBody">
+        <div class="empty-state">
+          <div class="icon">📡</div>
+          <div class="msg">No open trades.<br>Bot scans every hour for signals.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Watchlist -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Symbol Prices</span>
+        <span class="panel-badge blink" style="color:var(--green);border-color:var(--green)">LIVE</span>
+      </div>
+      <div class="panel-body">
+        <div class="symbol-grid" id="symbolGrid">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Trade History + Log -->
+  <div class="grid-3">
+
+    <!-- History -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Trade History</span>
+        <span class="panel-badge" id="historyCount">0 trades</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Dir</th>
+              <th>Entry</th>
+              <th>Close</th>
+              <th>PnL</th>
+              <th>Result</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">No closed trades yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bot Log -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Bot Log</span>
+        <span class="panel-badge" id="logBadge">live</span>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <div class="log-panel" id="logPanel">
+          <span class="log-line info">Waiting for connection...</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+// ── CONFIG — change this to your API server URL ──────────────────
+const API_BASE = "http://localhost:5000";
+// After deploying dashboard_api.py to Render.com, change to:
+// const API_BASE = "https://your-app-name.onrender.com";
+
+const SYMBOLS = [
+  "BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT",
+  "ADAUSDT","AVAXUSDT","SUIUSDT","DOTUSDT","LINKUSDT",
+  "MATICUSDT","NEARUSDT","APTUSDT","INJUSDT","ARBUSDT"
+];
+
+let prevPrices = {};
+let isScanning = false;
+
+// ── Format helpers ──────────────────────────────────────────────
+function fmt(v, dec) {
+  if (v == null) return "—";
+  return parseFloat(v).toFixed(dec ?? (v < 10 ? 4 : 2));
+}
+function fmtPnl(v) {
+  if (v == null) return "—";
+  const s = v >= 0 ? "+" : "";
+  return s + parseFloat(v).toFixed(4);
+}
+function timeAgo(iso) {
+  if (!iso) return "—";
+  const diff = Math.floor((Date.now() - new Date(iso)) / 60000);
+  if (diff < 1)  return "just now";
+  if (diff < 60) return diff + "m ago";
+  return Math.floor(diff / 60) + "h ago";
+}
+
+// ── Fetch status ────────────────────────────────────────────────
+async function fetchStatus() {
+  try {
+    const r = await fetch(API_BASE + "/api/status", {signal: AbortSignal.timeout(5000)});
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+
+    document.getElementById("statusBadge").textContent   = "LIVE";
+    document.getElementById("statusBadge").className     = "status-badge";
+    document.getElementById("lastUpdate").textContent    = "Updated " + new Date().toLocaleTimeString();
+    document.getElementById("openTrades").textContent    = d.open_trades;
+    document.getElementById("maxTrades").textContent     = `of ${d.max_trades} max`;
+    document.getElementById("winRate").textContent       = d.win_rate + "%";
+    document.getElementById("winRate").className         = "stat-value " + (d.win_rate >= 50 ? "green" : "red");
+    document.getElementById("winsLosses").textContent    = `${d.wins}W / ${d.losses}L`;
+    document.getElementById("totalPnl").textContent      = fmtPnl(d.total_pnl) + " USDT";
+    document.getElementById("totalPnl").className        = "stat-value " + (d.total_pnl >= 0 ? "green" : "red");
+    document.getElementById("totalClosed").textContent   = d.total_closed;
+
+    document.getElementById("configNote").style.display = "none";
+  } catch {
+    document.getElementById("statusBadge").textContent = "OFFLINE";
+    document.getElementById("statusBadge").className   = "status-badge offline";
+    document.getElementById("lastUpdate").textContent  = "API not reachable";
+  }
+}
+
+// ── Fetch open trades ────────────────────────────────────────────
+async function fetchOpenTrades() {
+  try {
+    const r = await fetch(API_BASE + "/api/trades/open", {signal: AbortSignal.timeout(8000)});
+    if (!r.ok) return;
+    const trades = await r.json();
+
+    document.getElementById("openCount").textContent = trades.length + " active";
+
+    if (!trades.length) {
+      document.getElementById("openTradesBody").innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📡</div>
+          <div class="msg">No open trades.<br>Bot scans every hour for signals.</div>
+        </div>`;
+      return;
+    }
+
+    document.getElementById("openTradesBody").innerHTML = trades.map(t => {
+      const dec   = t.entry < 10 ? 4 : 2;
+      const pnlCl = t.unrealised_pnl >= 0 ? "pos" : "neg";
+      return `
+      <div class="trade-card ${t.signal.toLowerCase()}">
+        <div class="trade-top">
+          <div>
+            <div class="trade-symbol">${t.symbol.replace("USDT","")}<span style="color:var(--text3);font-size:12px;font-weight:400">/USDT</span></div>
+            <div style="color:var(--text3);font-size:10px;margin-top:2px">${timeAgo(t.opened_at)} · score ${t.score}/6 · ${t.confidence}% conf</div>
+          </div>
+          <div style="text-align:right">
+            <span class="trade-dir ${t.signal.toLowerCase()}">${t.signal}</span>
+            <div class="trade-pnl ${pnlCl}" style="margin-top:5px">${fmtPnl(t.unrealised_pnl)} USDT</div>
+            <div style="font-size:10px;color:var(--text3)">${t.pnl_pct >= 0 ? "+" : ""}${t.pnl_pct}%</div>
+          </div>
+        </div>
+
+        <div class="trade-prices">
+          <div class="price-box">
+            <div class="price-label">Live</div>
+            <div class="price-val live">${fmt(t.live_price, dec)}</div>
+          </div>
+          <div class="price-box">
+            <div class="price-label">Entry</div>
+            <div class="price-val entry">${fmt(t.entry, dec)}</div>
+          </div>
+          <div class="price-box">
+            <div class="price-label">Stop</div>
+            <div class="price-val sl">${fmt(t.stop, dec)}</div>
+          </div>
+          <div class="price-box">
+            <div class="price-label">TP1 / TP2</div>
+            <div class="price-val tp">${fmt(t.tp1, dec)} / ${fmt(t.tp2, dec)}</div>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span>Progress to TP2</span>
+            <span>${t.progress}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${t.progress}%"></div>
+          </div>
+        </div>
+
+        <div class="trade-meta">
+          <div class="trade-conf">
+            <span>AI ${t.confidence}%</span>
+            <div class="conf-bar"><div class="conf-fill" style="width:${t.confidence}%"></div></div>
+            <span style="color:var(--text3)">· ${t.status}</span>
+          </div>
+          <button class="btn-close" onclick="closeTrade('${t.symbol}')">✕ Close</button>
+        </div>
+      </div>`;
+    }).join("");
+
+  } catch (e) {
+    console.warn("Open trades fetch failed:", e);
+  }
+}
+
+// ── Fetch history ────────────────────────────────────────────────
+async function fetchHistory() {
+  try {
+    const r = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(5000)});
+    if (!r.ok) return;
+    const history = await r.json();
+
+    document.getElementById("historyCount").textContent = history.length + " trades";
+
+    if (!history.length) return;
+
+    document.getElementById("historyBody").innerHTML = [...history].reverse().map(h => {
+      const dec    = h.entry < 10 ? 4 : 2;
+      const pnl    = h.pnl ?? 0;
+      const result = pnl > 0 ? "win" : "loss";
+      const reason = (h.close_reason || "auto").substring(0, 14);
+      return `<tr>
+        <td style="font-weight:500;color:#fff">${h.symbol.replace("USDT","")}</td>
+        <td><span class="tag ${h.signal.toLowerCase()}">${h.signal}</span></td>
+        <td>${fmt(h.entry, dec)}</td>
+        <td>${fmt(h.close_price, dec)}</td>
+        <td style="color:${pnl>=0?"var(--green)":"var(--red)"}">${fmtPnl(pnl)}</td>
+        <td><span class="tag ${result}">${result.toUpperCase()}</span></td>
+        <td style="color:var(--text3)">${reason}</td>
+      </tr>`;
+    }).join("");
+  } catch (e) {
+    console.warn("History fetch failed:", e);
+  }
+}
+
+// ── Fetch log ────────────────────────────────────────────────────
+async function fetchLog() {
+  try {
+    const r = await fetch(API_BASE + "/api/log", {signal: AbortSignal.timeout(5000)});
+    if (!r.ok) return;
+    const d = await r.json();
+
+    const panel = document.getElementById("logPanel");
+    panel.innerHTML = d.lines.map(line => {
+      let cls = "info";
+      if (line.includes("SIGNAL") || line.includes("✅"))       cls = "signal";
+      else if (line.includes("ERROR") || line.includes("error")) cls = "error";
+      else if (line.includes("Warning") || line.includes("warn")) cls = "warn";
+      return `<span class="log-line ${cls}">${escapeHtml(line)}</span>`;
+    }).join("\n");
+
+    panel.scrollTop = panel.scrollHeight;
+    document.getElementById("logBadge").textContent = d.lines.length + " lines";
+  } catch {
+    document.getElementById("logPanel").innerHTML = '<span class="log-line warn">API not connected — run dashboard_api.py</span>';
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// ── Symbol watchlist ─────────────────────────────────────────────
+async function fetchSymbolPrices() {
+  const grid = document.getElementById("symbolGrid");
+  // Build from last known prices first
+  grid.innerHTML = SYMBOLS.map(s => `
+    <div class="sym-item" id="sym-${s}">
+      <span class="sym-name">${s.replace("USDT","")}</span>
+      <div style="text-align:right">
+        <div class="sym-price" id="price-${s}">—</div>
+        <div class="sym-chg" id="chg-${s}">—</div>
+      </div>
+    </div>`).join("");
+
+  // Fetch all at once from Binance ticker endpoint
+  try {
+    const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?" +
+      SYMBOLS.map(s=>"symbols[]="+s).join("&"), {signal: AbortSignal.timeout(8000)});
+    if (!r.ok) return;
+    const data = await r.json();
+    data.forEach(t => {
+      const price = parseFloat(t.lastPrice);
+      const chg   = parseFloat(t.priceChangePercent);
+      const prev  = prevPrices[t.symbol];
+      const flash = prev && price !== prev ? (price > prev ? "var(--green)" : "var(--red)") : null;
+
+      const pEl = document.getElementById("price-" + t.symbol);
+      const cEl = document.getElementById("chg-" + t.symbol);
+      const iEl = document.getElementById("sym-" + t.symbol);
+
+      if (pEl) {
+        pEl.textContent = fmt(price, price < 10 ? 4 : 2);
+        if (flash) { pEl.style.color = flash; setTimeout(() => pEl.style.color = "", 800); }
+      }
+      if (cEl) {
+        cEl.textContent = (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%";
+        cEl.className   = "sym-chg " + (chg >= 0 ? "up" : "down");
+      }
+      prevPrices[t.symbol] = price;
+    });
+  } catch { /* silently fail — Binance public API is usually available */ }
+}
+
+// ── Highlight symbols with open trades ───────────────────────────
+async function highlightActiveSymbols() {
+  try {
+    const r = await fetch(API_BASE + "/api/trades/open", {signal: AbortSignal.timeout(4000)});
+    if (!r.ok) return;
+    const trades = await r.json();
+    SYMBOLS.forEach(s => {
+      const el = document.getElementById("sym-" + s);
+      if (!el) return;
+      if (trades.find(t => t.symbol === s)) el.classList.add("active");
+      else el.classList.remove("active");
+    });
+  } catch {}
+}
+
+// ── Trigger manual scan ───────────────────────────────────────────
+async function triggerScan() {
+  if (isScanning) return;
+  isScanning = true;
+  const btn = document.getElementById("scanBtn");
+  btn.textContent = "⟳ Scanning...";
+  btn.classList.add("running");
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(API_BASE + "/api/scan", {method:"POST", signal: AbortSignal.timeout(10000)});
+    const d = await r.json();
+    if (d.ok) {
+      btn.textContent = "✓ Scan started";
+      setTimeout(() => {
+        btn.textContent = "▶ Scan Now";
+        btn.classList.remove("running");
+        btn.disabled = false;
+        isScanning = false;
+      }, 5000);
+    }
+  } catch {
+    btn.textContent = "✕ API offline";
+    setTimeout(() => {
+      btn.textContent = "▶ Scan Now";
+      btn.classList.remove("running");
+      btn.disabled = false;
+      isScanning = false;
+    }, 3000);
+  }
+}
+
+// ── Close trade manually ──────────────────────────────────────────
+async function closeTrade(symbol) {
+  if (!confirm(`Close ${symbol} trade now at market price?`)) return;
+  try {
+    const r = await fetch(API_BASE + "/api/close_trade", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({symbol})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert(`${symbol} closed. PnL: ${fmtPnl(d.pnl)} USDT`);
+      refreshAll();
+    } else {
+      alert("Close failed: " + d.error);
+    }
+  } catch (e) {
+    alert("API error: " + e.message);
+  }
+}
+
+// ── Refresh all data ──────────────────────────────────────────────
+async function refreshAll() {
+  await Promise.allSettled([
+    fetchStatus(),
+    fetchOpenTrades(),
+    fetchHistory(),
+    fetchLog(),
+    fetchSymbolPrices(),
+    highlightActiveSymbols(),
+  ]);
+}
+
+// ── Start polling ─────────────────────────────────────────────────
+refreshAll();
+setInterval(refreshAll,         30000);   // full refresh every 30s
+setInterval(fetchSymbolPrices,   8000);   // prices every 8s
+setInterval(highlightActiveSymbols, 15000);
+</script>
+</body>
+</html>
