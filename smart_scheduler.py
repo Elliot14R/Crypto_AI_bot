@@ -12,13 +12,13 @@ from datetime import datetime, timezone
 log = logging.getLogger(__name__)
 
 # ── Base thresholds (overridden by mode) ───────────────────────
-BASE_CONFIDENCE = 65
-BASE_SCORE      = 3
-BASE_ADX        = 20
+BASE_CONFIDENCE = 50
+BASE_SCORE      = 1
+BASE_ADX        = 5
 
 # ── Volatility thresholds ──────────────────────────────────────
-ATR_HIGH_PCT    = 2.0    # above 2% = high vol → warn, reduce size
-ATR_LOW_PCT     = 0.3    # below 0.3% = low vol → skip scan entirely
+ATR_HIGH_PCT    = 80.0    # above 2% = high vol → warn, reduce size
+ATR_LOW_PCT     = 0.1    # below 0.3% = low vol → skip scan entirely
 
 
 def get_scan_mode() -> dict:
