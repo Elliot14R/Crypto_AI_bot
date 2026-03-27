@@ -1,154 +1,257 @@
-import streamlit as st
-import pandas as pd
-import ccxt
-import requests
-import plotly.graph_objects as go
-from datetime import datetime
+# dashboard_api.py
+# Flask backend — serves live trade data + triggers manual scans
+# Run locally: python dashboard_api.py
+# Or deploy free on Render.com / Railway.app
 
-# --- PAGE CONFIGURATION ---
-st.set_page_config(
-    page_title="CryptoBot AI Dashboard",
-    page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+import os
+import json
+import time
+import threading
+import logging
+from datetime import datetime, timezone
+from pathlib import Path
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
+from dotenv import load_dotenv
 
-# --- PRO TERMINAL CSS (From index.css) ---
-st.markdown("""
-<style>
-    :root {
-        --background: #0E1117;
-        --card: #161B22;
-        --border: #30363D;
-        --primary: #14b8a6;
-        --chart-2: #22c55e;
-        --destructive: #ef4444;
-    }
-    .stApp { background-color: var(--background); color: #C9D1D9; }
-    
-    .pro-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-    }
-    .badge-live {
-        background: rgba(34, 197, 94, 0.1);
-        color: #22c55e;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: bold;
-    }
-    .pulse-dot {
-        height: 8px; width: 8px;
-        background-color: #22c55e;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 5px;
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-    }
-</style>
-""", unsafe_allow_html=True)
+load_dotenv(dotenv_path=".env", override=True)
 
-# --- DATA ENGINES ---
-def get_fear_greed():
+app = Flask(__name__, static_folder="dashboard_static")
+CORS(app)   # allow dashboard to call this API from any origin
+
+TRADES_FILE   = "trades.json"
+LOG_FILE      = "bot.log"
+HISTORY_FILE  = "trade_history.json"
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
+
+# ── Helpers ─────────────────────────────────────────────────────
+
+def load_json(path, default):
     try:
-        r = requests.get("https://api.alternative.me/fng/").json()
-        return r['data'][0]['value'], r['data'][0]['value_classification']
-    except: return "50", "Neutral"
+        if Path(path).exists():
+            with open(path) as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return default
 
-# --- SIDEBAR NAVIGATION ---
-with st.sidebar:
-    st.markdown("### 🤖 CryptoBot AI")
-    menu = st.radio(
-        "Navigation", 
-        ["Dashboard", "Signals", "Market", "Paper Trading", "Configuration"],
-        label_visibility="collapsed"
-    )
-    st.markdown("---")
-    st.caption("MONITORED COINS")
-    symbols = ["BTC", "ETH", "BNB", "SOL", "XRP", "ADA", "AVAX", "SUI", "DOT", "LINK", "MATIC", "NEAR", "APT", "INJ", "ARB"]
-    pills = "".join([f"<span style='background:#21262d; padding:2px 6px; margin:2px; border-radius:4px; font-size:10px; border:1px solid #30363d;'>{s}</span>" for s in symbols])
-    st.markdown(pills, unsafe_allow_html=True)
-    st.markdown("---")
-    st.caption(f"Last Scan: {datetime.now().strftime('%H:%M:%S')}")
 
-# --- PAGE: DASHBOARD ---
-if menu == "Dashboard":
-    col_h1, col_h2 = st.columns([3, 1])
-    with col_h1:
-        st.markdown("### Dashboard Summary")
-        st.markdown("<div class='badge-live'><span class='pulse-dot'></span>LIVE · Scanning 15 pairs · 15m interval</div>", unsafe_allow_html=True)
-    with col_h2:
-        st.metric("Testnet Balance", "$10,000.00", delta="API Restricted")
+def load_trade_history():
+    return load_json(HISTORY_FILE, [])
 
-    st.markdown("---")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Signals", "14", "All Time")
-    m2.metric("Win Rate", "73.1%", "Verified")
-    m3.metric("Buy Signals", "8", "Longs")
-    m4.metric("Sell Signals", "6", "Shorts")
 
-    col_main, col_side = st.columns([2, 1])
+def save_trade_history(history):
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2, default=str)
 
-    with col_main:
-        st.subheader("📈 Recent Signals")
-        # Real data from signals_log.json
-        signals = [
-            {"coin": "SUI", "type": "BUY", "conf": 83.2, "entry": 0.97, "sl": 0.94, "tp": 1.04},
-            {"coin": "BTC", "type": "BUY", "conf": 79.5, "entry": 70500, "sl": 68800, "tp": 74200}
-        ]
-        for s in signals:
-            st.markdown(f"""
-            <div class="pro-card">
-                <div style="display:flex; justify-content:space-between;">
-                    <b>{s['coin']}USDT</b> 
-                    <span style="color:#22c55e; font-weight:bold;">↗ {s['type']}</span>
-                    <small style="color:#8B949E;">{s['conf']}% Conf</small>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                    <div><small>Entry</small><br>${s['entry']:,}</div>
-                    <div><small>Stop</small><br><span style="color:#ef4444;">${s['sl']:,}</span></div>
-                    <div><small>Target</small><br><span style="color:#22c55e;">${s['tp']:,}</span></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
 
-    with col_side:
-        fng_val, fng_label = get_fear_greed()
-        st.markdown(f"""
-        <div style="background:#161B22; border:1px solid #30363D; border-radius:8px; padding:20px; text-align:center;">
-            <div style="color:#8B949E; font-size:12px;">FEAR & GREED INDEX</div>
-            <div style="font-size:40px; font-weight:bold; color:#ef4444;">{fng_val}</div>
-            <div style="color:#ef4444; font-weight:bold; font-size:14px;">{fng_label.upper()}</div>
-        </div>
-        """, unsafe_allow_html=True)
+def get_live_prices(symbols):
+    """Fetch current prices from Binance public API."""
+    prices = {}
+    try:
+        import requests as req
+        for sym in symbols:
+            try:
+                r = req.get(
+                    f"https://api.binance.com/api/v3/ticker/price",
+                    params={"symbol": sym}, timeout=5
+                )
+                prices[sym] = float(r.json()["price"])
+            except Exception:
+                prices[sym] = None
+    except Exception:
+        pass
+    return prices
 
-# --- PAGE: MARKET ---
-elif menu == "Market":
-    st.header("🌐 Market Overview")
-    st.info("Live data sourced via Binance US endpoint.")
-    # Gainers/Losers count placeholder
-    st.markdown("15 pairs monitored")
 
-# --- PAGE: PAPER TRADING ---
-elif menu == "Paper Trading":
-    st.header("📉 Paper Trading Performance")
-    fig = go.Figure(go.Scatter(x=[1, 2, 3, 4, 5], y=[1000, 1020, 1010, 1080, 1150], line=dict(color='#14b8a6', width=3)))
-    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="#C9D1D9")
-    st.plotly_chart(fig, use_container_width=True)
+def enrich_trades(trades: dict, prices: dict) -> list:
+    """Add live PnL and price data to open trades."""
+    result = []
+    for sym, t in trades.items():
+        entry      = t.get("entry", 0)
+        qty        = t.get("qty", 0)
+        signal     = t.get("signal", "BUY")
+        live_price = prices.get(sym)
 
-# --- PAGE: CONFIGURATION ---
-elif menu == "Configuration":
-    st.header("⚙️ Bot Configuration")
-    # From config.tsx
-    st.info("AI Ensemble: LightGBM (weight 3), XGBoost (weight 2), RF (weight 1)")
-    st.json({"Risk_per_Trade": "1%", "ATR_Stop_Mult": "1.5x", "Min_Confidence": "75%"})
+        if live_price and entry and qty:
+            if signal == "BUY":
+                unrealised_pnl = round((live_price - entry) * qty, 4)
+                pnl_pct        = round((live_price - entry) / entry * 100, 2)
+            else:
+                unrealised_pnl = round((entry - live_price) * qty, 4)
+                pnl_pct        = round((entry - live_price) / entry * 100, 2)
+        else:
+            unrealised_pnl = 0
+            pnl_pct        = 0
+
+        sl   = t.get("stop", 0)
+        tp1  = t.get("tp1", 0)
+        tp2  = t.get("tp2", 0)
+        dec  = 4 if entry < 10 else 2
+
+        # Progress toward TP (0–100%)
+        if signal == "BUY" and tp2 > entry > sl:
+            progress = round(max(0, min(100, (live_price - entry) / (tp2 - entry) * 100)), 1) if live_price else 0
+        elif signal == "SELL" and tp2 < entry < sl:
+            progress = round(max(0, min(100, (entry - live_price) / (entry - tp2) * 100)), 1) if live_price else 0
+        else:
+            progress = 0
+
+        result.append({
+            **t,
+            "live_price":     live_price,
+            "unrealised_pnl": unrealised_pnl,
+            "pnl_pct":        pnl_pct,
+            "progress":       progress,
+            "status":         "TP1 hit" if t.get("tp1_hit") else "Open",
+        })
+    return result
+
+
+# ── API Routes ───────────────────────────────────────────────────
+
+@app.route("/api/status")
+def api_status():
+    """Dashboard health check + summary stats."""
+    trades  = load_json(TRADES_FILE, {})
+    history = load_trade_history()
+
+    wins    = [h for h in history if h.get("pnl", 0) > 0]
+    losses  = [h for h in history if h.get("pnl", 0) <= 0]
+    total   = len(history)
+    win_rate = round(len(wins) / total * 100, 1) if total else 0
+    total_pnl = round(sum(h.get("pnl", 0) for h in history), 4)
+
+    return jsonify({
+        "ok":           True,
+        "timestamp":    datetime.now(timezone.utc).isoformat(),
+        "open_trades":  len(trades),
+        "max_trades":   3,
+        "total_closed": total,
+        "wins":         len(wins),
+        "losses":       len(losses),
+        "win_rate":     win_rate,
+        "total_pnl":    total_pnl,
+        "model_acc":    73.1,
+    })
+
+
+@app.route("/api/trades/open")
+def api_open_trades():
+    """Return all open trades with live prices + unrealised PnL."""
+    trades  = load_json(TRADES_FILE, {})
+    symbols = list(trades.keys())
+    prices  = get_live_prices(symbols)
+    return jsonify(enrich_trades(trades, prices))
+
+
+@app.route("/api/trades/history")
+def api_trade_history():
+    """Return closed trade history."""
+    history = load_trade_history()
+    return jsonify(history[-50:])   # last 50 trades
+
+
+@app.route("/api/log")
+def api_log():
+    """Return last 100 lines of bot.log."""
+    try:
+        if Path(LOG_FILE).exists():
+            lines = Path(LOG_FILE).read_text().splitlines()
+            return jsonify({"lines": lines[-100:]})
+    except Exception:
+        pass
+    return jsonify({"lines": ["Log file not found"]})
+
+
+@app.route("/api/scan", methods=["POST"])
+def api_trigger_scan():
+    """Manually trigger a scan (runs trade_executor in background)."""
+    def run_scan():
+        try:
+            import subprocess
+            subprocess.run(["python", "trade_executor.py"], timeout=300)
+        except Exception as e:
+            log.error(f"Manual scan error: {e}")
+
+    t = threading.Thread(target=run_scan, daemon=True)
+    t.start()
+    return jsonify({"ok": True, "message": "Scan started"})
+
+
+@app.route("/api/close_trade", methods=["POST"])
+def api_close_trade():
+    """Manually close a trade by symbol."""
+    data   = request.get_json()
+    symbol = data.get("symbol")
+    if not symbol:
+        return jsonify({"ok": False, "error": "symbol required"}), 400
+
+    trades = load_json(TRADES_FILE, {})
+    if symbol not in trades:
+        return jsonify({"ok": False, "error": "Trade not found"}), 404
+
+    try:
+        from trade_executor import init_exchange
+        exchange = init_exchange()
+        trade    = trades[symbol]
+        order_ids = trade.get("order_ids", {})
+
+        # Cancel all open orders for this symbol
+        for key, oid in order_ids.items():
+            try:
+                exchange.cancel_order(oid, symbol)
+            except Exception:
+                pass
+
+        # Market close
+        close_side = "sell" if trade["signal"] == "BUY" else "buy"
+        exchange.create_order(symbol, "market", close_side, trade["qty"])
+
+        # Record in history
+        prices  = get_live_prices([symbol])
+        close_p = prices.get(symbol, trade["entry"])
+        entry   = trade["entry"]
+        qty     = trade["qty"]
+        if trade["signal"] == "BUY":
+            pnl = round((close_p - entry) * qty, 4)
+        else:
+            pnl = round((entry - close_p) * qty, 4)
+
+        history = load_trade_history()
+        history.append({
+            **trade,
+            "close_price": close_p,
+            "pnl":         pnl,
+            "closed_at":   datetime.now(timezone.utc).isoformat(),
+            "close_reason": "Manual close",
+        })
+        save_trade_history(history)
+
+        trades.pop(symbol)
+        with open(TRADES_FILE, "w") as f:
+            json.dump(trades, f, indent=2)
+
+        return jsonify({"ok": True, "pnl": pnl})
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/")
+def serve_dashboard():
+    return send_from_directory("dashboard_static", "index.html")
+
+
+@app.route("/<path:path>")
+def serve_static(path):
+    return send_from_directory("dashboard_static", path)
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    log.info(f"Dashboard API running on http://localhost:{port}")
+    app.run(host="0.0.0.0", port=port, debug=False)
