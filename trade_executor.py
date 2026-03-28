@@ -1,10 +1,10 @@
-# trade_executor.py — FIXED & CLEANED VERSION
+# trade_executor.py — THE FINAL MASTER VERSION
 # Includes:
-#   1. Auto-recovery for orphaned trades (Render ephemeral disk fix)
-#   2. 20% max position sizing cap (Insufficient funds fix)
-#   3. Manual 1h feature attachment (Missing features fix)
-#   4. SELL stop/TP direction bug fixed
-#   5. Detailed diagnostic logging
+#   1. Time Machine Sync (Rebuilds History tab from Binance)
+#   2. Auto-recovery for orphaned open trades
+#   3. 20% max position sizing cap (Insufficient funds fix)
+#   4. Cleaned up logs (muted ccxt warnings)
+#   5. Manual 1h feature attachment
 
 import os, json, time, logging, requests, joblib, pandas as pd
 from datetime import datetime, timezone
@@ -88,6 +88,10 @@ def init_exchange():
         "enableRateLimit": True,
     })
     ex.set_sandbox_mode(True)
+    
+    # ── Mutes the annoying yellow warning about fetch_open_orders ──
+    ex.options["warnOnFetchOpenOrdersWithoutSymbol"] = False 
+    
     log.info("✓ Exchange: Binance TESTNET")
     return ex
 
@@ -291,14 +295,70 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
 
 # ════════════ MONITORING & RECOVERY ════════════════════════
 
+def sync_trade_history(ex):
+    """Rebuilds the history tab from Binance if Render wiped the disk."""
+    history = load_history()
+    
+    if len(history) > 0:
+        return
+
+    log.info("  🔄 Rebuilding History & Performance data from Binance...")
+    rebuilt = []
+    
+    try:
+        for sym in SYMBOLS:
+            try:
+                orders = ex.fetch_closed_orders(sym, limit=10)
+            except Exception:
+                continue
+            
+            entries = [o for o in orders if o['type'] == 'market' and o['status'] == 'closed']
+            exits   = [o for o in orders if o['type'] != 'market' and o['status'] == 'closed']
+            
+            for entry in entries:
+                exit_order = next((x for x in exits if x['timestamp'] > entry['timestamp']), None)
+                
+                if exit_order:
+                    qty = float(entry.get('filled') or entry.get('amount') or 0)
+                    entry_price = float(entry.get('average') or entry.get('price') or 0)
+                    exit_price = float(exit_order.get('average') or exit_order.get('price') or 0)
+                    
+                    if qty == 0 or entry_price == 0: 
+                        continue
+                    
+                    is_buy = entry['side'] == 'buy'
+                    if is_buy:
+                        pnl = (exit_price - entry_price) * qty
+                    else:
+                        pnl = (entry_price - exit_price) * qty
+                        
+                    rebuilt.append({
+                        "symbol": sym,
+                        "signal": "BUY" if is_buy else "SELL",
+                        "entry": entry_price,
+                        "close_price": exit_price,
+                        "pnl": round(pnl, 4),
+                        "opened_at": datetime.fromtimestamp(entry['timestamp']/1000, tz=timezone.utc).isoformat(),
+                        "closed_at": datetime.fromtimestamp(exit_order['timestamp']/1000, tz=timezone.utc).isoformat(),
+                        "close_reason": "Binance Sync"
+                    })
+        
+        if rebuilt:
+            rebuilt.sort(key=lambda x: x['closed_at'])
+            save_json(HISTORY_FILE, rebuilt)
+            log.info(f"  ✅ Recovered {len(rebuilt)} closed trades for the Performance Dashboard!")
+            
+    except Exception as e:
+        log.warning(f"  ⚠️ History sync failed: {e}")
+
+
 def auto_recover_trades(ex):
     """Asks Binance for open orders and reconstructs lost trades."""
     trades = load_trades()
     try:
-        log.info("  🔄 Syncing with Binance to check for orphaned trades...")
+        log.info("  🔄 Syncing with Binance to check for orphaned open trades...")
         open_orders = ex.fetch_open_orders()
         
-        # Find all coins currently tied up in active Stop Loss/Take Profit orders
         active_symbols = list(set([o['symbol'] for o in open_orders]))
         
         recovered = 0
@@ -443,7 +503,6 @@ def _record_close(trade, close_price, pnl, reason):
 
 def generate_signal(symbol, pipeline, thresholds):
     try:
-        # Fetch data
         df_entry   = add_indicators(get_data(symbol, TIMEFRAME_ENTRY))
         df_confirm = add_indicators(get_data(symbol, TIMEFRAME_CONFIRM))
 
@@ -451,11 +510,9 @@ def generate_signal(symbol, pipeline, thresholds):
             log.info(f"    Not enough data ({len(df_entry)} rows)")
             return None
 
-        # 1. Use .copy() so we can safely attach the new columns
         row_entry   = df_entry.iloc[-1].copy() 
         row_confirm = df_confirm.iloc[-1] if not df_confirm.empty else pd.Series(dtype=float)
 
-        # 2. Attach the missing 1-hour features manually!
         row_entry['rsi_1h']   = float(row_confirm.get('rsi', 50))
         row_entry['adx_1h']   = float(row_confirm.get('adx', 0))
         row_entry['trend_1h'] = float(row_confirm.get('trend', 0))
@@ -464,13 +521,11 @@ def generate_signal(symbol, pipeline, thresholds):
         selector = pipeline["selector"]
         ensemble = pipeline["ensemble"]
 
-        # 3. Check for missing features in row_entry.index
         missing = [f for f in all_feat if f not in row_entry.index]
         if missing:
             log.warning(f"    Missing features: {missing[:5]}")
             return None
 
-        # ML prediction
         X_raw      = pd.DataFrame([row_entry[all_feat].values], columns=all_feat)
         X_sel      = selector.transform(X_raw)
         pred       = ensemble.predict(X_sel)[0]
@@ -729,8 +784,9 @@ def run_execution_scan():
     pipeline   = load_model()
     thresholds = get_mode_thresholds(mode)
 
-    # 🔄 Auto-Recovery runs FIRST to fetch orphaned trades
+    # 🔄 Auto-Recovery & History Sync run FIRST
     auto_recover_trades(exchange)
+    sync_trade_history(exchange)
 
     log.info(f"\n[1/2] Checking open trades...")
     check_open_trades(exchange)
