@@ -139,11 +139,23 @@ def get_data(symbol, interval):
 def calc_pos_size(balance, entry, stop):
     risk = balance * RISK_PER_TRADE
     dist = abs(entry - stop)
+    
     if dist <= 0:
         log.warning("  Stop distance = 0, cannot size position")
         return 0.0
+        
     qty = risk / dist
-    return round(qty, 6)
+    
+    # ── NEW SAFETY CAP ───────────────────────────────────────────
+    # Never allocate more than 20% of total balance to a single trade
+    max_usd_position = balance * 0.20 
+    
+    if (qty * entry) > max_usd_position:
+        log.info(f"  Qty capped: {qty*entry:.2f} USDT exceeds 20% limit.")
+        qty = max_usd_position / entry
+    # ─────────────────────────────────────────────────────────────
+        
+    return round(qty, 6)6)
 
 
 # ════════════ EXECUTION ════════════════════════════════════
