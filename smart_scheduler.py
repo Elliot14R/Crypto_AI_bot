@@ -70,7 +70,7 @@ def get_scan_mode() -> dict:
 def check_btc_volatility() -> dict:
     """Fetch BTC 15m data and check ATR as % of price."""
     try:
-        url    = "https://api.binance.com/api/v3/klines"
+        url    = "https://data-api.binance.vision/api/v3/klines"
         params = {"symbol": "BTCUSDT", "interval": "15m", "limit": 30}
         resp   = requests.get(url, params=params, timeout=10)
         data   = resp.json()
