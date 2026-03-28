@@ -1,11 +1,10 @@
-# trade_executor.py — FIXED VERSION
-# Fixes:
-#   1. SELL stop/TP direction bug (was calculating wrong prices)
-#   2. Symbols not on Binance (RENDERUSDT, TAOUSDT) handled gracefully
-#   3. Detailed diagnostic logging so you can see exactly what's happening
-#   4. Score fallback — saves signal even if score too low (for dashboard)
-#   5. GitHub Actions cache failure handled — always starts clean
-#   6. Model pipeline dict checked properly before use
+# trade_executor.py — FIXED & CLEANED VERSION
+# Includes:
+#   1. Auto-recovery for orphaned trades (Render ephemeral disk fix)
+#   2. 20% max position sizing cap (Insufficient funds fix)
+#   3. Manual 1h feature attachment (Missing features fix)
+#   4. SELL stop/TP direction bug fixed
+#   5. Detailed diagnostic logging
 
 import os, json, time, logging, requests, joblib, pandas as pd
 from datetime import datetime, timezone
@@ -95,7 +94,6 @@ def init_exchange():
 
 def load_model():
     pipeline = joblib.load(MODEL_FILE)
-    # Validate it has the expected keys
     required = ["ensemble", "selector", "all_features", "best_features", "label_map"]
     missing  = [k for k in required if k not in pipeline]
     if missing:
@@ -114,7 +112,6 @@ def get_balance_usdt(ex):
 
 
 def verify_symbol(ex, symbol) -> bool:
-    """Check if symbol actually trades on Binance testnet."""
     try:
         ex.fetch_ticker(symbol)
         return True
@@ -146,14 +143,12 @@ def calc_pos_size(balance, entry, stop):
         
     qty = risk / dist
     
-    # ── NEW SAFETY CAP ───────────────────────────────────────────
-    # Never allocate more than 20% of total balance to a single trade
+    # ── SAFETY CAP: Never allocate >20% of balance to a single trade ──
     max_usd_position = balance * 0.20 
     
     if (qty * entry) > max_usd_position:
         log.info(f"  Qty capped: {qty*entry:.2f} USDT exceeds 20% limit.")
         qty = max_usd_position / entry
-    # ─────────────────────────────────────────────────────────────
         
     return round(qty, 6)
 
@@ -169,7 +164,6 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
         log.info(f"  Max open trades ({MAX_OPEN_TRADES}) reached — skip")
         return False
 
-    # ── Price levels — FIXED: correct direction for SELL ──────────
     dec = 4 if entry < 10 else 2
     if signal == "BUY":
         stop = round(entry - atr * ATR_STOP_MULT,    dec)
@@ -179,8 +173,8 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
         sl_side   = "sell"
         tp_side   = "sell"
     else:  # SELL
-        stop = round(entry + atr * ATR_STOP_MULT,    dec)   # SL above entry for short
-        tp1  = round(entry - atr * ATR_TARGET1_MULT, dec)   # TP below entry for short
+        stop = round(entry + atr * ATR_STOP_MULT,    dec)   
+        tp1  = round(entry - atr * ATR_TARGET1_MULT, dec)   
         tp2  = round(entry - atr * ATR_TARGET2_MULT, dec)
         side      = "sell"
         sl_side   = "buy"
@@ -206,14 +200,14 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
     order_ids = {}
 
     try:
-        # ── Entry market order ─────────────────────────────────────
+        # Entry market order
         entry_order = ex.create_order(symbol, "market", side, qty)
         order_ids["entry"] = entry_order["id"]
         actual_entry = float(entry_order.get("average", entry) or entry)
         log.info(f"  ✅ Entry filled at {actual_entry:.{dec}f}")
-        time.sleep(1.5)   # give exchange time before placing SL/TP
+        time.sleep(1.5)
 
-        # ── Stop loss ──────────────────────────────────────────────
+        # Stop loss
         sl_placed = False
         for order_type in ["stop_loss_limit", "limit"]:
             try:
@@ -231,7 +225,7 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
         if not sl_placed:
             log.error(f"  ⚠️ Could not place stop loss for {symbol} — trade recorded without SL")
 
-        # ── Take profit 1 (50% position) ───────────────────────────
+        # Take profit 1
         for order_type in ["take_profit_limit", "limit"]:
             try:
                 tp1_o = ex.create_order(
@@ -244,7 +238,7 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
             except Exception as e:
                 log.warning(f"  TP1 attempt ({order_type}) failed: {e}")
 
-        # ── Take profit 2 (remaining 50%) ──────────────────────────
+        # Take profit 2
         for order_type in ["take_profit_limit", "limit"]:
             try:
                 tp2_o = ex.create_order(
@@ -274,7 +268,7 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
         _warn(f"⚠️ Unexpected error for {symbol}: {e}")
         return False
 
-    # ── Save trade record ──────────────────────────────────────────
+    # Save trade record
     record = {
         "symbol": symbol, "signal": signal,
         "entry": actual_entry, "stop": stop, "tp1": tp1, "tp2": tp2,
@@ -295,7 +289,55 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence, score, reasons):
     return True
 
 
-# ════════════ MONITORING ═══════════════════════════════════
+# ════════════ MONITORING & RECOVERY ════════════════════════
+
+def auto_recover_trades(ex):
+    """Asks Binance for open orders and reconstructs lost trades."""
+    trades = load_trades()
+    try:
+        log.info("  🔄 Syncing with Binance to check for orphaned trades...")
+        open_orders = ex.fetch_open_orders()
+        
+        # Find all coins currently tied up in active Stop Loss/Take Profit orders
+        active_symbols = list(set([o['symbol'] for o in open_orders]))
+        
+        recovered = 0
+        for sym in active_symbols:
+            if sym not in trades:
+                sym_orders = [o for o in open_orders if o['symbol'] == sym]
+                total_qty = sum([o.get('amount', 0) for o in sym_orders])
+                
+                order_ids = {}
+                for o in sym_orders:
+                    if o['type'] == 'stop_loss_limit' or 'stop' in o['type']:
+                        order_ids["stop_loss"] = o['id']
+                    elif "tp1" not in order_ids:
+                        order_ids["tp1"] = o['id']
+                    else:
+                        order_ids["tp2"] = o['id']
+
+                trades[sym] = {
+                    "symbol": sym, 
+                    "signal": "RECOVERED",
+                    "entry": sym_orders[0].get('average', 0) or sym_orders[0].get('price', 0), 
+                    "stop": 0, "tp1": 0, "tp2": 0,
+                    "qty": total_qty, "qty_tp1": total_qty / 2, "qty_tp2": total_qty / 2,
+                    "risk_usd": 0, "balance_at_open": 0,
+                    "order_ids": order_ids,
+                    "tp1_hit": False, "tp2_hit": False, "closed": False,
+                    "confidence": 100, "score": 6, "reasons": ["🔄 Recovered by Auto-Sync"],
+                    "tier": get_tier(sym),
+                    "opened_at": sym_orders[0].get('datetime', datetime.now(timezone.utc).isoformat())
+                }
+                recovered += 1
+                
+        if recovered > 0:
+            save_trades(trades)
+            log.info(f"  ✅ Successfully recovered {recovered} orphaned trades!")
+            
+    except Exception as e:
+        log.warning(f"  ⚠️ Auto-recover failed (this is safe to ignore): {e}")
+
 
 def check_open_trades(ex):
     trades = load_trades()
@@ -398,11 +440,8 @@ def _record_close(trade, close_price, pnl, reason):
 
 
 # ════════════ SIGNAL GENERATION ════════════════════════════
+
 def generate_signal(symbol, pipeline, thresholds):
-    """
-    Returns a signal dict if a qualifying signal is found, else None.
-    Includes detailed logging so you can see exactly why signals are rejected.
-    """
     try:
         # Fetch data
         df_entry   = add_indicators(get_data(symbol, TIMEFRAME_ENTRY))
@@ -425,16 +464,11 @@ def generate_signal(symbol, pipeline, thresholds):
         selector = pipeline["selector"]
         ensemble = pipeline["ensemble"]
 
-        # 3. Check for missing features in row_entry.index, NOT df_entry.columns
+        # 3. Check for missing features in row_entry.index
         missing = [f for f in all_feat if f not in row_entry.index]
         if missing:
             log.warning(f"    Missing features: {missing[:5]}")
             return None
-
-        # ML prediction
-        X_raw      = pd.DataFrame([row_entry[all_feat].values], columns=all_feat)
-        
-        # ... (Leave the rest of your generate_signal function exactly as is!)
 
         # ML prediction
         X_raw      = pd.DataFrame([row_entry[all_feat].values], columns=all_feat)
@@ -466,7 +500,6 @@ def generate_signal(symbol, pipeline, thresholds):
 
         if score < thresholds["min_score"]:
             log.info(f"    Skipped: score {score} < {thresholds['min_score']}")
-            # Still save to signals for dashboard visibility
             entry = float(row_entry["close"])
             atr   = float(row_entry["atr"])
             save_signal({
@@ -482,7 +515,6 @@ def generate_signal(symbol, pipeline, thresholds):
         entry = float(row_entry["close"])
         atr   = float(row_entry["atr"])
 
-        # FIXED: correct SL/TP direction for both BUY and SELL
         if signal == "BUY":
             stop = round(entry - atr * ATR_STOP_MULT,    4)
             tp1  = round(entry + atr * ATR_TARGET1_MULT, 4)
@@ -501,7 +533,6 @@ def generate_signal(symbol, pipeline, thresholds):
         }
 
     except requests.exceptions.HTTPError as e:
-        # Handles symbols not on Binance testnet gracefully
         log.warning(f"    HTTP error (symbol may not exist on testnet): {e}")
         return None
     except Exception as e:
@@ -512,7 +543,6 @@ def generate_signal(symbol, pipeline, thresholds):
 def _quality_score(row_entry, row_confirm, signal, confidence):
     score, reasons = 0, []
 
-    # Confidence
     if confidence >= 75:
         score += 1; reasons.append(f"High AI confidence ({confidence:.0f}%)")
     elif confidence >= 65:
@@ -520,21 +550,18 @@ def _quality_score(row_entry, row_confirm, signal, confidence):
     elif confidence >= 60:
         reasons.append(f"AI confidence ({confidence:.0f}%)")
 
-    # ADX trend strength
     adx = float(row_entry.get("adx", 0))
     if adx > 25:
         score += 1; reasons.append(f"Strong trend ADX {adx:.0f}")
     elif adx > 18:
         score += 1; reasons.append(f"Moderate trend ADX {adx:.0f}")
 
-    # RSI zone
     rsi = float(row_entry.get("rsi", 50))
     if signal == "BUY" and rsi < 45:
         score += 1; reasons.append(f"RSI bullish zone ({rsi:.0f})")
     elif signal == "SELL" and rsi > 55:
         score += 1; reasons.append(f"RSI bearish zone ({rsi:.0f})")
 
-    # EMA alignment
     e20  = float(row_entry.get("ema20",  0))
     e50  = float(row_entry.get("ema50",  0))
     e200 = float(row_entry.get("ema200", 0))
@@ -543,7 +570,6 @@ def _quality_score(row_entry, row_confirm, signal, confidence):
     elif signal == "SELL" and e20 < e50:
         score += 1; reasons.append("EMA20 < EMA50 (downtrend)")
 
-    # 1h confirmation
     c20 = float(row_confirm.get("ema20", 0))
     c50 = float(row_confirm.get("ema50", 0))
     if signal == "BUY" and c20 > c50:
@@ -610,13 +636,13 @@ def _send_open_alert(symbol, signal, confidence, score, entry,
         f"{emoji} *{signal} — {symbol}* {stars}\n"
         f"🏷️ Tier: _{tier}_\n"
         f"🎯 Confidence: *{confidence:.1f}%* · Score: *{score}/6*\n\n"
-        f"⚡ *ENTRY:*     `{fp(entry)}`\n"
+        f"⚡ *ENTRY:* `{fp(entry)}`\n"
         f"🛑 *STOP LOSS:* `{fp(stop)}`  (-{sl_pct:.1f}%)\n"
-        f"🎯 *TARGET 1:*  `{fp(tp1)}`  (+{t1_pct:.1f}%)\n"
-        f"🎯 *TARGET 2:*  `{fp(tp2)}`  (+{t2_pct:.1f}%)\n\n"
-        f"💰 *Position:*  `{pos_usd:.2f} USDT`\n"
-        f"⚠️  *Risk:*      `{risk_usd:.2f} USDT` (1% balance)\n"
-        f"💼 *Balance:*   `{balance:.2f} USDT`\n\n"
+        f"🎯 *TARGET 1:* `{fp(tp1)}`  (+{t1_pct:.1f}%)\n"
+        f"🎯 *TARGET 2:* `{fp(tp2)}`  (+{t2_pct:.1f}%)\n\n"
+        f"💰 *Position:* `{pos_usd:.2f} USDT`\n"
+        f"⚠️  *Risk:* `{risk_usd:.2f} USDT` (1% balance)\n"
+        f"💼 *Balance:* `{balance:.2f} USDT`\n\n"
         f"📊 *Reasons:*\n{rlines}\n\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"_Binance Testnet — paper trading_"
@@ -647,10 +673,6 @@ def _send_close_alert(symbol, result, pnl, entry, close_price, opened_at):
 # ════════════ DIAGNOSTIC SCAN ══════════════════════════════
 
 def run_diagnostic():
-    """
-    Send a full Telegram diagnostic showing exactly why no trades fired.
-    Run manually from GitHub Actions workflow_dispatch.
-    """
     log.info("Running diagnostic scan...")
     lines = [
         "🔍 *Bot Diagnostic Report*",
@@ -694,7 +716,6 @@ def run_execution_scan():
     log.info(f"SCAN START — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
     log.info(f"{'═'*56}")
 
-    # Smart scheduler check
     run, mode, vol, reason = should_scan()
     check_mode_switch(mode)
 
@@ -708,6 +729,9 @@ def run_execution_scan():
     pipeline   = load_model()
     thresholds = get_mode_thresholds(mode)
 
+    # 🔄 Auto-Recovery runs FIRST to fetch orphaned trades
+    auto_recover_trades(exchange)
+
     log.info(f"\n[1/2] Checking open trades...")
     check_open_trades(exchange)
 
@@ -718,7 +742,6 @@ def run_execution_scan():
 
     signals_found = 0
     for symbol in SYMBOLS:
-        # Stop scanning if max trades reached
         if len(load_trades()) >= MAX_OPEN_TRADES:
             log.info("  Max trades reached — stopping scan")
             break
