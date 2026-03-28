@@ -1,0 +1,28 @@
+{
+  "ETH/USDT": {
+    "symbol": "ETH/USDT",
+    "signal": "RECOVERED",
+    "entry": 2040.63,
+    "stop": 0,
+    "tp1": 0,
+    "tp2": 0,
+    "qty": 0.3965,
+    "qty_tp1": 0.19825,
+    "qty_tp2": 0.19825,
+    "risk_usd": 0,
+    "balance_at_open": 0,
+    "order_ids": {
+      "tp1": "14655433"
+    },
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 100,
+    "score": 6,
+    "reasons": [
+      "\ud83d\udd04 Recovered by Auto-Sync"
+    ],
+    "tier": "Unknown",
+    "opened_at": "2026-03-28T15:09:27.032Z"
+  }
+}
