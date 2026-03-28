@@ -386,7 +386,6 @@ def _record_close(trade, close_price, pnl, reason):
 
 
 # ════════════ SIGNAL GENERATION ════════════════════════════
-
 def generate_signal(symbol, pipeline, thresholds):
     """
     Returns a signal dict if a qualifying signal is found, else None.
@@ -401,18 +400,29 @@ def generate_signal(symbol, pipeline, thresholds):
             log.info(f"    Not enough data ({len(df_entry)} rows)")
             return None
 
-        row_entry   = df_entry.iloc[-1]
+        # 1. Use .copy() so we can safely attach the new columns
+        row_entry   = df_entry.iloc[-1].copy() 
         row_confirm = df_confirm.iloc[-1] if not df_confirm.empty else pd.Series(dtype=float)
+
+        # 2. Attach the missing 1-hour features manually!
+        row_entry['rsi_1h']   = float(row_confirm.get('rsi', 50))
+        row_entry['adx_1h']   = float(row_confirm.get('adx', 0))
+        row_entry['trend_1h'] = float(row_confirm.get('trend', 0))
 
         all_feat = pipeline["all_features"]
         selector = pipeline["selector"]
         ensemble = pipeline["ensemble"]
 
-        # Check features
-        missing = [f for f in all_feat if f not in df_entry.columns]
+        # 3. Check for missing features in row_entry.index, NOT df_entry.columns
+        missing = [f for f in all_feat if f not in row_entry.index]
         if missing:
             log.warning(f"    Missing features: {missing[:5]}")
             return None
+
+        # ML prediction
+        X_raw      = pd.DataFrame([row_entry[all_feat].values], columns=all_feat)
+        
+        # ... (Leave the rest of your generate_signal function exactly as is!)
 
         # ML prediction
         X_raw      = pd.DataFrame([row_entry[all_feat].values], columns=all_feat)
