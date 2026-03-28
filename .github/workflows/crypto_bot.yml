@@ -20,6 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
 
+    # ── Job-level env vars (available to ALL steps) ──────────
+    env:
+      GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
+      GITHUB_REPO:  Elliot14R/Crypto_AI_bot
+      GITHUB_BRANCH: main
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +46,9 @@ jobs:
           echo "CRYPTOPANIC_KEY=${{ secrets.CRYPTOPANIC_KEY }}"   >> .env
           echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"   >> .env
           echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"     >> .env
+          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"        >> .env
+          echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"              >> .env
+          echo "GITHUB_BRANCH=main"                                >> .env
 
       - name: Restore model cache
         uses: actions/cache@v4
@@ -48,7 +57,6 @@ jobs:
           key: model-${{ hashFiles('model_performance.json') }}
 
       # State files — restore from previous run
-      # Uses restore-keys so if no exact match it grabs the latest available
       - name: Restore state files
         uses: actions/cache@v4
         id: state-cache
@@ -62,13 +70,13 @@ jobs:
           restore-keys: |
             bot-state-
 
-      # If no state cache found, create empty defaults so bot doesn't crash
+      # If no state cache found, create empty defaults
       - name: Init state files if missing
         run: |
-          [ -f trades.json ]       || echo '{}'  > trades.json
-          [ -f trade_history.json ]|| echo '[]'  > trade_history.json
-          [ -f signals.json ]      || echo '[]'  > signals.json
-          [ -f scan_mode.json ]    || echo '{}'  > scan_mode.json
+          [ -f trades.json ]        || echo '{}'  > trades.json
+          [ -f trade_history.json ] || echo '[]'  > trade_history.json
+          [ -f signals.json ]       || echo '[]'  > signals.json
+          [ -f scan_mode.json ]     || echo '{}'  > scan_mode.json
 
       - name: Run bot
         run: |
