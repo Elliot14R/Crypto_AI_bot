@@ -155,7 +155,7 @@ def calc_pos_size(balance, entry, stop):
         qty = max_usd_position / entry
     # ─────────────────────────────────────────────────────────────
         
-    return round(qty, 6)6)
+    return round(qty, 6)
 
 
 # ════════════ EXECUTION ════════════════════════════════════
