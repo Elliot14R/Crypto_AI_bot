@@ -84,5 +84,40 @@
     "pnl": 3.5936,
     "closed_at": "2026-03-30T13:36:43.706813+00:00",
     "close_reason": "TP2 hit"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "signal": "BUY",
+    "entry": 618.43,
+    "stop": 616.08,
+    "tp1": 621.53,
+    "tp2": 623.09,
+    "qty": 1.076814,
+    "qty_tp1": 0.538407,
+    "qty_tp2": 0.538407,
+    "risk_usd": 33.3,
+    "balance_at_open": 3329.6171581,
+    "order_ids": {
+      "entry": "7878181",
+      "stop_loss": "7878182",
+      "tp1": "7878183"
+    },
+    "opened_at": "2026-03-30T11:39:43.486162+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": true,
+    "confidence": 64.1,
+    "score": 3,
+    "reasons": [
+      "AI confidence (64%)",
+      "Strong trend ADX 31",
+      "EMA20 > EMA50 (uptrend)",
+      "1h confirms uptrend"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "close_price": 616.08,
+    "pnl": -2.5305,
+    "closed_at": "2026-03-30T14:30:57.265189+00:00",
+    "close_reason": "SL hit"
   }
 ]
