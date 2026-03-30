@@ -549,7 +549,12 @@ def run_execution_scan():
     log.info(f"\n[2/2] Scanning {len(SYMBOLS)} symbols | Open: {len(trades)}/{MAX_OPEN_TRADES}")
     
     for symbol in SYMBOLS:
-        if len(load_trades()) >= MAX_OPEN_TRADES: break
+        # ── Added the print statement back in so you know why it stops ──
+        if len(load_trades()) >= MAX_OPEN_TRADES:
+            log.info("  🛑 Max open trades (3/3) reached — skipping market scan to save memory.")
+            break
+
+        log.info(f"\n  ── {symbol} ({get_tier(symbol)}) ──")
         sig = generate_signal(symbol, pipeline, thresholds)
         if sig is None: continue
         if vol_warning: sig["reasons"].append(f"⚠️ {vol_warning}")
