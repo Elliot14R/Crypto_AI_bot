@@ -366,6 +366,7 @@ def check_open_trades(ex):
                                     params={"stopPrice": entry, "timeInForce": "GTC"}
                                 )
                                 trade["order_ids"]["stop_loss"] = new_sl["id"]
+                                trade["stop"] = entry
                                 _send(f"🛡️ *{symbol} RISK-FREE!*\nStop Loss moved to entry price: `{entry}`")
                             except Exception as e: log.warning(f"Failed moving SL: {e}")
                 except Exception: pass
