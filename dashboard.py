@@ -10,7 +10,16 @@ load_dotenv(dotenv_path=".env", override=True)
 app = Flask(__name__, static_folder="dashboard_static")
 CORS(app)
 
-logging.basicConfig(level=logging.INFO)
+# ── THE FIX: Tell Python to save logs to 'bot.log' AND the console ──
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("bot.log"),
+        logging.StreamHandler()
+    ]
+)
 log = logging.getLogger(__name__)
 
 TRADES_FILE  = "trades.json"
