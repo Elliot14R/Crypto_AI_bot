@@ -115,8 +115,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--bg3)}
 .panel-title{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;}
-.refresh-icon {cursor:pointer; margin-left:8px; opacity:0.5; transition: opacity 0.2s, transform 0.3s;}
-.refresh-icon:hover {opacity:1; transform: rotate(180deg);}
+.refresh-icon{cursor:pointer;margin-left:8px;opacity:0.5;transition:opacity 0.2s,transform 0.3s;}
+.refresh-icon:hover{opacity:1;transform:rotate(180deg);}
 .panel-meta{display:flex;align-items:center;gap:8px}
 .panel-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text2)}
 .panel-body{padding:14px}
@@ -269,14 +269,508 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .empty .eicon{font-size:24px;margin-bottom:8px;opacity:0.5}
 .empty .emsg{font-size:11px;line-height:1.6}
 
+/* ── Config rows ── */
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:11px}
+.cfg-row:last-child{border-bottom:none}
+.cfg-key{color:var(--text3);letter-spacing:0.5px}
+.cfg-val{font-weight:600;color:var(--text)}
+
 /* ── Responsive ── */
 @media(max-width:1200px){.stats-row{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
 </style>
 </head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-dot"></div>
+    <div>
+      <div class="logo-text">CryptoBot AI</div>
+      <div class="logo-sub">20-pair scanner</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">Navigation</div>
+  <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+    <span class="nav-icon">⬛</span> Dashboard
+  </div>
+  <div class="nav-item" id="nav-signals" onclick="showPage('signals')">
+    <span class="nav-icon">⚡</span> Signals
+    <span class="nav-badge" id="signalCount">0</span>
+  </div>
+  <div class="nav-item" id="nav-trades" onclick="showPage('trades')">
+    <span class="nav-icon">📈</span> Open Trades
+    <span class="nav-badge green" id="tradeCount">0</span>
+  </div>
+  <div class="nav-item" id="nav-history" onclick="showPage('history')">
+    <span class="nav-icon">📋</span> History
+  </div>
+  <div class="nav-item" id="nav-market" onclick="showPage('market')">
+    <span class="nav-icon">🌐</span> Market
+  </div>
+  <div class="nav-item" id="nav-performance" onclick="showPage('performance')">
+    <span class="nav-icon">📊</span> Performance
+  </div>
+  <div class="nav-item" id="nav-config" onclick="showPage('config')">
+    <span class="nav-icon">⚙️</span> Config
+  </div>
+
+  <div class="sidebar-coins">
+    <div class="coins-label">Tracked Pairs</div>
+    <div class="coin-chips" id="coinChips"></div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="mode-badge active-mode" id="sidebarMode">
+      <div class="mode-dot"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600" id="sidebarModeTitle">ACTIVE HOURS</div>
+        <div style="font-size:9px;opacity:0.8;margin-top:1px" id="sidebarModeSub">Scan every 15 min</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="pageTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="top-stat">BTC <span id="btcPrice">—</span> <span id="btcChg" style="margin-left:4px">—</span></div>
+      <div class="top-stat">Balance <span id="topBalance">—</span> USDT</div>
+      <div class="live-badge" id="liveBadge">CONNECTING</div>
+      <span class="last-upd">Updated: <span id="lastUpd">—</span></span>
+      <button class="btn-scan" id="scanBtn" onclick="triggerScan()">▶ Scan Now</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ DASHBOARD PAGE ══════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+
+    <!-- Scan mode bar -->
+    <div class="scan-mode-bar active-mode" id="scanModeBar">
+      <div class="smode-dot"></div>
+      <div class="smode-info">
+        <div class="smode-title" id="smodeTitleMain">ACTIVE HOURS — Scanning every 15 minutes</div>
+        <div class="smode-sub" id="smodeSubMain">Min confidence: 65% · Min score: 3/6 · UTC 08:00–20:00</div>
+      </div>
+      <div class="smode-badge" id="smodeBadge">ACTIVE</div>
+    </div>
+
+    <!-- Volatility banner -->
+    <div class="vol-banner normal" id="volBanner">
+      <span id="volText">⟳ Fetching market data...</span>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card c-green">
+        <div class="stat-label">Total P&L</div>
+        <div class="stat-value" id="statPnl">—</div>
+        <div class="stat-sub">Realised USDT</div>
+      </div>
+      <div class="stat-card c-blue">
+        <div class="stat-label">Unrealised P&L</div>
+        <div class="stat-value" id="ot-upnl">—</div>
+        <div class="stat-sub">Open positions</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-label">Balance</div>
+        <div class="stat-value" id="statBalance">—</div>
+        <div class="stat-sub">USDT available</div>
+      </div>
+      <div class="stat-card c-purple">
+        <div class="stat-label">Open Trades</div>
+        <div class="stat-value blue" id="statOpen">—</div>
+        <div class="stat-sub">Active positions</div>
+      </div>
+      <div class="stat-card c-cyan">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value cyan" id="statWR">—</div>
+        <div class="stat-sub" id="statWRSub">—W / —L</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Signals Today</div>
+        <div class="stat-value green" id="statSigToday">—</div>
+        <div class="stat-sub" id="statSigSub">— BUY · — SELL</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-label">BTC ATR</div>
+        <div class="stat-value amber" id="btcAtrPct">—</div>
+        <div class="stat-sub">Range: $<span id="btcAtr">—</span></div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <!-- Left: recent signals + open trades -->
+      <div>
+        <!-- Recent signals -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Recent Signals <span class="refresh-icon" onclick="fetchSignals()">↻</span></div>
+            <div class="panel-meta">
+              <span class="panel-badge" id="recentSigBadge">last 5</span>
+              <button class="fbtn" onclick="showPage('signals')" style="font-size:10px">View all →</button>
+            </div>
+          </div>
+          <div class="panel-body" id="recentSignalsBody">
+            <div class="empty"><div class="eicon">⚡</div><div class="emsg">Fetching signals...</div></div>
+          </div>
+        </div>
+
+        <!-- Open trades -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Open Trades <span class="refresh-icon" onclick="fetchOpenTrades()">↻</span></div>
+            <div class="panel-meta">
+              <span class="panel-badge" id="openBadge">0 active</span>
+              <button class="fbtn" onclick="showPage('trades')" style="font-size:10px">View all →</button>
+            </div>
+          </div>
+          <div class="panel-body" id="openTradesBody">
+            <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div>
+        <!-- Balance card -->
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header">
+            <div class="panel-title">Balance</div>
+            <div class="panel-meta"><span class="panel-badge">Binance</span></div>
+          </div>
+          <div class="panel-body">
+            <div class="balance-card">
+              <div class="bal-num" id="balMain">—</div>
+              <div class="bal-sub">USDT Available</div>
+              <div class="bal-assets" id="balAssets"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fear & Greed -->
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header">
+            <div class="panel-title">Fear & Greed Index</div>
+            <div class="panel-meta"><span class="panel-badge">alternative.me</span></div>
+          </div>
+          <div class="fg-wrap">
+            <div class="fg-num" id="fgNum">—</div>
+            <div class="fg-label" id="fgLabel">Loading...</div>
+            <div class="fg-bar">
+              <div class="fg-bar-cursor" id="fgCursor" style="left:50%"></div>
+            </div>
+            <div class="fg-zones">
+              <div class="fg-zone" id="fgz0"><span style="color:var(--green)">Extreme Fear</span><span>0–24</span></div>
+              <div class="fg-zone" id="fgz1"><span style="color:var(--cyan)">Fear</span><span>25–44</span></div>
+              <div class="fg-zone" id="fgz2"><span style="color:var(--text2)">Neutral</span><span>45–54</span></div>
+              <div class="fg-zone" id="fgz3"><span style="color:var(--amber)">Greed</span><span>55–74</span></div>
+              <div class="fg-zone" id="fgz4"><span style="color:var(--red)">Extreme Greed</span><span>75–100</span></div>
+            </div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text2);line-height:1.5" id="fgAdvice">Fetching market sentiment...</div>
+          </div>
+        </div>
+
+        <!-- Signal stats -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Signal Stats</div>
+          </div>
+          <div class="panel-body">
+            <div class="cfg-row"><span class="cfg-key">Total Signals</span><span class="cfg-val" id="sig-total">—</span></div>
+            <div class="cfg-row"><span class="cfg-key">Buy Signals</span><span class="cfg-val" style="color:var(--green)" id="sig-buy">—</span></div>
+            <div class="cfg-row"><span class="cfg-key">Sell Signals</span><span class="cfg-val" style="color:var(--red)" id="sig-sell">—</span></div>
+            <div class="cfg-row"><span class="cfg-key">Avg Confidence</span><span class="cfg-val" style="color:var(--amber)" id="sig-avgconf">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bot log -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Bot Log <span class="refresh-icon" onclick="fetchLog()">↻</span></div>
+        <div class="panel-meta"><span class="panel-badge" id="logBadge">live</span></div>
+      </div>
+      <div class="panel-body">
+        <div class="log-box" id="logPanel">
+          <span class="log-line wrn">Connecting to API...</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-dashboard -->
+
+  <!-- ══════════════════════════════ SIGNALS PAGE ══════════════════════════════ -->
+  <div class="page" id="page-signals">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Signal History</div>
+        <div class="panel-meta">
+          <span class="panel-badge" id="signalCountBadge">— signals</span>
+        </div>
+      </div>
+
+      <!-- Direction filters -->
+      <div class="signal-filters">
+        <div class="filter-group">
+          <button class="fbtn active" id="fbtn-all" onclick="filterSig('all',this)">All</button>
+          <button class="fbtn buy-btn" id="fbtn-buy" onclick="filterSig('BUY',this)">BUY</button>
+          <button class="fbtn sell-btn" id="fbtn-sell" onclick="filterSig('SELL',this)">SELL</button>
+        </div>
+        <div class="filter-sep"></div>
+        <!-- Tier + coin filters injected by JS -->
+        <div class="filter-group" id="coinFilterBtns"></div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <button class="fbtn active" id="fbtn-conf-any" onclick="filterConf(0,this)">Any conf</button>
+          <button class="fbtn" id="fbtn-conf-65" onclick="filterConf(65,this)">65%+</button>
+          <button class="fbtn" id="fbtn-conf-70" onclick="filterConf(70,this)">70%+</button>
+          <button class="fbtn" id="fbtn-conf-80" onclick="filterConf(80,this)">80%+</button>
+        </div>
+      </div>
+
+      <div class="panel-body" id="signalsBody">
+        <div class="empty"><div class="eicon">⚡</div><div class="emsg">Loading signals...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ TRADES PAGE ══════════════════════════════ -->
+  <div class="page" id="page-trades">
+    <!-- Trade stats -->
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-blue">
+        <div class="stat-label">Open Trades</div>
+        <div class="stat-value blue" id="ot-count">—</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Unrealised P&L</div>
+        <div class="stat-value" id="ot-upnl2">—</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Total Risk</div>
+        <div class="stat-value red">$<span id="ot-risk">—</span></div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-label">Avg Confidence</div>
+        <div class="stat-value amber" id="ot-conf">—</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Open Positions <span class="refresh-icon" onclick="fetchOpenTrades()">↻</span></div>
+      </div>
+      <div class="panel-body" id="openTradesFullBody">
+        <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min for signals.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ HISTORY PAGE ══════════════════════════════ -->
+  <div class="page" id="page-history">
+    <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stat-card c-blue">
+        <div class="stat-label">Total Trades</div>
+        <div class="stat-value blue" id="h-total">—</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Wins</div>
+        <div class="stat-value green" id="h-wins">—</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Losses</div>
+        <div class="stat-value red" id="h-losses">—</div>
+      </div>
+      <div class="stat-card c-cyan">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value cyan" id="h-wr">—</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Total P&L</div>
+        <div class="stat-value" id="h-pnl">—</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Trade History <span class="refresh-icon" onclick="fetchHistory()">↻</span></div>
+        <div class="panel-meta"><span class="panel-badge" id="histBadge">0 trades</span></div>
+      </div>
+      <div class="panel-body" style="overflow-x:auto">
+        <table class="htable">
+          <thead>
+            <tr>
+              <th>Coin</th><th>Tier</th><th>Dir</th><th>Entry</th><th>Close</th>
+              <th>P&L</th><th>Result</th><th>Opened</th><th>Duration</th><th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="histBody">
+            <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Loading history...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ MARKET PAGE ══════════════════════════════ -->
+  <div class="page" id="page-market">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-green">
+        <div class="stat-label">Gainers</div>
+        <div class="stat-value green" id="mkt-gainers">—</div>
+        <div class="stat-sub">of 20 pairs</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Losers</div>
+        <div class="stat-value red" id="mkt-losers">—</div>
+        <div class="stat-sub">of 20 pairs</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Best</div>
+        <div class="stat-value green" id="mkt-best">—</div>
+        <div class="stat-sub" id="mkt-best-sym">—</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Worst</div>
+        <div class="stat-value red" id="mkt-worst">—</div>
+        <div class="stat-sub" id="mkt-worst-sym">—</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">All Pairs — 24h Overview <span class="refresh-icon" onclick="fetchMarketPrices()">↻</span></div>
+        <div class="panel-meta"><span class="panel-badge">Binance live</span></div>
+      </div>
+      <div class="panel-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px" id="mktPairsGrid">
+          <div class="empty" style="grid-column:1/-1"><div class="emsg">Loading market data...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ PERFORMANCE PAGE ══════════════════════════════ -->
+  <div class="page" id="page-performance">
+    <div class="g2" style="margin-bottom:16px">
+      <!-- W/L ratio -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Win / Loss Ratio</div></div>
+        <div class="panel-body" id="wlRatioBody">
+          <div class="empty"><div class="emsg">No trade data yet</div></div>
+        </div>
+      </div>
+      <!-- P&L bars -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Recent P&L (last 20)</div></div>
+        <div class="panel-body">
+          <div class="perf-bars" id="perfBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Best / worst -->
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="stat-card c-green">
+        <div class="stat-label">Best Trade</div>
+        <div class="stat-value green" id="p-best">—</div>
+        <div class="stat-sub" id="p-best-sym">—</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Worst Trade</div>
+        <div class="stat-value red" id="p-worst">—</div>
+        <div class="stat-sub" id="p-worst-sym">—</div>
+      </div>
+      <div class="stat-card c-cyan">
+        <div class="stat-label">Avg Win</div>
+        <div class="stat-value cyan" id="p-avgwin">—</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Avg Loss</div>
+        <div class="stat-value red" id="p-avgloss">—</div>
+      </div>
+    </div>
+
+    <!-- Coin performance -->
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Performance by Coin</div></div>
+      <div class="panel-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px" id="coinPerfGrid">
+          <div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ CONFIG PAGE ══════════════════════════════ -->
+  <div class="page" id="page-config">
+    <div class="g2">
+      <!-- Bot status -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Bot Status</div></div>
+        <div class="panel-body">
+          <div class="cfg-row"><span class="cfg-key">API Connection</span><span class="cfg-val" id="cfgApi">Checking...</span></div>
+          <div class="cfg-row"><span class="cfg-key">Current Mode</span><span class="cfg-val" id="cfgMode">—</span></div>
+          <div class="cfg-row"><span class="cfg-key">UTC Time</span><span class="cfg-val" id="cfgTime">—</span></div>
+          <div class="cfg-row"><span class="cfg-key">Day</span><span class="cfg-val" id="cfgDay">—</span></div>
+          <div class="cfg-row"><span class="cfg-key">Weekend Mode</span><span class="cfg-val" id="weekendStatus">—</span></div>
+          <div class="cfg-row"><span class="cfg-key">BTC Volatility</span><span class="cfg-val" id="cfgAtr">—</span></div>
+        </div>
+      </div>
+
+      <!-- Scan settings -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Scan Settings</div></div>
+        <div class="panel-body">
+          <div class="cfg-row"><span class="cfg-key">Active Hours</span><span class="cfg-val">UTC 08:00–20:00</span></div>
+          <div class="cfg-row"><span class="cfg-key">Active Min Conf</span><span class="cfg-val" style="color:var(--green)">65%</span></div>
+          <div class="cfg-row"><span class="cfg-key">Quiet Min Conf</span><span class="cfg-val" style="color:var(--purple)">72%</span></div>
+          <div class="cfg-row"><span class="cfg-key">Weekend Min Conf</span><span class="cfg-val" style="color:var(--amber)">70%</span></div>
+          <div class="cfg-row"><span class="cfg-key">Active Scan Interval</span><span class="cfg-val">15 min</span></div>
+          <div class="cfg-row"><span class="cfg-key">Quiet Scan Interval</span><span class="cfg-val">30 min</span></div>
+          <div class="cfg-row"><span class="cfg-key">Min Score</span><span class="cfg-val">3 / 6 signals</span></div>
+          <div class="cfg-row"><span class="cfg-key">High Vol ATR Skip</span><span class="cfg-val">ATR &gt; 2% skip scan</span></div>
+          <div class="cfg-row"><span class="cfg-key">Low Vol ATR Skip</span><span class="cfg-val">ATR &lt; 0.3% skip scan</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coin tiers -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Tracked Pairs — 20 coins across 4 tiers</div>
+        <div class="panel-meta"><span class="panel-badge">config.py</span></div>
+      </div>
+      <div class="panel-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px" id="tierTableCfg"></div>
+      </div>
+    </div>
+
+    <!-- API endpoint -->
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">API Endpoint</div></div>
+      <div class="panel-body">
+        <div class="cfg-row"><span class="cfg-key">Base URL</span><span class="cfg-val" style="color:var(--cyan);font-size:10px" id="cfgApiUrl"></span></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="fbtn" onclick="refreshAll()">↻ Refresh All</button>
+          <button class="fbtn" onclick="fetchLog()">📋 Reload Log</button>
+          <button class="fbtn" onclick="triggerScan()">▶ Manual Scan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
 <script>
 // ══ CONFIG ═══════════════════════════════════════════════
-// Change to your Render.com URL e.g.:
 const API_BASE = "https://crypto-ai-bot-na93.onrender.com";
 
 // ── 20 coins — verified on Binance, matching config.py ──────────
@@ -287,17 +781,18 @@ const COIN_TIERS = {
   "ai_mom": { label:"🤖 AI & Momentum",      color:"var(--cyan)",   coins:["FETUSDT","RENDERUSDT","ADAUSDT","INJUSDT","ARBUSDT","OPUSDT","SEIUSDT"] },
 };
 const SYMBOLS = Object.values(COIN_TIERS).flatMap(t => t.coins);
-// Helper: get tier for a symbol
 const getTier = sym => Object.entries(COIN_TIERS).find(([,t]) => t.coins.includes(sym));
 const getTierColor = sym => { const t = getTier(sym); return t ? t[1].color : "var(--text2)"; };
 
-let allSignals    = [];
-let marketData    = [];
-let sigFilter     = {dir:"all", conf:0, tier:null, coin:null};
-let prevPrices    = {};
-let btcAtrPct     = 0;
-let isScanning    = false;
-let apiOnline     = false;
+let allSignals  = [];
+let marketData  = [];
+let sigFilter   = {dir:"all", conf:0, tier:null, coin:null};
+let isScanning  = false;
+let apiOnline   = false;
+let btcAtrPct   = 0;
+
+// Set API URL on config page
+document.getElementById("cfgApiUrl").textContent = API_BASE;
 
 // ══ FORMAT HELPERS ══════════════════════════════════════
 const fmt    = (v, d) => v == null ? "—" : parseFloat(v).toFixed(d ?? (v < 10 ? 4 : 2));
@@ -328,7 +823,7 @@ function duration(iso1, iso2) {
 function getScanMode() {
   const now  = new Date();
   const utcH = now.getUTCHours();
-  const dow  = now.getUTCDay(); // 0=Sun, 6=Sat
+  const dow  = now.getUTCDay();
   const isWeekend = (dow === 0 || dow === 6);
   const isActive  = (utcH >= 8 && utcH < 20);
 
@@ -355,20 +850,17 @@ function updateScanMode() {
   const utcH = now.getUTCHours(), utcM = String(now.getUTCMinutes()).padStart(2,"0");
   const dow = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][now.getUTCDay()];
 
-  // Sidebar mode
   const sm = document.getElementById("sidebarMode");
   sm.className = "mode-badge " + m.cls;
   document.getElementById("sidebarModeTitle").textContent = m.label;
   document.getElementById("sidebarModeSub").textContent   = `Scan every ${m.interval} min`;
 
-  // Dashboard bar
   const bar = document.getElementById("scanModeBar");
   bar.className = "scan-mode-bar " + m.cls;
   document.getElementById("smodeTitleMain").textContent = m.label + " — Scanning every " + m.interval + " minutes";
   document.getElementById("smodeSubMain").textContent   = m.sub;
   document.getElementById("smodeBadge").textContent     = m.badge;
 
-  // Config page
   const modeColors = {active:"var(--green)", quiet:"var(--purple)", weekend:"var(--amber)"};
   const cfgM = document.getElementById("cfgMode");
   if (cfgM) { cfgM.textContent = m.label; cfgM.style.color = modeColors[m.mode]; }
@@ -380,7 +872,6 @@ function updateScanMode() {
   if (ws) ws.textContent = m.mode==="weekend" ? "ACTIVE NOW" : "Weekday";
 }
 
-// Build tier table for config page
 function buildTierTable() {
   const el = document.getElementById("tierTableCfg");
   if (!el) return;
@@ -394,9 +885,7 @@ function buildTierTable() {
         ${tier.coins.map(s => `
           <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:${tier.color}15;
                        border:1px solid ${tier.color}35;color:${tier.color};cursor:pointer"
-                onclick="showPage('signals')" title="${s}">
-            ${s.replace("USDT","")}
-          </span>`).join("")}
+                onclick="showPage('signals')">${s.replace("USDT","")}</span>`).join("")}
       </div>
     </div>`).join("");
 }
@@ -420,9 +909,8 @@ function showPage(id) {
   if (id === "config")      { updateScanMode(); buildTierTable(); }
 }
 
-// Build coin chips — grouped by tier
+// Build coin chips
 function buildCoinChips() {
-  // Sidebar coin chips grouped by tier
   document.getElementById("coinChips").innerHTML = Object.entries(COIN_TIERS).map(([key, tier]) =>
     `<div style="width:100%;font-size:8px;letter-spacing:1px;color:var(--text3);margin:6px 0 3px;text-transform:uppercase">${tier.label}</div>` +
     tier.coins.map(s =>
@@ -430,7 +918,6 @@ function buildCoinChips() {
     ).join("")
   ).join("");
 
-  // Signal page coin filter — Tier groups + Individual coins
   document.getElementById("coinFilterBtns").innerHTML =
     Object.entries(COIN_TIERS).map(([key, tier]) =>
       `<button class="fbtn" id="fbtn-tier-${key}" onclick="filterTier('${key}',this)" style="font-size:10px">${tier.label.split(' ').slice(1).join(' ')}</button>`
@@ -461,15 +948,12 @@ async function fetchStatus() {
     document.getElementById("statWR").textContent    = d.win_rate + "%";
     document.getElementById("statWR").className      = "stat-value " + (d.win_rate >= 50 ? "cyan" : "red");
     document.getElementById("statWRSub").textContent = `${d.wins}W / ${d.losses}L`;
-    document.getElementById("ot-count").textContent  = d.open_trades;
 
-    // Closed trade counts
     document.getElementById("h-total").textContent  = d.total_closed;
     document.getElementById("h-wins").textContent   = d.wins;
     document.getElementById("h-losses").textContent = d.losses;
     document.getElementById("h-wr").textContent     = d.win_rate + "%";
 
-    // Trade badge in nav
     document.getElementById("tradeCount").textContent = d.open_trades;
     document.getElementById("tradeCount").className   = d.open_trades > 0 ? "nav-badge green" : "nav-badge";
 
@@ -495,7 +979,6 @@ async function fetchBalance() {
     document.getElementById("statBalance").className    = "stat-value " + (usdt > 100 ? "green" : "amber");
     document.getElementById("topBalance").textContent   = fmted;
     document.getElementById("balMain").textContent      = fmted;
-
     if (d.assets && d.assets.length) {
       document.getElementById("balAssets").innerHTML = d.assets.slice(0,6).map(a =>
         `<div class="bal-row"><span style="color:var(--text2)">${a.asset}</span><span style="color:var(--cyan)">${parseFloat(a.free).toFixed(4)}</span></div>`
@@ -513,17 +996,15 @@ async function fetchOpenTrades() {
     if (!r.ok) return;
     const trades = await r.json();
 
-    document.getElementById("openBadge").textContent    = trades.length + " active";
-    document.getElementById("tradeCount").textContent   = trades.length;
+    document.getElementById("openBadge").textContent  = trades.length + " active";
+    document.getElementById("tradeCount").textContent = trades.length;
+    document.getElementById("ot-count").textContent   = trades.length;
 
     const noTrades = `<div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min for signals.</div></div>`;
 
     if (!trades.length) {
       document.getElementById("openTradesBody").innerHTML     = noTrades;
       document.getElementById("openTradesFullBody").innerHTML = noTrades;
-      document.getElementById("ot-upnl").textContent = "+0.0000";
-      document.getElementById("ot-risk").textContent = "—";
-      document.getElementById("ot-conf").textContent = "—";
       return;
     }
 
@@ -541,14 +1022,11 @@ async function fetchOpenTrades() {
     document.getElementById("openTradesBody").innerHTML     = html;
     document.getElementById("openTradesFullBody").innerHTML = html;
 
-    // Highlight active coins in sidebar
     SYMBOLS.forEach(s => {
       const chip = document.getElementById("chip-" + s);
       if (chip) chip.classList.toggle("has-signal", !!trades.find(t => t.symbol === s));
     });
-  } catch (e) {
-    console.warn("Open trades:", e);
-  }
+  } catch (e) { console.warn("Open trades:", e); }
 }
 
 function tradeCardHTML(t) {
@@ -562,8 +1040,8 @@ function tradeCardHTML(t) {
   <div class="trade-card ${t.signal.toLowerCase()}">
     <div class="tc-top">
       <div>
-        <div class="tc-sym" style="color:${tierCol}">${t.symbol.replace("USDT","")}<span style="color:var(--text3);font-size:11px;font-weight:400">/USDT</span></div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">${timeAgo(t.opened_at)} · score ${t.score}/6 · ${t.status||"Open"} · <span style="color:${tierCol}">${tierLbl}</span></div>
+        <div class="tc-sym" style="color:${tierCol}">${t.symbol.replace("USDT","")}<span>/USDT</span></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${timeAgo(t.opened_at)} · score ${t.score}/6 · <span style="color:${tierCol}">${tierLbl}</span></div>
       </div>
       <div style="text-align:right">
         <span class="dir-tag ${t.signal.toLowerCase()}">${t.signal}</span>
@@ -592,25 +1070,19 @@ function tradeCardHTML(t) {
   </div>`;
 }
 
-// Fetch signals from API (or build from log)
 async function fetchSignals() {
   try {
     const r = await fetch(API_BASE + "/api/signals", {signal: AbortSignal.timeout(15000)});
     if (r.ok) {
-      const d = await r.json();
-      allSignals = d;
+      allSignals = await r.json();
     } else {
-      throw new Error("no signals endpoint");
-    }
-  } catch {
-    try {
       const r2 = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(15000)});
       if (r2.ok) {
         const h = await r2.json();
         allSignals = h.map(t => ({...t, generated_at: t.opened_at}));
       }
-    } catch {}
-  }
+    }
+  } catch {}
   renderSignalsPage();
   renderRecentSignals();
   updateSignalStats();
@@ -627,7 +1099,8 @@ function renderSignalsPage() {
   }
   if (sigFilter.conf > 0) data = data.filter(s => (s.confidence||0) >= sigFilter.conf);
 
-  document.getElementById("signalCount").textContent = data.length;
+  document.getElementById("signalCount").textContent     = data.length;
+  document.getElementById("signalCountBadge").textContent = data.length + " signals";
 
   const body = document.getElementById("signalsBody");
   if (!data.length) {
@@ -693,7 +1166,6 @@ function updateSignalStats() {
   document.getElementById("signalCount").textContent  = total;
 }
 
-// ── BULLETPROOF TOGGLE FILTERS ──
 function filterSig(dir, btn) {
   const group = btn.closest(".filter-group");
   if (btn.classList.contains("active") && dir !== 'all') {
@@ -711,11 +1183,10 @@ function filterSig(dir, btn) {
 function filterCoin(coin, btn) {
   const group = btn.closest(".filter-group");
   if (btn.classList.contains("active")) {
-    sigFilter.coin = null; 
+    sigFilter.coin = null;
     btn.classList.remove("active");
   } else {
-    sigFilter.coin = coin;
-    sigFilter.tier = null; 
+    sigFilter.coin = coin; sigFilter.tier = null;
     group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
   }
@@ -725,11 +1196,10 @@ function filterCoin(coin, btn) {
 function filterTier(tierKey, btn) {
   const group = btn.closest(".filter-group");
   if (btn.classList.contains("active")) {
-    sigFilter.tier = null; 
+    sigFilter.tier = null;
     btn.classList.remove("active");
   } else {
-    sigFilter.tier = tierKey;
-    sigFilter.coin = null; 
+    sigFilter.tier = tierKey; sigFilter.coin = null;
     group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
   }
@@ -749,7 +1219,8 @@ function filterConf(conf, btn) {
   }
   renderSignalsPage();
 }
-  // ══ MARKET DATA ════════════════════════════════════════
+
+// ══ MARKET DATA ════════════════════════════════════════
 async function fetchMarketPrices() {
   try {
     const symJson = JSON.stringify(SYMBOLS);
@@ -759,25 +1230,22 @@ async function fetchMarketPrices() {
     if (!Array.isArray(data)) throw new Error();
     marketData = data;
 
-    // BTC ATR calc (using range as proxy)
     const btc = data.find(d => d.symbol === "BTCUSDT");
     if (btc) {
       const price = parseFloat(btc.lastPrice);
       const high  = parseFloat(btc.highPrice);
       const low   = parseFloat(btc.lowPrice);
-      const atr   = (high - low);
-      btcAtrPct   = (atr / price * 100);
+      btcAtrPct   = (high - low) / price * 100;
 
       document.getElementById("btcPrice").textContent  = fmtUSD(price);
-      document.getElementById("btcAtr").textContent    = atr.toFixed(2);
+      document.getElementById("btcAtr").textContent    = (high-low).toFixed(2);
       document.getElementById("btcAtrPct").textContent = btcAtrPct.toFixed(2) + "%";
 
-      const chg    = parseFloat(btc.priceChangePercent);
-      const chgEl  = document.getElementById("btcChg");
+      const chg   = parseFloat(btc.priceChangePercent);
+      const chgEl = document.getElementById("btcChg");
       chgEl.textContent = (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%";
       chgEl.style.color = chg >= 0 ? "var(--green)" : "var(--red)";
 
-      // Volatility banner
       const banner = document.getElementById("volBanner");
       const volTxt = document.getElementById("volText");
       const cfgAtr = document.getElementById("cfgAtr");
@@ -798,7 +1266,6 @@ async function fetchMarketPrices() {
     renderMarketPage();
   } catch (e) {
     console.warn("Market prices:", e.message);
-    // Fallback individual
     for (const sym of ["BTCUSDT","ETHUSDT"]) {
       try {
         const r2 = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`, {signal: AbortSignal.timeout(15000)});
@@ -816,7 +1283,7 @@ function renderMarketPage() {
   document.getElementById("mkt-losers").textContent  = marketData.length - gainers;
 
   const sorted = [...marketData].sort((a,b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent));
-  const best   = sorted[0], worst = sorted[sorted.length-1];
+  const best = sorted[0], worst = sorted[sorted.length-1];
   if (best) {
     document.getElementById("mkt-best").textContent     = "+" + parseFloat(best.priceChangePercent).toFixed(1) + "%";
     document.getElementById("mkt-best-sym").textContent = best.symbol.replace("USDT","");
@@ -826,11 +1293,9 @@ function renderMarketPage() {
     document.getElementById("mkt-worst-sym").textContent = worst.symbol.replace("USDT","");
   }
 
-  // Build market data lookup
   const bySymbol = {};
   marketData.forEach(t => { bySymbol[t.symbol] = t; });
 
-  // Render tier-grouped
   const grid = document.getElementById("mktPairsGrid");
   grid.innerHTML = Object.entries(COIN_TIERS).map(([key, tier]) => {
     const tiledCoins = tier.coins.map(sym => {
@@ -852,9 +1317,7 @@ function renderMarketPage() {
         </div>
         <div class="mc-price">${fmtUSD(price)}</div>
         <div class="mc-vol">Vol $${volFmt}</div>
-        <div class="mc-range">
-          <div class="mc-range-fill" style="left:${Math.min(pos,95)}%;width:5%;background:${tier.color}"></div>
-        </div>
+        <div class="mc-range"><div class="mc-range-fill" style="left:${Math.min(pos,95)}%;width:5%;background:${tier.color}"></div></div>
         <div class="mc-range-labels"><span>${fmtUSD(low)}</span><span>${fmtUSD(high)}</span></div>
       </div>`;
     }).join("");
@@ -883,7 +1346,6 @@ async function fetchFearGreed() {
                   val < 55 ? "var(--text2)" : val < 75 ? "var(--amber)" : "var(--red)";
     document.getElementById("fgNum").style.color = color;
 
-    // Highlight active zone
     const zones = ["fgz0","fgz1","fgz2","fgz3","fgz4"];
     const thresholds = [25,45,55,75,101];
     zones.forEach((id,i) => {
@@ -959,84 +1421,78 @@ async function fetchHistory() {
 
 // ══ PERFORMANCE ══════════════════════════════════════════
 function renderPerformancePage() {
-  try {
-    fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(15000)})
-      .then(r => r.json()).then(history => {
-        if (!history.length) return;
-        const wins   = history.filter(h => (h.pnl||0) > 0);
-        const losses = history.filter(h => (h.pnl||0) <= 0);
-        const best   = Math.max(...history.map(h => h.pnl||0));
-        const worst  = Math.min(...history.map(h => h.pnl||0));
-        const avgWin = wins.length   ? wins.reduce((s,h)=>s+(h.pnl||0),0)/wins.length     : 0;
-        const avgLoss= losses.length ? losses.reduce((s,h)=>s+(h.pnl||0),0)/losses.length : 0;
-        const bestH  = history.find(h => h.pnl === best);
-        const worstH = history.find(h => h.pnl === worst);
+  fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(15000)})
+    .then(r => r.json()).then(history => {
+      if (!history.length) return;
+      const wins   = history.filter(h => (h.pnl||0) > 0);
+      const losses = history.filter(h => (h.pnl||0) <= 0);
+      const best   = Math.max(...history.map(h => h.pnl||0));
+      const worst  = Math.min(...history.map(h => h.pnl||0));
+      const avgWin = wins.length   ? wins.reduce((s,h)=>s+(h.pnl||0),0)/wins.length     : 0;
+      const avgLoss= losses.length ? losses.reduce((s,h)=>s+(h.pnl||0),0)/losses.length : 0;
+      const bestH  = history.find(h => h.pnl === best);
+      const worstH = history.find(h => h.pnl === worst);
 
-        document.getElementById("p-best").textContent      = fmtPnl(best);
-        document.getElementById("p-best-sym").textContent  = bestH?.symbol?.replace("USDT","") || "—";
-        document.getElementById("p-worst").textContent     = fmtPnl(worst);
-        document.getElementById("p-worst-sym").textContent = worstH?.symbol?.replace("USDT","") || "—";
-        document.getElementById("p-avgwin").textContent    = fmtPnl(avgWin);
-        document.getElementById("p-avgloss").textContent   = fmtPnl(avgLoss);
+      document.getElementById("p-best").textContent      = fmtPnl(best);
+      document.getElementById("p-best-sym").textContent  = bestH?.symbol?.replace("USDT","") || "—";
+      document.getElementById("p-worst").textContent     = fmtPnl(worst);
+      document.getElementById("p-worst-sym").textContent = worstH?.symbol?.replace("USDT","") || "—";
+      document.getElementById("p-avgwin").textContent    = fmtPnl(avgWin);
+      document.getElementById("p-avgloss").textContent   = fmtPnl(avgLoss);
 
-        // PnL bars
-        const maxAbs = Math.max(...history.map(h => Math.abs(h.pnl||0)), 0.001);
-        document.getElementById("perfBars").innerHTML = history.slice(-20).map(h => {
-          const pnl = h.pnl || 0;
-          const h_  = Math.round((Math.abs(pnl) / maxAbs) * 76) + 4;
-          const cls = pnl >= 0 ? "win" : "loss";
-          return `<div class="perf-bar-wrap"><div class="perf-bar ${cls}" style="height:${h_}px" title="${fmtPnl(pnl)} USDT"></div></div>`;
-        }).join("");
+      const maxAbs = Math.max(...history.map(h => Math.abs(h.pnl||0)), 0.001);
+      document.getElementById("perfBars").innerHTML = history.slice(-20).map(h => {
+        const pnl = h.pnl || 0;
+        const h_  = Math.round((Math.abs(pnl) / maxAbs) * 76) + 4;
+        const cls = pnl >= 0 ? "win" : "loss";
+        return `<div class="perf-bar-wrap"><div class="perf-bar ${cls}" style="height:${h_}px" title="${fmtPnl(pnl)} USDT"></div></div>`;
+      }).join("");
 
-        // W/L ratio donut (CSS based)
-        const wr = wins.length / history.length * 100;
-        document.getElementById("wlRatioBody").innerHTML = `
-          <div style="text-align:center">
-            <div style="font-family:var(--sans);font-size:40px;font-weight:800;color:${wr>=50?"var(--green)":"var(--red)"}">${wr.toFixed(1)}%</div>
-            <div style="font-size:11px;color:var(--text2);margin:4px 0 14px">Win Rate</div>
-            <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px">
-              <div style="flex:${wins.length};background:var(--green);border-radius:4px 0 0 4px"></div>
-              <div style="flex:${losses.length};background:var(--red);border-radius:0 4px 4px 0"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:5px">
-              <span style="color:var(--green)">${wins.length} wins</span>
-              <span style="color:var(--red)">${losses.length} losses</span>
-            </div>
+      const wr = wins.length / history.length * 100;
+      document.getElementById("wlRatioBody").innerHTML = `
+        <div style="text-align:center">
+          <div style="font-family:var(--sans);font-size:40px;font-weight:800;color:${wr>=50?"var(--green)":"var(--red)"}">${wr.toFixed(1)}%</div>
+          <div style="font-size:11px;color:var(--text2);margin:4px 0 14px">Win Rate</div>
+          <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px">
+            <div style="flex:${wins.length};background:var(--green);border-radius:4px 0 0 4px"></div>
+            <div style="flex:${losses.length};background:var(--red);border-radius:0 4px 4px 0"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:5px">
+            <span style="color:var(--green)">${wins.length} wins</span>
+            <span style="color:var(--red)">${losses.length} losses</span>
+          </div>
+        </div>`;
+
+      const byCoin = {};
+      history.forEach(h => {
+        const s = h.symbol;
+        if (!byCoin[s]) byCoin[s] = {wins:0,losses:0,pnl:0};
+        if ((h.pnl||0) > 0) byCoin[s].wins++; else byCoin[s].losses++;
+        byCoin[s].pnl += (h.pnl||0);
+      });
+      const tierHtml = Object.entries(COIN_TIERS).map(([key, tier]) => {
+        const tierCoins = tier.coins.filter(s => byCoin[s]);
+        if (!tierCoins.length) return "";
+        const coinCards = tierCoins.map(sym => {
+          const d = byCoin[sym];
+          const wr2 = d.wins/(d.wins+d.losses)*100;
+          return `<div style="background:var(--bg3);border:1px solid ${tier.color}30;border-radius:7px;padding:12px">
+            <div style="font-family:var(--sans);font-weight:700;color:${tier.color};margin-bottom:6px">${sym.replace("USDT","")}</div>
+            <div style="font-size:11px;color:${d.pnl>=0?"var(--green)":"var(--red)"};font-weight:600;margin-bottom:4px">${fmtPnl(d.pnl)} USDT</div>
+            <div style="font-size:10px;color:var(--text3)">${d.wins}W ${d.losses}L · ${wr2.toFixed(0)}%</div>
           </div>`;
-
-        // Coin performance grouped by tier
-        const byCoin = {};
-        history.forEach(h => {
-          const s = h.symbol;
-          if (!byCoin[s]) byCoin[s] = {wins:0,losses:0,pnl:0};
-          if ((h.pnl||0) > 0) byCoin[s].wins++; else byCoin[s].losses++;
-          byCoin[s].pnl += (h.pnl||0);
-        });
-        // Render grouped by tier
-        const tierHtml = Object.entries(COIN_TIERS).map(([key, tier]) => {
-          const tierCoins = tier.coins.filter(s => byCoin[s]);
-          if (!tierCoins.length) return "";
-          const coinCards = tierCoins.map(sym => {
-            const d = byCoin[sym];
-            const wr2 = d.wins/(d.wins+d.losses)*100;
-            return `<div style="background:var(--bg3);border:1px solid ${tier.color}30;border-radius:7px;padding:12px">
-              <div style="font-family:var(--sans);font-weight:700;color:${tier.color};margin-bottom:6px">${sym.replace("USDT","")}</div>
-              <div style="font-size:11px;color:${d.pnl>=0?"var(--green)":"var(--red)"};font-weight:600;margin-bottom:4px">${fmtPnl(d.pnl)} USDT</div>
-              <div style="font-size:10px;color:var(--text3)">${d.wins}W ${d.losses}L · ${wr2.toFixed(0)}%</div>
-            </div>`;
-          }).join("");
-          return `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:6px 0 2px">
-              <span style="font-size:11px;color:${tier.color};font-weight:600">${tier.label}</span>
-              <div style="flex:1;height:1px;background:${tier.color}25"></div>
-            </div>${coinCards}`;
         }).join("");
-        document.getElementById("coinPerfGrid").innerHTML = tierHtml ||
-          `<div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>`;
-      }).catch(() => {});
-  } catch {}
+        return `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:6px 0 2px">
+            <span style="font-size:11px;color:${tier.color};font-weight:600">${tier.label}</span>
+            <div style="flex:1;height:1px;background:${tier.color}25"></div>
+          </div>${coinCards}`;
+      }).join("");
+      document.getElementById("coinPerfGrid").innerHTML = tierHtml ||
+        `<div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>`;
+    }).catch(() => {});
 }
 
-// ══ SCAN + CLOSE ══════════════════════════════════════════
+// ══ SCAN + CLOSE ═════════════════════════════════════════
 async function triggerScan() {
   if (isScanning) return;
   isScanning = true;
@@ -1091,10 +1547,10 @@ async function refreshAll() {
 buildCoinChips();
 refreshAll();
 
-setInterval(refreshAll,          30000);
-setInterval(fetchMarketPrices,    8000);
-setInterval(updateScanMode,      60000);
-setInterval(fetchOpenTrades,     15000);
+setInterval(refreshAll,        30000);
+setInterval(fetchMarketPrices,  8000);
+setInterval(updateScanMode,    60000);
+setInterval(fetchOpenTrades,   15000);
 </script>
 </body>
 </html>
