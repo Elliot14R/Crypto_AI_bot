@@ -29,7 +29,7 @@
       "EMA20 > EMA50 (uptrend)",
       "1h confirms uptrend"
     ],
-    "tier": "\ud83d\udc51 Big Three"
+    "tier": "👑 Big Three"
   },
   "BNBUSDT": {
     "symbol": "BNBUSDT",
@@ -60,7 +60,7 @@
       "EMA20 > EMA50 (uptrend)",
       "1h confirms uptrend"
     ],
-    "tier": "\ud83d\udc51 Big Three"
+    "tier": "👑 Big Three"
   },
   "SOLUSDT": {
     "symbol": "SOLUSDT",
@@ -92,91 +92,6 @@
       "EMA20 > EMA50 (uptrend)",
       "1h confirms uptrend"
     ],
-    "tier": "\u26a1 High-Liquidity L1s"
-  },
-  "BTC/USDT": {
-    "symbol": "BTC/USDT",
-    "signal": "RECOVERED",
-    "entry": 67231.34,
-    "stop": 0,
-    "tp1": 0,
-    "tp2": 0,
-    "qty": 0.01848,
-    "qty_tp1": 0.00924,
-    "qty_tp2": 0.00924,
-    "risk_usd": 0,
-    "balance_at_open": 0,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "stop_loss": "25691555",
-      "tp1": "25691558"
-    },
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 100,
-    "score": 6,
-    "reasons": [
-      "\ud83d\udd04 Recovered by Auto-Sync"
-    ],
-    "tier": "Unknown",
-    "opened_at": "2026-03-30T11:39:32.526Z"
-  },
-  "BNB/USDT": {
-    "symbol": "BNB/USDT",
-    "signal": "RECOVERED",
-    "entry": 616.08,
-    "stop": 0,
-    "tp1": 0,
-    "tp2": 0,
-    "qty": 1.614,
-    "qty_tp1": 0.807,
-    "qty_tp2": 0.807,
-    "risk_usd": 0,
-    "balance_at_open": 0,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "stop_loss": "7878182",
-      "tp1": "7878183"
-    },
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 100,
-    "score": 6,
-    "reasons": [
-      "\ud83d\udd04 Recovered by Auto-Sync"
-    ],
-    "tier": "Unknown",
-    "opened_at": "2026-03-30T11:39:43.213Z"
-  },
-  "SOL/USDT": {
-    "symbol": "SOL/USDT",
-    "signal": "RECOVERED",
-    "entry": 83.66,
-    "stop": 0,
-    "tp1": 0,
-    "tp2": 0,
-    "qty": 12.657,
-    "qty_tp1": 6.3285,
-    "qty_tp2": 6.3285,
-    "risk_usd": 0,
-    "balance_at_open": 0,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "stop_loss": "4045680",
-      "tp1": "4045681",
-      "tp2": "4045682"
-    },
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 100,
-    "score": 6,
-    "reasons": [
-      "\ud83d\udd04 Recovered by Auto-Sync"
-    ],
-    "tier": "Unknown",
-    "opened_at": "2026-03-30T11:39:52.262Z"
+    "tier": "⚡ High-Liquidity L1s"
   }
 }
