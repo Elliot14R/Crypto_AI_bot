@@ -120,5 +120,42 @@
     "pnl": 0.0,
     "closed_at": "2026-03-30T14:31:01.359635+00:00",
     "close_reason": "SL hit"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "signal": "BUY",
+    "entry": 2056.1202893674295,
+    "stop": 2056.1202893674295,
+    "tp1": 2074.02,
+    "tp2": 2083.13,
+    "qty": 0.445869,
+    "qty_tp1": 0.222935,
+    "qty_tp2": 0.222935,
+    "risk_usd": 45.83,
+    "balance_at_open": 4583.0685421,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "15244094",
+      "stop_loss": "15256611",
+      "tp1": "15244764",
+      "tp2": "15244765"
+    },
+    "opened_at": "2026-03-30T14:32:39.334036+00:00",
+    "tp1_hit": true,
+    "tp2_hit": false,
+    "closed": true,
+    "confidence": 73.1,
+    "score": 4,
+    "reasons": [
+      "Good AI conf (73%)",
+      "Strong trend ADX 38",
+      "EMA20 > EMA50 uptrend",
+      "1h confirms uptrend"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "close_price": 2056.12,
+    "pnl": -0.0001,
+    "closed_at": "2026-03-30T17:30:38.586888+00:00",
+    "close_reason": "SL hit"
   }
 ]
