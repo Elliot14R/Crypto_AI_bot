@@ -13,12 +13,12 @@
   --bg4:     #161f2a;
   --border:  #1a2535;
   --border2: #243040;
-  --text:    #e2e8f0;
-  --text2:   #94a3b8;
-  --text3:   #64748b;
-  --green:   #10b981;
+  --text:    #f1f5f9; /* Brightened for better contrast */
+  --text2:   #cbd5e1; /* Brightened */
+  --text3:   #94a3b8; /* Brightened */
+  --green:   #10b981; 
   --green2:  #10b98115;
-  --red:     #f43f5e;
+  --red:     #f43f5e; 
   --red2:    #f43f5e15;
   --amber:   #f59e0b;
   --amber2:  #f59e0b15;
@@ -35,6 +35,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;min-height:100vh;display:flex;overflow-x:hidden}
 
+/* scanlines */
 body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:9999}
 
 /* ══ SIDEBAR ══ */
@@ -101,7 +102,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .stat-card.c-purple::before{background:var(--purple)}
 .stat-card.c-cyan::before{background:var(--cyan)}
 .stat-label{font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
-.stat-value{font-family:var(--sans);font-size:18px;font-weight:800;color:#fff;line-height:1}
+.stat-value{font-family:var(--sans);font-size:17px;font-weight:800;color:#fff;line-height:1} /* SHRUNK FONT SIZE */
 .stat-value.green{color:var(--green)}
 .stat-value.red{color:var(--red)}
 .stat-value.amber{color:var(--amber)}
@@ -130,12 +131,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .trade-card.buy{border-left:3px solid var(--green)}
 .trade-card.sell{border-left:3px solid var(--red)}
 .tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tc-sym{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff}
+.tc-sym{font-family:var(--sans);font-size:15px;font-weight:800;color:#fff} /* SHRUNK FONT SIZE */
 .tc-sym span{color:var(--text3);font-size:11px;font-weight:400}
 .dir-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;letter-spacing:0.5px}
 .dir-tag.buy{background:var(--green2);color:var(--green);border:1px solid #10b98140}
 .dir-tag.sell{background:var(--red2);color:var(--red);border:1px solid #f43f5e40}
-.tc-pnl{font-family:var(--sans);font-size:14px;font-weight:800}
+.tc-pnl{font-family:var(--sans);font-size:13px;font-weight:800}
 .tc-pnl.pos{color:var(--green)}
 .tc-pnl.neg{color:var(--red)}
 .tc-prices{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
@@ -164,7 +165,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .signal-card.sell{border-left:3px solid var(--red)}
 .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .sc-left{display:flex;align-items:center;gap:10px}
-.sc-sym{font-family:var(--sans);font-size:15px;font-weight:800;color:#fff}
+.sc-sym{font-family:var(--sans);font-size:14px;font-weight:800;color:#fff} /* SHRUNK FONT SIZE */
 .sc-conf{font-size:11px;color:var(--text2)}
 .sc-conf span{color:var(--amber)}
 .sc-time{font-size:10px;color:var(--text3)}
@@ -179,13 +180,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Signal filters ── */
 .signal-filters{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.filter-group{display:flex;gap:4px}
-.fbtn{font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
+.filter-group{display:flex;flex-wrap:wrap;gap:4px}
+.fbtn{font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
 .fbtn:hover{border-color:var(--border2);color:var(--text)}
 .fbtn.active{background:var(--blue2);border-color:var(--blue);color:var(--blue)}
 .fbtn.buy-btn.active{background:var(--green2);border-color:var(--green);color:var(--green)}
 .fbtn.sell-btn.active{background:var(--red2);border-color:var(--red);color:var(--red)}
-.filter-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.filter-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 4px;}
 
 /* ── Market cards ── */
 .market-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color 0.15s,transform 0.1s}
@@ -195,8 +196,495 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .mc-chg{font-size:11px;padding:2px 7px;border-radius:3px;font-weight:600}
 .mc-chg.up{background:var(--green2);color:var(--green)}
 .mc-chg.down{background:var(--red2);color:var(--red)}
-.mc-price{font-family:var(--sans);font-size:18px;font-weight:800;color:#fff;margin-bottom:6px}
+.mc-price{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff;margin-bottom:6px}
 .mc-vol{font-size:10px;color:var(--text3);margin-bottom:8px}
 .mc-range{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px;position:relative}
 .mc-range-fill{position:absolute;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
 .mc-range-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text3)}
+
+/* ── Fear & Greed ── */
+.fg-wrap{padding:16px}
+.fg-num{font-family:var(--sans);font-size:36px;font-weight:800;line-height:1;margin-bottom:4px}
+.fg-label{font-size:12px;color:var(--text2);margin-bottom:14px}
+.fg-bar{height:8px;border-radius:4px;overflow:hidden;background:linear-gradient(90deg,#10b981,#3b82f6,#f59e0b,#f43f5e);margin-bottom:10px;position:relative}
+.fg-bar-cursor{position:absolute;top:-2px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--bg);transform:translateX(-50%);transition:left 0.5s ease}
+.fg-zones{display:flex;flex-direction:column;gap:4px}
+.fg-zone{display:flex;justify-content:space-between;font-size:10px;padding:3px 6px;border-radius:3px}
+.fg-zone.active-zone{background:var(--bg3)}
+
+/* ── Volatility banner ── */
+.vol-banner{border-radius:6px;padding:8px 12px;font-size:11px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.vol-banner.high{background:var(--red2);border:1px solid #f43f5e40;color:var(--red)}
+.vol-banner.low{background:var(--amber2);border:1px solid #f59e0b40;color:var(--amber)}
+.vol-banner.normal{background:var(--green2);border:1px solid #10b98130;color:var(--green)}
+
+/* ── Log panel ── */
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:6px;height:220px;overflow-y:auto;padding:10px 12px;font-size:11px;line-height:1.9;color:var(--text2)}
+.log-box::-webkit-scrollbar{width:3px}
+.log-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.log-line.sig{color:var(--green)}
+.log-line.err{color:var(--red)}
+.log-line.wrn{color:var(--amber)}
+
+/* ── History table ── */
+.htable{width:100%;border-collapse:collapse}
+.htable th{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+.htable td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:11px}
+.htable tr:last-child td{border-bottom:none}
+.htable tr:hover td{background:var(--bg3)}
+.tag{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:0.5px}
+.tag.buy{background:var(--green2);color:var(--green)}
+.tag.sell{background:var(--red2);color:var(--red)}
+.tag.win{background:var(--green2);color:var(--green)}
+.tag.loss{background:var(--red2);color:var(--red)}
+
+/* ── Scanning mode indicator ── */
+.scan-mode-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:7px;margin-bottom:16px;font-size:11px}
+.scan-mode-bar.active-mode{background:var(--green2);border:1px solid #10b98130;color:var(--green)}
+.scan-mode-bar.quiet-mode{background:var(--purple2);border:1px solid #8b5cf630;color:var(--purple)}
+.scan-mode-bar.weekend-mode{background:var(--amber2);border:1px solid #f59e0b30;color:var(--amber)}
+.smode-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0}
+.smode-info{flex:1}
+.smode-title{font-weight:600;font-size:12px}
+.smode-sub{font-size:10px;opacity:0.8;margin-top:1px}
+.smode-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.3);border:1px solid currentColor;opacity:0.7}
+
+/* ── Balance card ── */
+.balance-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+.bal-num{font-family:var(--sans);font-size:24px;font-weight:800;color:var(--green);line-height:1}
+.bal-sub{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1px;text-transform:uppercase}
+.bal-assets{margin-top:12px;display:flex;flex-direction:column;gap:5px}
+.bal-row{display:flex;justify-content:space-between;font-size:11px;padding:5px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
+
+/* ── Perf chart ── */
+.perf-bars{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px}
+.perf-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.perf-bar{width:100%;border-radius:2px 2px 0 0;min-height:2px;transition:height 0.5s ease}
+.perf-bar.win{background:var(--green)}
+.perf-bar.loss{background:var(--red)}
+.perf-bar-lbl{font-size:8px;color:var(--text3)}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:36px 20px;color:var(--text3)}
+.empty .eicon{font-size:24px;margin-bottom:8px;opacity:0.5}
+.empty .emsg{font-size:11px;line-height:1.6}
+
+/* ── Responsive ── */
+@media(max-width:1200px){.stats-row{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-dot"></div>
+    <div>
+      <div class="logo-text">CryptoBot AI</div>
+      <div class="logo-sub">Live Scanner</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">Navigation</div>
+  <nav>
+    <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="nav-icon">⊞</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('signals')" id="nav-signals">
+      <span class="nav-icon">⚡</span> Signals
+      <span class="nav-badge green" id="signalCount">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('market')" id="nav-market">
+      <span class="nav-icon">◎</span> Market
+    </div>
+    <div class="nav-item" onclick="showPage('trades')" id="nav-trades">
+      <span class="nav-icon">◈</span> Open Trades
+      <span class="nav-badge" id="tradeCount">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('history')" id="nav-history">
+      <span class="nav-icon">≡</span> History
+    </div>
+    <div class="nav-item" onclick="showPage('performance')" id="nav-performance">
+      <span class="nav-icon">△</span> Performance
+    </div>
+    <div class="nav-item" onclick="showPage('config')" id="nav-config">
+      <span class="nav-icon">⊙</span> Configuration
+    </div>
+  </nav>
+
+  <div class="sidebar-coins">
+    <div class="coins-label">Monitored Coins</div>
+    <div class="coin-chips" id="coinChips"></div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="mode-badge active-mode" id="sidebarMode">
+      <div class="mode-dot"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600" id="sidebarModeTitle">ACTIVE HOURS</div>
+        <div style="font-size:9px;opacity:0.8" id="sidebarModeSub">Scan every 15 min</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="page-title" id="pageTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="top-stat">Balance: <span id="topBalance">—</span> USDT</span>
+      <span class="top-stat">Acc: <span style="color:var(--green)">73.1%</span></span>
+      <span class="top-stat"><span style="color:var(--blue)">20</span> pairs · <span style="color:var(--cyan)">4 tiers</span></span>
+      <span class="last-upd" id="lastUpd">—</span>
+      <span class="live-badge offline" id="liveBadge">OFFLINE</span>
+      <button class="btn-scan" id="scanBtn" onclick="triggerScan()">▶ Scan Now</button>
+    </div>
+  </div>
+
+  <div class="page active" id="page-dashboard">
+    <div class="stats-row">
+      <div class="stat-card c-green">
+        <div class="stat-label">Testnet Balance</div>
+        <div class="stat-value green" id="statBalance">—</div>
+        <div class="stat-sub">USDT (paper money)</div>
+      </div>
+      <div class="stat-card c-blue">
+        <div class="stat-label">Open Trades</div>
+        <div class="stat-value blue" id="statOpen">0</div>
+        <div class="stat-sub" id="statOpenSub">of 3 max</div>
+      </div>
+      <div class="stat-card c-cyan">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value cyan" id="statWR">—</div>
+        <div class="stat-sub" id="statWRSub">— W / — L</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-label">Total PnL</div>
+        <div class="stat-value" id="statPnl">+0.0000</div>
+        <div class="stat-sub">USDT closed trades</div>
+      </div>
+      <div class="stat-card c-purple">
+        <div class="stat-label">Model Accuracy</div>
+        <div class="stat-value purple">73.1%</div>
+        <div class="stat-sub">XGB + RF + GB</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Today Signals</div>
+        <div class="stat-value green" id="statSigToday">0</div>
+        <div class="stat-sub" id="statSigSub">0 BUY · 0 SELL</div>
+      </div>
+      <div class="stat-card c-blue">
+        <div class="stat-label">Monitoring</div>
+        <div class="stat-value blue" style="font-size:16px">20 pairs</div>
+        <div class="stat-sub">4 tiers · 15 min scan</div>
+      </div>
+    </div>
+
+    <div class="scan-mode-bar active-mode" id="scanModeBar">
+      <div class="smode-dot"></div>
+      <div class="smode-info">
+        <div class="smode-title" id="smodeTitleMain">ACTIVE HOURS — Scanning every 15 minutes</div>
+        <div class="smode-sub" id="smodeSubMain">Min confidence: 65% · Min score: 3/6 · UTC 08:00–20:00</div>
+      </div>
+      <div class="smode-badge" id="smodeBadge">ACTIVE</div>
+    </div>
+
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">
+            Open Trades
+            <svg class="refresh-icon" onclick="fetchOpenTrades()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh Trades"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          </span>
+          <div class="panel-meta">
+            <span class="panel-badge blink" style="color:var(--green);border-color:var(--green)">LIVE PnL</span>
+            <span class="panel-badge" id="openBadge">0 active</span>
+          </div>
+        </div>
+        <div class="panel-body" id="openTradesBody">
+          <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min.</div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              BTC Volatility (ATR)
+              <svg class="refresh-icon" onclick="fetchMarketPrices()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh Volatility"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            </span>
+            <span class="panel-badge blink" style="color:var(--cyan);border-color:var(--cyan)">LIVE</span>
+          </div>
+          <div class="panel-body">
+            <div id="volBanner" class="vol-banner normal">
+              <span>⬤</span> <span id="volText">Fetching BTC ATR...</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="price-box">
+                <div class="price-lbl">ATR Value</div>
+                <div class="price-val" id="btcAtr" style="color:var(--cyan)">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">ATR % of Price</div>
+                <div class="price-val" id="btcAtrPct" style="color:var(--cyan)">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">BTC Price</div>
+                <div class="price-val" id="btcPrice" style="color:var(--blue)">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">24h Change</div>
+                <div class="price-val" id="btcChg">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              Testnet Balance
+              <svg class="refresh-icon" onclick="fetchBalance()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh Balance"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            </span>
+            <span class="panel-badge" style="color:var(--green);border-color:var(--green)">BINANCE TESTNET</span>
+          </div>
+          <div class="panel-body">
+            <div class="balance-card">
+              <div class="bal-num" id="balMain">—</div>
+              <div class="bal-sub">USDT Available</div>
+            </div>
+            <div class="bal-assets" id="balAssets" style="margin-top:10px">
+              <div style="font-size:10px;color:var(--text3);text-align:center">Loading assets...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">
+            Recent Signals
+            <svg class="refresh-icon" onclick="fetchSignals()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh Signals"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          </span>
+          <span class="panel-badge" id="recentSigBadge">—</span>
+        </div>
+        <div id="recentSignalsBody" style="max-height:280px;overflow-y:auto;padding:10px 14px">
+          <div class="empty"><div class="eicon">⚡</div><div class="emsg">No signals yet</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">
+            Bot Log
+            <svg class="refresh-icon" onclick="fetchLog()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh Log"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          </span>
+          <span class="panel-badge" id="logBadge">—</span>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div class="log-box" id="logPanel"><span class="log-line">Connecting...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-signals">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-green">
+        <div class="stat-label">Total Signals Today</div>
+        <div class="stat-value green" id="sig-total">0</div>
+        <div class="stat-sub">last 24 hours</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">BUY Signals</div>
+        <div class="stat-value green" id="sig-buy">0</div>
+        <div class="stat-sub">long setups</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">SELL Signals</div>
+        <div class="stat-value red" id="sig-sell">0</div>
+        <div class="stat-sub">short setups</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-label">Avg Confidence</div>
+        <div class="stat-value amber" id="sig-avgconf">—</div>
+        <div class="stat-sub">AI model score</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="signal-filters" id="sigFilters">
+        <div class="filter-group">
+          <button class="fbtn active" onclick="filterSig('all',this)">All</button>
+          <button class="fbtn buy-btn" onclick="filterSig('buy',this)">▲ BUY</button>
+          <button class="fbtn sell-btn" onclick="filterSig('sell',this)">▼ SELL</button>
+        </div>
+        <span class="filter-sep"></span>
+        <div class="filter-group" id="coinFilterBtns">
+          </div>
+        <span class="filter-sep"></span>
+        <div class="filter-group">
+          <button class="fbtn active" onclick="filterConf(0,this)">Any</button>
+          <button class="fbtn" onclick="filterConf(60,this)">60%+</button>
+          <button class="fbtn" onclick="filterConf(70,this)">70%+</button>
+          <button class="fbtn" onclick="filterConf(75,this)">75%+</button>
+        </div>
+      </div>
+      <div id="signalsBody" style="padding:10px 14px;max-height:calc(100vh - 300px);overflow-y:auto">
+        <div class="empty"><div class="eicon">⚡</div><div class="emsg">No signals yet. Bot scans every 15 min.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-market">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-green">
+        <div class="stat-label">Gainers</div>
+        <div class="stat-value green" id="mkt-gainers">0</div>
+        <div class="stat-sub">of 20 pairs</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Losers</div>
+        <div class="stat-value red" id="mkt-losers">0</div>
+        <div class="stat-sub">of 20 pairs</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Best 24h</div>
+        <div class="stat-value green" id="mkt-best">—</div>
+        <div class="stat-sub" id="mkt-best-sym">—</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Worst 24h</div>
+        <div class="stat-value red" id="mkt-worst">—</div>
+        <div class="stat-sub" id="mkt-worst-sym">—</div>
+      </div>
+    </div>
+
+    <div class="g2" style="align-items:start">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Fear & Greed Index</span>
+          <span class="panel-badge blink" style="color:var(--cyan);border-color:var(--cyan)">LIVE</span>
+        </div>
+        <div class="fg-wrap">
+          <div class="fg-num" id="fgNum" style="color:var(--red)">—</div>
+          <div class="fg-label" id="fgLabel">Loading...</div>
+          <div class="fg-bar"><div class="fg-bar-cursor" id="fgCursor" style="left:50%"></div></div>
+          <div class="fg-zones">
+            <div class="fg-zone" id="fgz0"><span style="color:var(--green)">Extreme Fear</span><span>0–24</span></div>
+            <div class="fg-zone" id="fgz1"><span style="color:var(--cyan)">Fear</span><span>25–44</span></div>
+            <div class="fg-zone" id="fgz2"><span style="color:var(--text2)">Neutral</span><span>45–54</span></div>
+            <div class="fg-zone" id="fgz3"><span style="color:var(--amber)">Greed</span><span>55–74</span></div>
+            <div class="fg-zone" id="fgz4"><span style="color:var(--red)">Extreme Greed</span><span>75–100</span></div>
+          </div>
+          <div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--amber);margin-bottom:3px">⚡ Trade Advice</div>
+            <div style="font-size:11px;color:var(--text)" id="fgAdvice">Loading market conditions...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">All Pairs</span>
+          <span class="panel-badge blink" style="color:var(--green);border-color:var(--green)">20 pairs · Live</span>
+        </div>
+        <div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:540px;overflow-y:auto" id="mktPairsGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-trades">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-blue"><div class="stat-label">Open Positions</div><div class="stat-value blue" id="ot-count">0</div><div class="stat-sub">of 3 max</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Unrealised PnL</div><div class="stat-value" id="ot-upnl">+0.0000</div><div class="stat-sub">USDT combined</div></div>
+      <div class="stat-card c-green"><div class="stat-label">Capital at Risk</div><div class="stat-value green" id="ot-risk">—</div><div class="stat-sub">USDT (1% each)</div></div>
+      <div class="stat-card c-cyan"><div class="stat-label">Avg Confidence</div><div class="stat-value cyan" id="ot-conf">—</div><div class="stat-sub">ML score avg</div></div>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          Active Positions
+          <svg class="refresh-icon" onclick="fetchOpenTrades()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh Trades"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        </span>
+      </div>
+      <div class="panel-body" id="openTradesFullBody">
+        <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min for signals.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-history">
+    <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stat-card c-purple"><div class="stat-label">Total Trades</div><div class="stat-value purple" id="h-total">0</div><div class="stat-sub">all time</div></div>
+      <div class="stat-card c-green"><div class="stat-label">Wins</div><div class="stat-value green" id="h-wins">0</div><div class="stat-sub">profitable closes</div></div>
+      <div class="stat-card c-red"><div class="stat-label">Losses</div><div class="stat-value red" id="h-losses">0</div><div class="stat-sub">stopped out</div></div>
+      <div class="stat-card c-cyan"><div class="stat-label">Win Rate</div><div class="stat-value cyan" id="h-wr">—</div><div class="stat-sub">closed trades</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Total PnL</div><div class="stat-value" id="h-pnl">+0.0000</div><div class="stat-sub">USDT net</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          Trade History
+          <svg class="refresh-icon" onclick="fetchHistory()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Refresh History"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        </span>
+        <span class="panel-badge" id="histBadge">0 trades</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="htable">
+          <thead><tr>
+            <th>Symbol</th><th>Tier</th><th>Dir</th><th>Entry</th><th>Close</th>
+            <th>PnL (USDT)</th><th>Result</th><th>Opened</th><th>Duration</th><th>Reason</th>
+          </tr></thead>
+          <tbody id="histBody"><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text3)">No closed trades yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-performance">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-green"><div class="stat-label">Best Trade</div><div class="stat-value green" id="p-best">—</div><div class="stat-sub" id="p-best-sym">USDT profit</div></div>
+      <div class="stat-card c-red"><div class="stat-label">Worst Trade</div><div class="stat-value red" id="p-worst">—</div><div class="stat-sub" id="p-worst-sym">USDT loss</div></div>
+      <div class="stat-card c-cyan"><div class="stat-label">Avg Win</div><div class="stat-value cyan" id="p-avgwin">—</div><div class="stat-sub">USDT per win</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Avg Loss</div><div class="stat-value amber" id="p-avgloss">—</div><div class="stat-sub">USDT per loss</div></div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">PnL by Trade</span></div>
+        <div class="panel-body">
+          <div class="perf-bars" id="perfBars" style="height:80px;align-items:flex-end"></div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px">Each bar = one closed trade (green=win, red=loss)</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Win/Loss Ratio</span></div>
+        <div class="panel-body" id="wlRatioBody">
+          <div class="empty"><div class="emsg">No closed trades yet</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Signal Performance by Coin</span></div>
+      <div class="panel-body">
+        <div id="coinPerfGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+          <div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-config">
+    <div class="g2" style="align-items:start">
+      <div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header"><span class="panel-title">Smart Scanning Schedule</span></div>
+          <div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+                <div style="display:flex;
