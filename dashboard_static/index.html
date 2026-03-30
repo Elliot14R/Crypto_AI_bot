@@ -13,30 +13,30 @@
   --bg4:     #161f2a;
   --border:  #1a2535;
   --border2: #243040;
-  --text:    #f1f5f9; 
-  --text2:   #cbd5e1; 
-  --text3:   #94a3b8; 
-  --green:   #10b981; 
-  --green2:  #10b98115;
-  --red:     #f43f5e; 
-  --red2:    #f43f5e15;
-  --amber:   #f59e0b;
-  --amber2:  #f59e0b15;
-  --blue:    #3b82f6;
-  --blue2:   #3b82f615;
-  --purple:  #8b5cf6;
-  --purple2: #8b5cf615;
-  --cyan:    #06b6d4;
-  --cyan2:   #06b6d415;
+  --text:    #c8d8ea;
+  --text2:   #607a90;
+  --text3:   #364d62;
+  --green:   #00d97e;
+  --green2:  #00d97e22;
+  --red:     #ff4d6d;
+  --red2:    #ff4d6d22;
+  --amber:   #f5a623;
+  --amber2:  #f5a62322;
+  --blue:    #4d9fff;
+  --blue2:   #4d9fff18;
+  --purple:  #a78bfa;
+  --purple2: #a78bfa18;
+  --cyan:    #22d3ee;
+  --cyan2:   #22d3ee18;
   --nav-w:   220px;
   --mono:    'JetBrains Mono', monospace;
   --sans:    'Syne', sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;min-height:100vh;display:flex;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;min-height:100vh;display:flex;overflow-x:hidden}
 
 /* scanlines */
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:9999}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);pointer-events:none;z-index:9999}
 
 /* ══ SIDEBAR ══ */
 .sidebar{width:var(--nav-w);min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200}
@@ -49,16 +49,16 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .sidebar-section{padding:14px 12px 4px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;margin:1px 8px;border-radius:7px;cursor:pointer;color:var(--text2);font-size:12px;transition:all 0.15s;position:relative}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
-.nav-item.active{background:var(--blue2);color:var(--blue);border:1px solid #3b82f630}
+.nav-item.active{background:var(--blue2);color:var(--blue);border:1px solid #4d9fff30}
 .nav-item .nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
 .nav-item .nav-badge{margin-left:auto;font-size:9px;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-weight:700}
-.nav-item .nav-badge.green{background:var(--green);color:#fff}
+.nav-item .nav-badge.green{background:var(--green);color:#000}
 
 .sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
 .mode-badge{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;font-size:11px;font-weight:500}
-.mode-badge.active-mode{background:var(--green2);border:1px solid #10b98130;color:var(--green)}
-.mode-badge.quiet-mode{background:var(--purple2);border:1px solid #8b5cf630;color:var(--purple)}
-.mode-badge.weekend-mode{background:var(--amber2);border:1px solid #f59e0b30;color:var(--amber)}
+.mode-badge.active-mode{background:var(--green2);border:1px solid #00d97e30;color:var(--green)}
+.mode-badge.quiet-mode{background:var(--purple2);border:1px solid #a78bfa30;color:var(--purple)}
+.mode-badge.weekend-mode{background:var(--amber2);border:1px solid #f5a62330;color:var(--amber)}
 .mode-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite}
 
 .sidebar-coins{padding:10px 12px}
@@ -81,7 +81,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-badge{font-size:10px;padding:4px 10px;border-radius:20px;border:1px solid var(--green);color:var(--green);background:var(--green2);letter-spacing:1px}
 .live-badge.offline{border-color:var(--red);color:var(--red);background:var(--red2)}
 .btn-scan{font-family:var(--mono);font-size:11px;padding:6px 14px;background:var(--blue2);border:1px solid var(--blue);color:var(--blue);border-radius:5px;cursor:pointer;letter-spacing:0.5px;transition:background 0.15s}
-.btn-scan:hover{background:#3b82f630}
+.btn-scan:hover{background:#4d9fff30}
 .btn-scan:disabled{opacity:0.4;cursor:not-allowed}
 .btn-scan.running{border-color:var(--amber);color:var(--amber);background:var(--amber2)}
 .last-upd{font-size:10px;color:var(--text3)}
@@ -102,7 +102,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .stat-card.c-purple::before{background:var(--purple)}
 .stat-card.c-cyan::before{background:var(--cyan)}
 .stat-label{font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
-.stat-value{font-family:var(--sans);font-size:17px;font-weight:800;color:#fff;line-height:1}
+.stat-value{font-family:var(--sans);font-size:20px;font-weight:800;color:#fff;line-height:1}
 .stat-value.green{color:var(--green)}
 .stat-value.red{color:var(--red)}
 .stat-value.amber{color:var(--amber)}
@@ -114,9 +114,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 /* ── Panel ── */
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--bg3)}
-.panel-title{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;}
-.refresh-icon{cursor:pointer;margin-left:8px;opacity:0.5;transition:opacity 0.2s,transform 0.3s;}
-.refresh-icon:hover{opacity:1;transform:rotate(180deg);}
+.panel-title{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
 .panel-meta{display:flex;align-items:center;gap:8px}
 .panel-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text2)}
 .panel-body{padding:14px}
@@ -124,6 +122,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 /* ── Grid layouts ── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .g3{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 
 /* ── Open trade card ── */
 .trade-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px;margin-bottom:10px;transition:border-color 0.15s,transform 0.1s;position:relative}
@@ -131,18 +130,18 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .trade-card.buy{border-left:3px solid var(--green)}
 .trade-card.sell{border-left:3px solid var(--red)}
 .tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tc-sym{font-family:var(--sans);font-size:15px;font-weight:800;color:#fff}
-.tc-sym span{color:var(--text3);font-size:11px;font-weight:400}
+.tc-sym{font-family:var(--sans);font-size:17px;font-weight:800;color:#fff}
+.tc-sym span{color:var(--text3);font-size:12px;font-weight:400}
 .dir-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;letter-spacing:0.5px}
-.dir-tag.buy{background:var(--green2);color:var(--green);border:1px solid #10b98140}
-.dir-tag.sell{background:var(--red2);color:var(--red);border:1px solid #f43f5e40}
-.tc-pnl{font-family:var(--sans);font-size:13px;font-weight:800}
+.dir-tag.buy{background:var(--green2);color:var(--green);border:1px solid #00d97e40}
+.dir-tag.sell{background:var(--red2);color:var(--red);border:1px solid #ff4d6d40}
+.tc-pnl{font-family:var(--sans);font-size:15px;font-weight:800}
 .tc-pnl.pos{color:var(--green)}
 .tc-pnl.neg{color:var(--red)}
 .tc-prices{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
 .price-box{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:6px 8px}
 .price-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
-.price-val{font-size:11px;font-weight:500}
+.price-val{font-size:12px;font-weight:500}
 .price-val.live{color:var(--cyan)}
 .price-val.entry{color:var(--blue)}
 .price-val.sl{color:var(--red)}
@@ -165,14 +164,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .signal-card.sell{border-left:3px solid var(--red)}
 .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .sc-left{display:flex;align-items:center;gap:10px}
-.sc-sym{font-family:var(--sans);font-size:14px;font-weight:800;color:#fff}
+.sc-sym{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff}
 .sc-conf{font-size:11px;color:var(--text2)}
 .sc-conf span{color:var(--amber)}
 .sc-time{font-size:10px;color:var(--text3)}
 .sc-prices{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .sc-box{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 9px}
 .sc-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
-.sc-val{font-size:11px;font-weight:500;color:var(--text)}
+.sc-val{font-size:12px;font-weight:500;color:var(--text)}
 .sc-val.entry{color:var(--blue)}
 .sc-val.sl{color:var(--red)}
 .sc-val.tp{color:var(--green)}
@@ -180,23 +179,23 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Signal filters ── */
 .signal-filters{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.filter-group{display:flex;flex-wrap:wrap;gap:4px}
-.fbtn{font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
+.filter-group{display:flex;gap:4px}
+.fbtn{font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
 .fbtn:hover{border-color:var(--border2);color:var(--text)}
 .fbtn.active{background:var(--blue2);border-color:var(--blue);color:var(--blue)}
 .fbtn.buy-btn.active{background:var(--green2);border-color:var(--green);color:var(--green)}
 .fbtn.sell-btn.active{background:var(--red2);border-color:var(--red);color:var(--red)}
-.filter-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 4px;}
+.filter-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
 
 /* ── Market cards ── */
 .market-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color 0.15s,transform 0.1s}
 .market-card:hover{border-color:var(--border2);transform:translateY(-1px)}
 .mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.mc-sym{font-family:var(--sans);font-size:13px;font-weight:700;color:#fff}
+.mc-sym{font-family:var(--sans);font-size:14px;font-weight:700;color:#fff}
 .mc-chg{font-size:11px;padding:2px 7px;border-radius:3px;font-weight:600}
 .mc-chg.up{background:var(--green2);color:var(--green)}
 .mc-chg.down{background:var(--red2);color:var(--red)}
-.mc-price{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff;margin-bottom:6px}
+.mc-price{font-family:var(--sans);font-size:20px;font-weight:800;color:#fff;margin-bottom:6px}
 .mc-vol{font-size:10px;color:var(--text3);margin-bottom:8px}
 .mc-range{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px;position:relative}
 .mc-range-fill{position:absolute;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
@@ -204,9 +203,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Fear & Greed ── */
 .fg-wrap{padding:16px}
-.fg-num{font-family:var(--sans);font-size:36px;font-weight:800;line-height:1;margin-bottom:4px}
+.fg-num{font-family:var(--sans);font-size:48px;font-weight:800;line-height:1;margin-bottom:4px}
 .fg-label{font-size:12px;color:var(--text2);margin-bottom:14px}
-.fg-bar{height:8px;border-radius:4px;overflow:hidden;background:linear-gradient(90deg,#10b981,#3b82f6,#f59e0b,#f43f5e);margin-bottom:10px;position:relative}
+.fg-bar{height:8px;border-radius:4px;overflow:hidden;background:linear-gradient(90deg,#00d97e,#4d9fff,#f5a623,#ff4d6d);margin-bottom:10px;position:relative}
 .fg-bar-cursor{position:absolute;top:-2px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--bg);transform:translateX(-50%);transition:left 0.5s ease}
 .fg-zones{display:flex;flex-direction:column;gap:4px}
 .fg-zone{display:flex;justify-content:space-between;font-size:10px;padding:3px 6px;border-radius:3px}
@@ -214,9 +213,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Volatility banner ── */
 .vol-banner{border-radius:6px;padding:8px 12px;font-size:11px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.vol-banner.high{background:var(--red2);border:1px solid #f43f5e40;color:var(--red)}
-.vol-banner.low{background:var(--amber2);border:1px solid #f59e0b40;color:var(--amber)}
-.vol-banner.normal{background:var(--green2);border:1px solid #10b98130;color:var(--green)}
+.vol-banner.high{background:var(--red2);border:1px solid #ff4d6d40;color:var(--red)}
+.vol-banner.low{background:var(--amber2);border:1px solid #f5a62340;color:var(--amber)}
+.vol-banner.normal{background:var(--green2);border:1px solid #00d97e30;color:var(--green)}
 
 /* ── Log panel ── */
 .log-box{background:var(--bg);border:1px solid var(--border);border-radius:6px;height:220px;overflow-y:auto;padding:10px 12px;font-size:11px;line-height:1.9;color:var(--text2)}
@@ -229,7 +228,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 /* ── History table ── */
 .htable{width:100%;border-collapse:collapse}
 .htable th{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
-.htable td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:11px}
+.htable td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:12px}
 .htable tr:last-child td{border-bottom:none}
 .htable tr:hover td{background:var(--bg3)}
 .tag{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:0.5px}
@@ -240,9 +239,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Scanning mode indicator ── */
 .scan-mode-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:7px;margin-bottom:16px;font-size:11px}
-.scan-mode-bar.active-mode{background:var(--green2);border:1px solid #10b98130;color:var(--green)}
-.scan-mode-bar.quiet-mode{background:var(--purple2);border:1px solid #8b5cf630;color:var(--purple)}
-.scan-mode-bar.weekend-mode{background:var(--amber2);border:1px solid #f59e0b30;color:var(--amber)}
+.scan-mode-bar.active-mode{background:var(--green2);border:1px solid #00d97e30;color:var(--green)}
+.scan-mode-bar.quiet-mode{background:var(--purple2);border:1px solid #a78bfa30;color:var(--purple)}
+.scan-mode-bar.weekend-mode{background:var(--amber2);border:1px solid #f5a62330;color:var(--amber)}
 .smode-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0}
 .smode-info{flex:1}
 .smode-title{font-weight:600;font-size:12px}
@@ -251,7 +250,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Balance card ── */
 .balance-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
-.bal-num{font-family:var(--sans);font-size:24px;font-weight:800;color:var(--green);line-height:1}
+.bal-num{font-family:var(--sans);font-size:32px;font-weight:800;color:var(--green);line-height:1}
 .bal-sub{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1px;text-transform:uppercase}
 .bal-assets{margin-top:12px;display:flex;flex-direction:column;gap:5px}
 .bal-row{display:flex;justify-content:space-between;font-size:11px;padding:5px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
@@ -266,59 +265,73 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ── Empty state ── */
 .empty{text-align:center;padding:36px 20px;color:var(--text3)}
-.empty .eicon{font-size:24px;margin-bottom:8px;opacity:0.5}
+.empty .eicon{font-size:28px;margin-bottom:8px;opacity:0.5}
 .empty .emsg{font-size:11px;line-height:1.6}
 
-/* ── Config rows ── */
-.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:11px}
-.cfg-row:last-child{border-bottom:none}
-.cfg-key{color:var(--text3);letter-spacing:0.5px}
-.cfg-val{font-weight:600;color:var(--text)}
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page.active .stat-card{animation:fadeUp 0.3s ease both}
+.page.active .stat-card:nth-child(1){animation-delay:0.04s}
+.page.active .stat-card:nth-child(2){animation-delay:0.08s}
+.page.active .stat-card:nth-child(3){animation-delay:0.12s}
+.page.active .stat-card:nth-child(4){animation-delay:0.16s}
+.page.active .stat-card:nth-child(5){animation-delay:0.20s}
+.page.active .stat-card:nth-child(6){animation-delay:0.24s}
+.page.active .stat-card:nth-child(7){animation-delay:0.28s}
+.blink{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ── Responsive ── */
 @media(max-width:1200px){.stats-row{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
-<!-- ══ SIDEBAR ══ -->
-<nav class="sidebar">
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-dot"></div>
     <div>
       <div class="logo-text">CryptoBot AI</div>
-      <div class="logo-sub">20-pair scanner</div>
+      <div class="logo-sub">Live Scanner</div>
     </div>
   </div>
 
   <div class="sidebar-section">Navigation</div>
-  <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
-    <span class="nav-icon">⬛</span> Dashboard
-  </div>
-  <div class="nav-item" id="nav-signals" onclick="showPage('signals')">
-    <span class="nav-icon">⚡</span> Signals
-    <span class="nav-badge" id="signalCount">0</span>
-  </div>
-  <div class="nav-item" id="nav-trades" onclick="showPage('trades')">
-    <span class="nav-icon">📈</span> Open Trades
-    <span class="nav-badge green" id="tradeCount">0</span>
-  </div>
-  <div class="nav-item" id="nav-history" onclick="showPage('history')">
-    <span class="nav-icon">📋</span> History
-  </div>
-  <div class="nav-item" id="nav-market" onclick="showPage('market')">
-    <span class="nav-icon">🌐</span> Market
-  </div>
-  <div class="nav-item" id="nav-performance" onclick="showPage('performance')">
-    <span class="nav-icon">📊</span> Performance
-  </div>
-  <div class="nav-item" id="nav-config" onclick="showPage('config')">
-    <span class="nav-icon">⚙️</span> Config
-  </div>
+  <nav>
+    <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="nav-icon">⊞</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('signals')" id="nav-signals">
+      <span class="nav-icon">⚡</span> Signals
+      <span class="nav-badge green" id="signalCount">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('market')" id="nav-market">
+      <span class="nav-icon">◎</span> Market
+    </div>
+    <div class="nav-item" onclick="showPage('trades')" id="nav-trades">
+      <span class="nav-icon">◈</span> Open Trades
+      <span class="nav-badge" id="tradeCount">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('history')" id="nav-history">
+      <span class="nav-icon">≡</span> History
+    </div>
+    <div class="nav-item" onclick="showPage('performance')" id="nav-performance">
+      <span class="nav-icon">△</span> Performance
+    </div>
+    <div class="nav-item" onclick="showPage('config')" id="nav-config">
+      <span class="nav-icon">⊙</span> Configuration
+    </div>
+  </nav>
 
   <div class="sidebar-coins">
-    <div class="coins-label">Tracked Pairs</div>
+    <div class="coins-label">Monitored Coins</div>
     <div class="coin-chips" id="coinChips"></div>
   </div>
 
@@ -327,31 +340,69 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <div class="mode-dot"></div>
       <div>
         <div style="font-size:11px;font-weight:600" id="sidebarModeTitle">ACTIVE HOURS</div>
-        <div style="font-size:9px;opacity:0.8;margin-top:1px" id="sidebarModeSub">Scan every 15 min</div>
+        <div style="font-size:9px;opacity:0.8" id="sidebarModeSub">Scan every 15 min</div>
       </div>
     </div>
   </div>
-</nav>
+</aside>
 
-<!-- ══ MAIN ══ -->
+<!-- ════════════════ MAIN ════════════════ -->
 <div class="main">
 
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
-      <div class="page-title" id="pageTitle">Dashboard</div>
+      <span class="page-title" id="pageTitle">Dashboard</span>
     </div>
     <div class="topbar-right">
-      <div class="top-stat">BTC <span id="btcPrice">—</span> <span id="btcChg" style="margin-left:4px">—</span></div>
-      <div class="top-stat">Balance <span id="topBalance">—</span> USDT</div>
-      <div class="live-badge" id="liveBadge">CONNECTING</div>
-      <span class="last-upd">Updated: <span id="lastUpd">—</span></span>
+      <span class="top-stat">Balance: <span id="topBalance">—</span> USDT</span>
+      <span class="top-stat">Acc: <span style="color:var(--green)">73.1%</span></span>
+      <span class="top-stat"><span style="color:var(--blue)">20</span> pairs · <span style="color:var(--cyan)">4 tiers</span></span>
+      <span class="last-upd" id="lastUpd">—</span>
+      <span class="live-badge offline" id="liveBadge">OFFLINE</span>
       <button class="btn-scan" id="scanBtn" onclick="triggerScan()">▶ Scan Now</button>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ DASHBOARD PAGE ══════════════════════════════ -->
+  <!-- ════ PAGE: DASHBOARD ════ -->
   <div class="page active" id="page-dashboard">
+    <div class="stats-row">
+      <div class="stat-card c-green">
+        <div class="stat-label">Testnet Balance</div>
+        <div class="stat-value green" id="statBalance">—</div>
+        <div class="stat-sub">USDT (paper money)</div>
+      </div>
+      <div class="stat-card c-blue">
+        <div class="stat-label">Open Trades</div>
+        <div class="stat-value blue" id="statOpen">0</div>
+        <div class="stat-sub" id="statOpenSub">of 3 max</div>
+      </div>
+      <div class="stat-card c-cyan">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value cyan" id="statWR">—</div>
+        <div class="stat-sub" id="statWRSub">— W / — L</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-label">Total PnL</div>
+        <div class="stat-value" id="statPnl">+0.0000</div>
+        <div class="stat-sub">USDT closed trades</div>
+      </div>
+      <div class="stat-card c-purple">
+        <div class="stat-label">Model Accuracy</div>
+        <div class="stat-value purple">73.1%</div>
+        <div class="stat-sub">XGB + RF + GB</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Today Signals</div>
+        <div class="stat-value green" id="statSigToday">0</div>
+        <div class="stat-sub" id="statSigSub">0 BUY · 0 SELL</div>
+      </div>
+      <div class="stat-card c-blue">
+        <div class="stat-label">Monitoring</div>
+        <div class="stat-value blue" style="font-size:16px">20 pairs</div>
+        <div class="stat-sub">4 tiers · 15 min scan</div>
+      </div>
+    </div>
 
     <!-- Scan mode bar -->
     <div class="scan-mode-bar active-mode" id="scanModeBar">
@@ -363,405 +414,379 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <div class="smode-badge" id="smodeBadge">ACTIVE</div>
     </div>
 
-    <!-- Volatility banner -->
-    <div class="vol-banner normal" id="volBanner">
-      <span id="volText">⟳ Fetching market data...</span>
-    </div>
-
-    <!-- Stats row -->
-    <div class="stats-row">
-      <div class="stat-card c-green">
-        <div class="stat-label">Total P&L</div>
-        <div class="stat-value" id="statPnl">—</div>
-        <div class="stat-sub">Realised USDT</div>
-      </div>
-      <div class="stat-card c-blue">
-        <div class="stat-label">Unrealised P&L</div>
-        <div class="stat-value" id="ot-upnl">—</div>
-        <div class="stat-sub">Open positions</div>
-      </div>
-      <div class="stat-card c-amber">
-        <div class="stat-label">Balance</div>
-        <div class="stat-value" id="statBalance">—</div>
-        <div class="stat-sub">USDT available</div>
-      </div>
-      <div class="stat-card c-purple">
-        <div class="stat-label">Open Trades</div>
-        <div class="stat-value blue" id="statOpen">—</div>
-        <div class="stat-sub">Active positions</div>
-      </div>
-      <div class="stat-card c-cyan">
-        <div class="stat-label">Win Rate</div>
-        <div class="stat-value cyan" id="statWR">—</div>
-        <div class="stat-sub" id="statWRSub">—W / —L</div>
-      </div>
-      <div class="stat-card c-green">
-        <div class="stat-label">Signals Today</div>
-        <div class="stat-value green" id="statSigToday">—</div>
-        <div class="stat-sub" id="statSigSub">— BUY · — SELL</div>
-      </div>
-      <div class="stat-card c-amber">
-        <div class="stat-label">BTC ATR</div>
-        <div class="stat-value amber" id="btcAtrPct">—</div>
-        <div class="stat-sub">Range: $<span id="btcAtr">—</span></div>
-      </div>
-    </div>
-
-    <div class="g3">
-      <!-- Left: recent signals + open trades -->
-      <div>
-        <!-- Recent signals -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Recent Signals <span class="refresh-icon" onclick="fetchSignals()">↻</span></div>
-            <div class="panel-meta">
-              <span class="panel-badge" id="recentSigBadge">last 5</span>
-              <button class="fbtn" onclick="showPage('signals')" style="font-size:10px">View all →</button>
-            </div>
-          </div>
-          <div class="panel-body" id="recentSignalsBody">
-            <div class="empty"><div class="eicon">⚡</div><div class="emsg">Fetching signals...</div></div>
+    <div class="g2">
+      <!-- Open trades -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Open Trades</span>
+          <div class="panel-meta">
+            <span class="panel-badge blink" style="color:var(--green);border-color:var(--green)">LIVE PnL</span>
+            <span class="panel-badge" id="openBadge">0 active</span>
           </div>
         </div>
-
-        <!-- Open trades -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Open Trades <span class="refresh-icon" onclick="fetchOpenTrades()">↻</span></div>
-            <div class="panel-meta">
-              <span class="panel-badge" id="openBadge">0 active</span>
-              <button class="fbtn" onclick="showPage('trades')" style="font-size:10px">View all →</button>
-            </div>
-          </div>
-          <div class="panel-body" id="openTradesBody">
-            <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min.</div></div>
-          </div>
+        <div class="panel-body" id="openTradesBody">
+          <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min.</div></div>
         </div>
       </div>
 
       <!-- Right column -->
       <div>
-        <!-- Balance card -->
-        <div class="panel" style="margin-bottom:16px">
+        <!-- Volatility status -->
+        <div class="panel">
           <div class="panel-header">
-            <div class="panel-title">Balance</div>
-            <div class="panel-meta"><span class="panel-badge">Binance</span></div>
+            <span class="panel-title">BTC Volatility (ATR)</span>
+            <span class="panel-badge blink" style="color:var(--cyan);border-color:var(--cyan)">LIVE</span>
+          </div>
+          <div class="panel-body">
+            <div id="volBanner" class="vol-banner normal">
+              <span>⬤</span> <span id="volText">Fetching BTC ATR...</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="price-box">
+                <div class="price-lbl">ATR Value</div>
+                <div class="price-val" id="btcAtr" style="color:var(--cyan)">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">ATR % of Price</div>
+                <div class="price-val" id="btcAtrPct" style="color:var(--cyan)">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">BTC Price</div>
+                <div class="price-val" id="btcPrice" style="color:var(--blue)">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">24h Change</div>
+                <div class="price-val" id="btcChg">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testnet balance breakdown -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Testnet Balance</span>
+            <span class="panel-badge" style="color:var(--green);border-color:var(--green)">BINANCE TESTNET</span>
           </div>
           <div class="panel-body">
             <div class="balance-card">
               <div class="bal-num" id="balMain">—</div>
               <div class="bal-sub">USDT Available</div>
-              <div class="bal-assets" id="balAssets"></div>
             </div>
-          </div>
-        </div>
-
-        <!-- Fear & Greed -->
-        <div class="panel" style="margin-bottom:16px">
-          <div class="panel-header">
-            <div class="panel-title">Fear & Greed Index</div>
-            <div class="panel-meta"><span class="panel-badge">alternative.me</span></div>
-          </div>
-          <div class="fg-wrap">
-            <div class="fg-num" id="fgNum">—</div>
-            <div class="fg-label" id="fgLabel">Loading...</div>
-            <div class="fg-bar">
-              <div class="fg-bar-cursor" id="fgCursor" style="left:50%"></div>
+            <div class="bal-assets" id="balAssets" style="margin-top:10px">
+              <div style="font-size:10px;color:var(--text3);text-align:center">Loading assets...</div>
             </div>
-            <div class="fg-zones">
-              <div class="fg-zone" id="fgz0"><span style="color:var(--green)">Extreme Fear</span><span>0–24</span></div>
-              <div class="fg-zone" id="fgz1"><span style="color:var(--cyan)">Fear</span><span>25–44</span></div>
-              <div class="fg-zone" id="fgz2"><span style="color:var(--text2)">Neutral</span><span>45–54</span></div>
-              <div class="fg-zone" id="fgz3"><span style="color:var(--amber)">Greed</span><span>55–74</span></div>
-              <div class="fg-zone" id="fgz4"><span style="color:var(--red)">Extreme Greed</span><span>75–100</span></div>
-            </div>
-            <div style="margin-top:10px;font-size:11px;color:var(--text2);line-height:1.5" id="fgAdvice">Fetching market sentiment...</div>
-          </div>
-        </div>
-
-        <!-- Signal stats -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Signal Stats</div>
-          </div>
-          <div class="panel-body">
-            <div class="cfg-row"><span class="cfg-key">Total Signals</span><span class="cfg-val" id="sig-total">—</span></div>
-            <div class="cfg-row"><span class="cfg-key">Buy Signals</span><span class="cfg-val" style="color:var(--green)" id="sig-buy">—</span></div>
-            <div class="cfg-row"><span class="cfg-key">Sell Signals</span><span class="cfg-val" style="color:var(--red)" id="sig-sell">—</span></div>
-            <div class="cfg-row"><span class="cfg-key">Avg Confidence</span><span class="cfg-val" style="color:var(--amber)" id="sig-avgconf">—</span></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bot log -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Bot Log <span class="refresh-icon" onclick="fetchLog()">↻</span></div>
-        <div class="panel-meta"><span class="panel-badge" id="logBadge">live</span></div>
-      </div>
-      <div class="panel-body">
-        <div class="log-box" id="logPanel">
-          <span class="log-line wrn">Connecting to API...</span>
+    <!-- Recent signals + log -->
+    <div class="g3">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Recent Signals</span>
+          <span class="panel-badge" id="recentSigBadge">—</span>
+        </div>
+        <div id="recentSignalsBody" style="max-height:280px;overflow-y:auto;padding:10px 14px">
+          <div class="empty"><div class="eicon">⚡</div><div class="emsg">No signals yet</div></div>
         </div>
       </div>
-    </div>
-
-  </div><!-- /page-dashboard -->
-
-  <!-- ══════════════════════════════ SIGNALS PAGE ══════════════════════════════ -->
-  <div class="page" id="page-signals">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Signal History</div>
-        <div class="panel-meta">
-          <span class="panel-badge" id="signalCountBadge">— signals</span>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Bot Log</span>
+          <span class="panel-badge" id="logBadge">—</span>
         </div>
-      </div>
-
-      <!-- Direction filters -->
-      <div class="signal-filters">
-        <div class="filter-group">
-          <button class="fbtn active" id="fbtn-all" onclick="filterSig('all',this)">All</button>
-          <button class="fbtn buy-btn" id="fbtn-buy" onclick="filterSig('BUY',this)">BUY</button>
-          <button class="fbtn sell-btn" id="fbtn-sell" onclick="filterSig('SELL',this)">SELL</button>
+        <div class="panel-body" style="padding:0">
+          <div class="log-box" id="logPanel"><span class="log-line">Connecting...</span></div>
         </div>
-        <div class="filter-sep"></div>
-        <!-- Tier + coin filters injected by JS -->
-        <div class="filter-group" id="coinFilterBtns"></div>
-        <div class="filter-sep"></div>
-        <div class="filter-group">
-          <button class="fbtn active" id="fbtn-conf-any" onclick="filterConf(0,this)">Any conf</button>
-          <button class="fbtn" id="fbtn-conf-65" onclick="filterConf(65,this)">65%+</button>
-          <button class="fbtn" id="fbtn-conf-70" onclick="filterConf(70,this)">70%+</button>
-          <button class="fbtn" id="fbtn-conf-80" onclick="filterConf(80,this)">80%+</button>
-        </div>
-      </div>
-
-      <div class="panel-body" id="signalsBody">
-        <div class="empty"><div class="eicon">⚡</div><div class="emsg">Loading signals...</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ TRADES PAGE ══════════════════════════════ -->
-  <div class="page" id="page-trades">
-    <!-- Trade stats -->
+  <!-- ════ PAGE: SIGNALS ════ -->
+  <div class="page" id="page-signals">
     <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-      <div class="stat-card c-blue">
-        <div class="stat-label">Open Trades</div>
-        <div class="stat-value blue" id="ot-count">—</div>
+      <div class="stat-card c-green">
+        <div class="stat-label">Total Signals Today</div>
+        <div class="stat-value green" id="sig-total">0</div>
+        <div class="stat-sub">last 24 hours</div>
       </div>
       <div class="stat-card c-green">
-        <div class="stat-label">Unrealised P&L</div>
-        <div class="stat-value" id="ot-upnl2">—</div>
+        <div class="stat-label">BUY Signals</div>
+        <div class="stat-value green" id="sig-buy">0</div>
+        <div class="stat-sub">long setups</div>
       </div>
       <div class="stat-card c-red">
-        <div class="stat-label">Total Risk</div>
-        <div class="stat-value red">$<span id="ot-risk">—</span></div>
+        <div class="stat-label">SELL Signals</div>
+        <div class="stat-value red" id="sig-sell">0</div>
+        <div class="stat-sub">short setups</div>
       </div>
       <div class="stat-card c-amber">
         <div class="stat-label">Avg Confidence</div>
-        <div class="stat-value amber" id="ot-conf">—</div>
+        <div class="stat-value amber" id="sig-avgconf">—</div>
+        <div class="stat-sub">AI model score</div>
       </div>
     </div>
+
     <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Open Positions <span class="refresh-icon" onclick="fetchOpenTrades()">↻</span></div>
+      <div class="signal-filters" id="sigFilters">
+        <div class="filter-group">
+          <button class="fbtn active" onclick="filterSig('all',this)">All</button>
+          <button class="fbtn buy-btn" onclick="filterSig('buy',this)">▲ BUY</button>
+          <button class="fbtn sell-btn" onclick="filterSig('sell',this)">▼ SELL</button>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group" id="coinFilterBtns"></div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <button class="fbtn" onclick="filterConf(0,this)">Any</button>
+          <button class="fbtn" onclick="filterConf(60,this)">60%+</button>
+          <button class="fbtn" onclick="filterConf(70,this)">70%+</button>
+          <button class="fbtn" onclick="filterConf(75,this)">75%+</button>
+        </div>
       </div>
-      <div class="panel-body" id="openTradesFullBody">
-        <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min for signals.</div></div>
+      <div id="signalsBody" style="padding:10px 14px;max-height:calc(100vh - 300px);overflow-y:auto">
+        <div class="empty"><div class="eicon">⚡</div><div class="emsg">No signals yet. Bot scans every 15 min.</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ HISTORY PAGE ══════════════════════════════ -->
-  <div class="page" id="page-history">
-    <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
-      <div class="stat-card c-blue">
-        <div class="stat-label">Total Trades</div>
-        <div class="stat-value blue" id="h-total">—</div>
-      </div>
+  <!-- ════ PAGE: MARKET ════ -->
+  <div class="page" id="page-market">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
       <div class="stat-card c-green">
-        <div class="stat-label">Wins</div>
-        <div class="stat-value green" id="h-wins">—</div>
+        <div class="stat-label">Gainers</div>
+        <div class="stat-value green" id="mkt-gainers">0</div>
+        <div class="stat-sub">of 20 pairs</div>
       </div>
       <div class="stat-card c-red">
-        <div class="stat-label">Losses</div>
-        <div class="stat-value red" id="h-losses">—</div>
-      </div>
-      <div class="stat-card c-cyan">
-        <div class="stat-label">Win Rate</div>
-        <div class="stat-value cyan" id="h-wr">—</div>
+        <div class="stat-label">Losers</div>
+        <div class="stat-value red" id="mkt-losers">0</div>
+        <div class="stat-sub">of 20 pairs</div>
       </div>
       <div class="stat-card c-green">
-        <div class="stat-label">Total P&L</div>
-        <div class="stat-value" id="h-pnl">—</div>
+        <div class="stat-label">Best 24h</div>
+        <div class="stat-value green" id="mkt-best">—</div>
+        <div class="stat-sub" id="mkt-best-sym">—</div>
       </div>
+      <div class="stat-card c-red">
+        <div class="stat-label">Worst 24h</div>
+        <div class="stat-value red" id="mkt-worst">—</div>
+        <div class="stat-sub" id="mkt-worst-sym">—</div>
+      </div>
+    </div>
+
+    <div class="g2" style="align-items:start">
+      <!-- Fear & Greed -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Fear & Greed Index</span>
+          <span class="panel-badge blink" style="color:var(--cyan);border-color:var(--cyan)">LIVE</span>
+        </div>
+        <div class="fg-wrap">
+          <div class="fg-num" id="fgNum" style="color:var(--red)">—</div>
+          <div class="fg-label" id="fgLabel">Loading...</div>
+          <div class="fg-bar"><div class="fg-bar-cursor" id="fgCursor" style="left:50%"></div></div>
+          <div class="fg-zones">
+            <div class="fg-zone" id="fgz0"><span style="color:var(--green)">Extreme Fear</span><span>0–24</span></div>
+            <div class="fg-zone" id="fgz1"><span style="color:var(--cyan)">Fear</span><span>25–44</span></div>
+            <div class="fg-zone" id="fgz2"><span style="color:var(--text2)">Neutral</span><span>45–54</span></div>
+            <div class="fg-zone" id="fgz3"><span style="color:var(--amber)">Greed</span><span>55–74</span></div>
+            <div class="fg-zone" id="fgz4"><span style="color:var(--red)">Extreme Greed</span><span>75–100</span></div>
+          </div>
+          <div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--amber);margin-bottom:3px">⚡ Trade Advice</div>
+            <div style="font-size:11px;color:var(--text)" id="fgAdvice">Loading market conditions...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All pairs -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">All Pairs</span>
+          <span class="panel-badge blink" style="color:var(--green);border-color:var(--green)">20 pairs · Live</span>
+        </div>
+        <div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:540px;overflow-y:auto" id="mktPairsGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: OPEN TRADES ════ -->
+  <div class="page" id="page-trades">
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-blue"><div class="stat-label">Open Positions</div><div class="stat-value blue" id="ot-count">0</div><div class="stat-sub">of 3 max</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Unrealised PnL</div><div class="stat-value" id="ot-upnl">+0.0000</div><div class="stat-sub">USDT combined</div></div>
+      <div class="stat-card c-green"><div class="stat-label">Capital at Risk</div><div class="stat-value green" id="ot-risk">—</div><div class="stat-sub">USDT (1% each)</div></div>
+      <div class="stat-card c-cyan"><div class="stat-label">Avg Confidence</div><div class="stat-value cyan" id="ot-conf">—</div><div class="stat-sub">ML score avg</div></div>
+    </div>
+    <div id="openTradesFullBody">
+      <div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min for signals.</div></div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: HISTORY ════ -->
+  <div class="page" id="page-history">
+    <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stat-card c-purple"><div class="stat-label">Total Trades</div><div class="stat-value purple" id="h-total">0</div><div class="stat-sub">all time</div></div>
+      <div class="stat-card c-green"><div class="stat-label">Wins</div><div class="stat-value green" id="h-wins">0</div><div class="stat-sub">profitable closes</div></div>
+      <div class="stat-card c-red"><div class="stat-label">Losses</div><div class="stat-value red" id="h-losses">0</div><div class="stat-sub">stopped out</div></div>
+      <div class="stat-card c-cyan"><div class="stat-label">Win Rate</div><div class="stat-value cyan" id="h-wr">—</div><div class="stat-sub">closed trades</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Total PnL</div><div class="stat-value" id="h-pnl">+0.0000</div><div class="stat-sub">USDT net</div></div>
     </div>
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Trade History <span class="refresh-icon" onclick="fetchHistory()">↻</span></div>
-        <div class="panel-meta"><span class="panel-badge" id="histBadge">0 trades</span></div>
+        <span class="panel-title">Trade History</span>
+        <span class="panel-badge" id="histBadge">0 trades</span>
       </div>
-      <div class="panel-body" style="overflow-x:auto">
+      <div style="overflow-x:auto">
         <table class="htable">
-          <thead>
-            <tr>
-              <th>Coin</th><th>Tier</th><th>Dir</th><th>Entry</th><th>Close</th>
-              <th>P&L</th><th>Result</th><th>Opened</th><th>Duration</th><th>Reason</th>
-            </tr>
-          </thead>
-          <tbody id="histBody">
-            <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Loading history...</td></tr>
-          </tbody>
+          <thead><tr>
+            <th>Symbol</th><th>Tier</th><th>Dir</th><th>Entry</th><th>Close</th>
+            <th>PnL (USDT)</th><th>Result</th><th>Opened</th><th>Duration</th><th>Reason</th>
+          </tr></thead>
+          <tbody id="histBody"><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text3)">No closed trades yet</td></tr></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ MARKET PAGE ══════════════════════════════ -->
-  <div class="page" id="page-market">
-    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-      <div class="stat-card c-green">
-        <div class="stat-label">Gainers</div>
-        <div class="stat-value green" id="mkt-gainers">—</div>
-        <div class="stat-sub">of 20 pairs</div>
-      </div>
-      <div class="stat-card c-red">
-        <div class="stat-label">Losers</div>
-        <div class="stat-value red" id="mkt-losers">—</div>
-        <div class="stat-sub">of 20 pairs</div>
-      </div>
-      <div class="stat-card c-green">
-        <div class="stat-label">Best</div>
-        <div class="stat-value green" id="mkt-best">—</div>
-        <div class="stat-sub" id="mkt-best-sym">—</div>
-      </div>
-      <div class="stat-card c-red">
-        <div class="stat-label">Worst</div>
-        <div class="stat-value red" id="mkt-worst">—</div>
-        <div class="stat-sub" id="mkt-worst-sym">—</div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">All Pairs — 24h Overview <span class="refresh-icon" onclick="fetchMarketPrices()">↻</span></div>
-        <div class="panel-meta"><span class="panel-badge">Binance live</span></div>
-      </div>
-      <div class="panel-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px" id="mktPairsGrid">
-          <div class="empty" style="grid-column:1/-1"><div class="emsg">Loading market data...</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ PERFORMANCE PAGE ══════════════════════════════ -->
+  <!-- ════ PAGE: PERFORMANCE ════ -->
   <div class="page" id="page-performance">
-    <div class="g2" style="margin-bottom:16px">
-      <!-- W/L ratio -->
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card c-green"><div class="stat-label">Best Trade</div><div class="stat-value green" id="p-best">—</div><div class="stat-sub" id="p-best-sym">USDT profit</div></div>
+      <div class="stat-card c-red"><div class="stat-label">Worst Trade</div><div class="stat-value red" id="p-worst">—</div><div class="stat-sub" id="p-worst-sym">USDT loss</div></div>
+      <div class="stat-card c-cyan"><div class="stat-label">Avg Win</div><div class="stat-value cyan" id="p-avgwin">—</div><div class="stat-sub">USDT per win</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Avg Loss</div><div class="stat-value amber" id="p-avgloss">—</div><div class="stat-sub">USDT per loss</div></div>
+    </div>
+    <div class="g2">
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">Win / Loss Ratio</div></div>
-        <div class="panel-body" id="wlRatioBody">
-          <div class="empty"><div class="emsg">No trade data yet</div></div>
-        </div>
-      </div>
-      <!-- P&L bars -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Recent P&L (last 20)</div></div>
+        <div class="panel-header"><span class="panel-title">PnL by Trade</span></div>
         <div class="panel-body">
-          <div class="perf-bars" id="perfBars"></div>
+          <div class="perf-bars" id="perfBars" style="height:80px;align-items:flex-end"></div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px">Each bar = one closed trade (green=win, red=loss)</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Win/Loss Ratio</span></div>
+        <div class="panel-body" id="wlRatioBody">
+          <div class="empty"><div class="emsg">No closed trades yet</div></div>
         </div>
       </div>
     </div>
-
-    <!-- Best / worst -->
-    <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
-      <div class="stat-card c-green">
-        <div class="stat-label">Best Trade</div>
-        <div class="stat-value green" id="p-best">—</div>
-        <div class="stat-sub" id="p-best-sym">—</div>
-      </div>
-      <div class="stat-card c-red">
-        <div class="stat-label">Worst Trade</div>
-        <div class="stat-value red" id="p-worst">—</div>
-        <div class="stat-sub" id="p-worst-sym">—</div>
-      </div>
-      <div class="stat-card c-cyan">
-        <div class="stat-label">Avg Win</div>
-        <div class="stat-value cyan" id="p-avgwin">—</div>
-      </div>
-      <div class="stat-card c-red">
-        <div class="stat-label">Avg Loss</div>
-        <div class="stat-value red" id="p-avgloss">—</div>
-      </div>
-    </div>
-
-    <!-- Coin performance -->
     <div class="panel">
-      <div class="panel-header"><div class="panel-title">Performance by Coin</div></div>
+      <div class="panel-header"><span class="panel-title">Signal Performance by Coin</span></div>
       <div class="panel-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px" id="coinPerfGrid">
+        <div id="coinPerfGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
           <div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════ CONFIG PAGE ══════════════════════════════ -->
+  <!-- ════ PAGE: CONFIG ════ -->
   <div class="page" id="page-config">
-    <div class="g2">
-      <!-- Bot status -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Bot Status</div></div>
-        <div class="panel-body">
-          <div class="cfg-row"><span class="cfg-key">API Connection</span><span class="cfg-val" id="cfgApi">Checking...</span></div>
-          <div class="cfg-row"><span class="cfg-key">Current Mode</span><span class="cfg-val" id="cfgMode">—</span></div>
-          <div class="cfg-row"><span class="cfg-key">UTC Time</span><span class="cfg-val" id="cfgTime">—</span></div>
-          <div class="cfg-row"><span class="cfg-key">Day</span><span class="cfg-val" id="cfgDay">—</span></div>
-          <div class="cfg-row"><span class="cfg-key">Weekend Mode</span><span class="cfg-val" id="weekendStatus">—</span></div>
-          <div class="cfg-row"><span class="cfg-key">BTC Volatility</span><span class="cfg-val" id="cfgAtr">—</span></div>
+    <div class="g2" style="align-items:start">
+      <div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header"><span class="panel-title">Smart Scanning Schedule</span></div>
+          <div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <span style="color:var(--green);font-size:13px">⬤</span>
+                  <span style="font-family:var(--sans);font-weight:700;color:#fff">ACTIVE HOURS</span>
+                  <span style="font-size:10px;color:var(--text3)">08:00 – 20:00 UTC</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">SCAN EVERY</div><div style="color:var(--green)">15 minutes</div></div>
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">MIN CONFIDENCE</div><div style="color:var(--green)">65%</div></div>
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">MIN SCORE</div><div style="color:var(--green)">3 / 6</div></div>
+                </div>
+              </div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <span style="color:var(--purple);font-size:13px">⬤</span>
+                  <span style="font-family:var(--sans);font-weight:700;color:#fff">QUIET HOURS</span>
+                  <span style="font-size:10px;color:var(--text3)">00:00 – 08:00 UTC</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">SCAN EVERY</div><div style="color:var(--purple)">30 minutes</div></div>
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">MIN CONFIDENCE</div><div style="color:var(--purple)">72%</div></div>
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">MIN ADX</div><div style="color:var(--purple)">30+</div></div>
+                </div>
+              </div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <span style="color:var(--amber);font-size:13px">⬤</span>
+                  <span style="font-family:var(--sans);font-weight:700;color:#fff">WEEKEND MODE</span>
+                  <span style="font-size:10px;color:var(--text3)">Saturday & Sunday</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">CONFIDENCE RAISED</div><div style="color:var(--amber)">+5% → 70%</div></div>
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">REASON</div><div style="color:var(--amber)">Low vol</div></div>
+                  <div><div style="color:var(--text3);font-size:9px;margin-bottom:2px">STATUS</div><div id="weekendStatus" style="color:var(--amber)">—</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Volatility Rules</span></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:var(--bg3);border:1px solid #ff4d6d30;border-radius:7px;padding:12px">
+              <div style="color:var(--red);font-size:12px;font-weight:600;margin-bottom:5px">🔴 HIGH VOLATILITY (ATR &gt; 2%)</div>
+              <div style="font-size:11px;color:var(--text2)">Warning sent to Telegram · Reduce position size · Signal still fires</div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid #f5a62330;border-radius:7px;padding:12px">
+              <div style="color:var(--amber);font-size:12px;font-weight:600;margin-bottom:5px">🟡 LOW VOLATILITY (ATR &lt; 0.3%)</div>
+              <div style="font-size:11px;color:var(--text2)">Scan skipped · Market is ranging · No signals generated</div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid #00d97e30;border-radius:7px;padding:12px">
+              <div style="color:var(--green);font-size:12px;font-weight:600;margin-bottom:5px">🟢 NORMAL (0.3% – 2%)</div>
+              <div style="font-size:11px;color:var(--text2)">Full scan runs · All filters apply · Normal operation</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Scan settings -->
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Scan Settings</div></div>
-        <div class="panel-body">
-          <div class="cfg-row"><span class="cfg-key">Active Hours</span><span class="cfg-val">UTC 08:00–20:00</span></div>
-          <div class="cfg-row"><span class="cfg-key">Active Min Conf</span><span class="cfg-val" style="color:var(--green)">65%</span></div>
-          <div class="cfg-row"><span class="cfg-key">Quiet Min Conf</span><span class="cfg-val" style="color:var(--purple)">72%</span></div>
-          <div class="cfg-row"><span class="cfg-key">Weekend Min Conf</span><span class="cfg-val" style="color:var(--amber)">70%</span></div>
-          <div class="cfg-row"><span class="cfg-key">Active Scan Interval</span><span class="cfg-val">15 min</span></div>
-          <div class="cfg-row"><span class="cfg-key">Quiet Scan Interval</span><span class="cfg-val">30 min</span></div>
-          <div class="cfg-row"><span class="cfg-key">Min Score</span><span class="cfg-val">3 / 6 signals</span></div>
-          <div class="cfg-row"><span class="cfg-key">High Vol ATR Skip</span><span class="cfg-val">ATR &gt; 2% skip scan</span></div>
-          <div class="cfg-row"><span class="cfg-key">Low Vol ATR Skip</span><span class="cfg-val">ATR &lt; 0.3% skip scan</span></div>
+      <div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header"><span class="panel-title">Risk Parameters</span></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:8px">
+            <div class="bal-row"><span style="color:var(--text3)">Risk per trade</span><span style="color:var(--green)">1% of balance</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Max open trades</span><span style="color:var(--blue)">3</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Stop loss</span><span style="color:var(--red)">1.5× ATR</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Take profit 1</span><span style="color:var(--green)">2.0× ATR (50%)</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Take profit 2</span><span style="color:var(--green)">3.0× ATR (50%)</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Exchange</span><span style="color:var(--amber)">Binance TESTNET</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Timeframe entry</span><span style="color:var(--cyan)">15m</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Timeframe confirm</span><span style="color:var(--cyan)">1h</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Timeframe trend</span><span style="color:var(--cyan)">4h</span></div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Coin tiers -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Tracked Pairs — 20 coins across 4 tiers</div>
-        <div class="panel-meta"><span class="panel-badge">config.py</span></div>
-      </div>
-      <div class="panel-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px" id="tierTableCfg"></div>
-      </div>
-    </div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header"><span class="panel-title">Current Status</span></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:8px">
+            <div class="bal-row"><span style="color:var(--text3)">Scan mode</span><span id="cfgMode">—</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Current UTC time</span><span id="cfgTime" style="color:var(--cyan)">—</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Day of week</span><span id="cfgDay">—</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">BTC ATR status</span><span id="cfgAtr">—</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">API status</span><span id="cfgApi">—</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Total pairs</span><span style="color:var(--blue)">20 coins · 4 tiers</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Model file</span><span style="color:var(--green)">pro_crypto_ai_model.pkl</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Features</span><span style="color:var(--purple)">40+ indicators</span></div>
+          </div>
+        </div>
 
-    <!-- API endpoint -->
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">API Endpoint</div></div>
-      <div class="panel-body">
-        <div class="cfg-row"><span class="cfg-key">Base URL</span><span class="cfg-val" style="color:var(--cyan);font-size:10px" id="cfgApiUrl"></span></div>
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button class="fbtn" onclick="refreshAll()">↻ Refresh All</button>
-          <button class="fbtn" onclick="fetchLog()">📋 Reload Log</button>
-          <button class="fbtn" onclick="triggerScan()">▶ Manual Scan</button>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Coin Universe — 4 Tiers</span></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:10px" id="tierTableCfg">
+            <!-- filled by JS -->
+          </div>
         </div>
       </div>
     </div>
@@ -771,7 +796,24 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 <script>
 // ══ CONFIG ═══════════════════════════════════════════════
+// ══ CONFIG — UPDATE THIS TO YOUR RENDER URL ══════════════
 const API_BASE = "https://crypto-ai-bot-na93.onrender.com";
+// If your Render URL is different, update the line above.
+
+// ── Render free tier wakes up slowly (~30s). We ping it first. ──
+let renderAwake = false;
+async function wakeUpRender() {
+  if (renderAwake) return;
+  try {
+    document.getElementById("liveBadge").textContent = "WAKING...";
+    document.getElementById("liveBadge").className   = "live-badge";
+    // Ping with long timeout — Render free tier sleeps after 15min inactivity
+    await fetch(API_BASE + "/api/status", {signal: AbortSignal.timeout(35000)});
+    renderAwake = true;
+  } catch {
+    // Will retry in next refreshAll
+  }
+}
 
 // ── 20 coins — verified on Binance, matching config.py ──────────
 const COIN_TIERS = {
@@ -784,15 +826,12 @@ const SYMBOLS = Object.values(COIN_TIERS).flatMap(t => t.coins);
 const getTier = sym => Object.entries(COIN_TIERS).find(([,t]) => t.coins.includes(sym));
 const getTierColor = sym => { const t = getTier(sym); return t ? t[1].color : "var(--text2)"; };
 
-let allSignals  = [];
-let marketData  = [];
-let sigFilter   = {dir:"all", conf:0, tier:null, coin:null};
-let isScanning  = false;
-let apiOnline   = false;
-let btcAtrPct   = 0;
-
-// Set API URL on config page
-document.getElementById("cfgApiUrl").textContent = API_BASE;
+let allSignals = [];
+let marketData = [];
+let sigFilter  = {dir:"all", conf:0, tier:null, coin:null};
+let btcAtrPct  = 0;
+let isScanning = false;
+let apiOnline  = false;
 
 // ══ FORMAT HELPERS ══════════════════════════════════════
 const fmt    = (v, d) => v == null ? "—" : parseFloat(v).toFixed(d ?? (v < 10 ? 4 : 2));
@@ -823,7 +862,7 @@ function duration(iso1, iso2) {
 function getScanMode() {
   const now  = new Date();
   const utcH = now.getUTCHours();
-  const dow  = now.getUTCDay();
+  const dow  = now.getUTCDay(); // 0=Sun, 6=Sat
   const isWeekend = (dow === 0 || dow === 6);
   const isActive  = (utcH >= 8 && utcH < 20);
 
@@ -850,17 +889,20 @@ function updateScanMode() {
   const utcH = now.getUTCHours(), utcM = String(now.getUTCMinutes()).padStart(2,"0");
   const dow = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][now.getUTCDay()];
 
+  // Sidebar mode
   const sm = document.getElementById("sidebarMode");
   sm.className = "mode-badge " + m.cls;
   document.getElementById("sidebarModeTitle").textContent = m.label;
   document.getElementById("sidebarModeSub").textContent   = `Scan every ${m.interval} min`;
 
+  // Dashboard bar
   const bar = document.getElementById("scanModeBar");
   bar.className = "scan-mode-bar " + m.cls;
   document.getElementById("smodeTitleMain").textContent = m.label + " — Scanning every " + m.interval + " minutes";
   document.getElementById("smodeSubMain").textContent   = m.sub;
   document.getElementById("smodeBadge").textContent     = m.badge;
 
+  // Config page
   const modeColors = {active:"var(--green)", quiet:"var(--purple)", weekend:"var(--amber)"};
   const cfgM = document.getElementById("cfgMode");
   if (cfgM) { cfgM.textContent = m.label; cfgM.style.color = modeColors[m.mode]; }
@@ -872,6 +914,7 @@ function updateScanMode() {
   if (ws) ws.textContent = m.mode==="weekend" ? "ACTIVE NOW" : "Weekday";
 }
 
+// Build tier table for config page
 function buildTierTable() {
   const el = document.getElementById("tierTableCfg");
   if (!el) return;
@@ -885,7 +928,9 @@ function buildTierTable() {
         ${tier.coins.map(s => `
           <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:${tier.color}15;
                        border:1px solid ${tier.color}35;color:${tier.color};cursor:pointer"
-                onclick="showPage('signals')">${s.replace("USDT","")}</span>`).join("")}
+                onclick="showPage('signals')" title="${s}">
+            ${s.replace("USDT","")}
+          </span>`).join("")}
       </div>
     </div>`).join("");
 }
@@ -909,8 +954,9 @@ function showPage(id) {
   if (id === "config")      { updateScanMode(); buildTierTable(); }
 }
 
-// Build coin chips
+// Build coin chips — grouped by tier
 function buildCoinChips() {
+  // Sidebar coin chips grouped by tier
   document.getElementById("coinChips").innerHTML = Object.entries(COIN_TIERS).map(([key, tier]) =>
     `<div style="width:100%;font-size:8px;letter-spacing:1px;color:var(--text3);margin:6px 0 3px;text-transform:uppercase">${tier.label}</div>` +
     tier.coins.map(s =>
@@ -918,23 +964,29 @@ function buildCoinChips() {
     ).join("")
   ).join("");
 
+  // Signal page coin filter — All + tier groups
   document.getElementById("coinFilterBtns").innerHTML =
+    '<button class="fbtn active" onclick="filterCoin(\'all\',this)">All</button>' +
     Object.entries(COIN_TIERS).map(([key, tier]) =>
-      `<button class="fbtn" id="fbtn-tier-${key}" onclick="filterTier('${key}',this)" style="font-size:10px">${tier.label.split(' ').slice(1).join(' ')}</button>`
+      `<button class="fbtn" onclick="filterTier('${key}',this)" style="font-size:10px">${tier.label.split(' ').slice(1).join(' ')}</button>`
     ).join("") +
-    '<span class="filter-sep"></span>' +
+    '<span style="width:1px;height:16px;background:var(--border);display:inline-block;margin:0 4px"></span>' +
     ["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT"].map(c =>
-      `<button class="fbtn" id="fbtn-coin-${c}" onclick="filterCoin('${c}',this)">${c.replace("USDT","")}</button>`
+      `<button class="fbtn" onclick="filterCoin('${c}',this)">${c.replace("USDT","")}</button>`
     ).join("");
 }
 
 // ══ API CALLS ════════════════════════════════════════════
+// NOTE: Render free tier sleeps after 15 min — first request takes ~30s
+// All timeouts set to 35s to handle cold starts
+
 async function fetchStatus() {
   try {
-    const r = await fetch(API_BASE + "/api/status", {signal: AbortSignal.timeout(15000)});
-    if (!r.ok) throw new Error();
+    const r = await fetch(API_BASE + "/api/status", {signal: AbortSignal.timeout(35000)});
+    if (!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
-    apiOnline = true;
+    apiOnline   = true;
+    renderAwake = true;
 
     document.getElementById("liveBadge").textContent  = "LIVE";
     document.getElementById("liveBadge").className    = "live-badge";
@@ -948,12 +1000,15 @@ async function fetchStatus() {
     document.getElementById("statWR").textContent    = d.win_rate + "%";
     document.getElementById("statWR").className      = "stat-value " + (d.win_rate >= 50 ? "cyan" : "red");
     document.getElementById("statWRSub").textContent = `${d.wins}W / ${d.losses}L`;
+    document.getElementById("ot-count").textContent  = d.open_trades;
 
+    // Closed trade counts
     document.getElementById("h-total").textContent  = d.total_closed;
     document.getElementById("h-wins").textContent   = d.wins;
     document.getElementById("h-losses").textContent = d.losses;
     document.getElementById("h-wr").textContent     = d.win_rate + "%";
 
+    // Trade badge in nav
     document.getElementById("tradeCount").textContent = d.open_trades;
     document.getElementById("tradeCount").className   = d.open_trades > 0 ? "nav-badge green" : "nav-badge";
 
@@ -970,41 +1025,57 @@ async function fetchStatus() {
 
 async function fetchBalance() {
   try {
-    const r = await fetch(API_BASE + "/api/balance", {signal: AbortSignal.timeout(15000)});
+    const r = await fetch(API_BASE + "/api/balance", {signal: AbortSignal.timeout(35000)});
     if (!r.ok) throw new Error();
     const d = await r.json();
-    const usdt = parseFloat(d.usdt || 0);
+
+    if (!d.ok || d.usdt === null) {
+      // Balance not fetched yet — shown from balance.json which GitHub Actions writes
+      const note = "Trigger GitHub Actions scan first";
+      document.getElementById("statBalance").textContent = note;
+      document.getElementById("balMain").textContent     = "Run GitHub Actions";
+      document.getElementById("topBalance").textContent  = "—";
+      return;
+    }
+
+    const usdt  = parseFloat(d.usdt || 0);
     const fmted = usdt.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
     document.getElementById("statBalance").textContent  = fmted;
     document.getElementById("statBalance").className    = "stat-value " + (usdt > 100 ? "green" : "amber");
     document.getElementById("topBalance").textContent   = fmted;
     document.getElementById("balMain").textContent      = fmted;
+
+    const updated = d.updated_at ? " · " + timeAgo(d.updated_at) : "";
     if (d.assets && d.assets.length) {
-      document.getElementById("balAssets").innerHTML = d.assets.slice(0,6).map(a =>
-        `<div class="bal-row"><span style="color:var(--text2)">${a.asset}</span><span style="color:var(--cyan)">${parseFloat(a.free).toFixed(4)}</span></div>`
-      ).join("");
+      document.getElementById("balAssets").innerHTML =
+        `<div style="font-size:9px;color:var(--text3);margin-bottom:6px">Updated by GitHub Actions${updated}</div>` +
+        d.assets.slice(0,6).map(a =>
+          `<div class="bal-row"><span style="color:var(--text2)">${a.asset}</span><span style="color:var(--cyan)">${parseFloat(a.free).toFixed(4)}</span></div>`
+        ).join("");
     }
   } catch {
-    document.getElementById("statBalance").textContent = "API offline";
-    document.getElementById("balMain").textContent     = "API offline";
+    document.getElementById("statBalance").textContent = "Offline";
+    document.getElementById("balMain").textContent     = "Offline";
   }
 }
 
 async function fetchOpenTrades() {
   try {
-    const r = await fetch(API_BASE + "/api/trades/open", {signal: AbortSignal.timeout(15000)});
+    const r = await fetch(API_BASE + "/api/trades/open", {signal: AbortSignal.timeout(35000)});
     if (!r.ok) return;
     const trades = await r.json();
 
-    document.getElementById("openBadge").textContent  = trades.length + " active";
-    document.getElementById("tradeCount").textContent = trades.length;
-    document.getElementById("ot-count").textContent   = trades.length;
+    document.getElementById("openBadge").textContent    = trades.length + " active";
+    document.getElementById("tradeCount").textContent   = trades.length;
 
     const noTrades = `<div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min for signals.</div></div>`;
 
     if (!trades.length) {
       document.getElementById("openTradesBody").innerHTML     = noTrades;
       document.getElementById("openTradesFullBody").innerHTML = noTrades;
+      document.getElementById("ot-upnl").textContent = "+0.0000";
+      document.getElementById("ot-risk").textContent = "—";
+      document.getElementById("ot-conf").textContent = "—";
       return;
     }
 
@@ -1022,11 +1093,14 @@ async function fetchOpenTrades() {
     document.getElementById("openTradesBody").innerHTML     = html;
     document.getElementById("openTradesFullBody").innerHTML = html;
 
+    // Highlight active coins in sidebar
     SYMBOLS.forEach(s => {
       const chip = document.getElementById("chip-" + s);
       if (chip) chip.classList.toggle("has-signal", !!trades.find(t => t.symbol === s));
     });
-  } catch (e) { console.warn("Open trades:", e); }
+  } catch (e) {
+    console.warn("Open trades:", e);
+  }
 }
 
 function tradeCardHTML(t) {
@@ -1040,8 +1114,8 @@ function tradeCardHTML(t) {
   <div class="trade-card ${t.signal.toLowerCase()}">
     <div class="tc-top">
       <div>
-        <div class="tc-sym" style="color:${tierCol}">${t.symbol.replace("USDT","")}<span>/USDT</span></div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">${timeAgo(t.opened_at)} · score ${t.score}/6 · <span style="color:${tierCol}">${tierLbl}</span></div>
+        <div class="tc-sym" style="color:${tierCol}">${t.symbol.replace("USDT","")}<span style="color:var(--text3);font-size:12px;font-weight:400">/USDT</span></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${timeAgo(t.opened_at)} · score ${t.score}/6 · ${t.status||"Open"} · <span style="color:${tierCol}">${tierLbl}</span></div>
       </div>
       <div style="text-align:right">
         <span class="dir-tag ${t.signal.toLowerCase()}">${t.signal}</span>
@@ -1070,19 +1144,27 @@ function tradeCardHTML(t) {
   </div>`;
 }
 
+// Fetch signals from API (or build from log)
 async function fetchSignals() {
   try {
-    const r = await fetch(API_BASE + "/api/signals", {signal: AbortSignal.timeout(15000)});
+    // Try dedicated signals endpoint first
+    const r = await fetch(API_BASE + "/api/signals", {signal: AbortSignal.timeout(35000)});
     if (r.ok) {
-      allSignals = await r.json();
+      const d = await r.json();
+      allSignals = d;
     } else {
-      const r2 = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(15000)});
+      throw new Error("no signals endpoint");
+    }
+  } catch {
+    // Build from trade history + mock recent for display
+    try {
+      const r2 = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(35000)});
       if (r2.ok) {
         const h = await r2.json();
         allSignals = h.map(t => ({...t, generated_at: t.opened_at}));
       }
-    }
-  } catch {}
+    } catch {}
+  }
   renderSignalsPage();
   renderRecentSignals();
   updateSignalStats();
@@ -1094,13 +1176,12 @@ function renderSignalsPage() {
   if (sigFilter.tier) {
     const tierCoins = COIN_TIERS[sigFilter.tier]?.coins || [];
     data = data.filter(s => tierCoins.includes(s.symbol));
-  } else if (sigFilter.coin) {
+  } else if (sigFilter.coin && sigFilter.coin !== "all") {
     data = data.filter(s => s.symbol === sigFilter.coin);
   }
   if (sigFilter.conf > 0) data = data.filter(s => (s.confidence||0) >= sigFilter.conf);
 
-  document.getElementById("signalCount").textContent     = data.length;
-  document.getElementById("signalCountBadge").textContent = data.length + " signals";
+  document.getElementById("signalCount").textContent = data.length;
 
   const body = document.getElementById("signalsBody");
   if (!data.length) {
@@ -1167,56 +1248,30 @@ function updateSignalStats() {
 }
 
 function filterSig(dir, btn) {
-  const group = btn.closest(".filter-group");
-  if (btn.classList.contains("active") && dir !== 'all') {
-    sigFilter.dir = 'all';
-    group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    document.getElementById("fbtn-all").classList.add("active");
-  } else {
-    sigFilter.dir = dir;
-    group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
+  sigFilter.dir = dir;
+  btn.closest(".filter-group").querySelectorAll(".fbtn").forEach(b => { if(b.classList.contains("fbtn")&&["all","buy","sell"].some(x=>b.textContent.toLowerCase().includes(x))){} });
+  btn.closest(".filter-group").querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
   renderSignalsPage();
 }
-
 function filterCoin(coin, btn) {
-  const group = btn.closest(".filter-group");
-  if (btn.classList.contains("active")) {
-    sigFilter.coin = null;
-    btn.classList.remove("active");
-  } else {
-    sigFilter.coin = coin; sigFilter.tier = null;
-    group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
+  sigFilter.coin = coin;
+  sigFilter.tier = null;
+  btn.closest(".filter-group") && btn.closest(".filter-group").querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
   renderSignalsPage();
 }
-
 function filterTier(tierKey, btn) {
-  const group = btn.closest(".filter-group");
-  if (btn.classList.contains("active")) {
-    sigFilter.tier = null;
-    btn.classList.remove("active");
-  } else {
-    sigFilter.tier = tierKey; sigFilter.coin = null;
-    group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
+  sigFilter.tier = tierKey;
+  sigFilter.coin = null;
+  btn.closest(".filter-group") && btn.closest(".filter-group").querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
   renderSignalsPage();
 }
-
 function filterConf(conf, btn) {
-  const group = btn.closest(".filter-group");
-  if (btn.classList.contains("active") && conf !== 0) {
-    sigFilter.conf = 0;
-    group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    document.getElementById("fbtn-conf-any").classList.add("active");
-  } else {
-    sigFilter.conf = conf;
-    group.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
+  sigFilter.conf = conf;
+  btn.closest(".filter-group").querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
   renderSignalsPage();
 }
 
@@ -1224,28 +1279,31 @@ function filterConf(conf, btn) {
 async function fetchMarketPrices() {
   try {
     const symJson = JSON.stringify(SYMBOLS);
-    const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(symJson)}`, {signal: AbortSignal.timeout(15000)});
+    const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(symJson)}`, {signal: AbortSignal.timeout(35000)});
     if (!r.ok) throw new Error("HTTP " + r.status);
     const data = await r.json();
     if (!Array.isArray(data)) throw new Error();
     marketData = data;
 
+    // BTC ATR calc (using range as proxy)
     const btc = data.find(d => d.symbol === "BTCUSDT");
     if (btc) {
       const price = parseFloat(btc.lastPrice);
       const high  = parseFloat(btc.highPrice);
       const low   = parseFloat(btc.lowPrice);
-      btcAtrPct   = (high - low) / price * 100;
+      const atr   = (high - low);
+      btcAtrPct   = (atr / price * 100);
 
       document.getElementById("btcPrice").textContent  = fmtUSD(price);
-      document.getElementById("btcAtr").textContent    = (high-low).toFixed(2);
+      document.getElementById("btcAtr").textContent    = atr.toFixed(2);
       document.getElementById("btcAtrPct").textContent = btcAtrPct.toFixed(2) + "%";
 
-      const chg   = parseFloat(btc.priceChangePercent);
-      const chgEl = document.getElementById("btcChg");
+      const chg    = parseFloat(btc.priceChangePercent);
+      const chgEl  = document.getElementById("btcChg");
       chgEl.textContent = (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%";
       chgEl.style.color = chg >= 0 ? "var(--green)" : "var(--red)";
 
+      // Volatility banner
       const banner = document.getElementById("volBanner");
       const volTxt = document.getElementById("volText");
       const cfgAtr = document.getElementById("cfgAtr");
@@ -1266,9 +1324,10 @@ async function fetchMarketPrices() {
     renderMarketPage();
   } catch (e) {
     console.warn("Market prices:", e.message);
+    // Fallback individual
     for (const sym of ["BTCUSDT","ETHUSDT"]) {
       try {
-        const r2 = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`, {signal: AbortSignal.timeout(15000)});
+        const r2 = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`, {signal: AbortSignal.timeout(35000)});
         if (r2.ok) marketData.push(await r2.json());
       } catch {}
     }
@@ -1283,7 +1342,7 @@ function renderMarketPage() {
   document.getElementById("mkt-losers").textContent  = marketData.length - gainers;
 
   const sorted = [...marketData].sort((a,b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent));
-  const best = sorted[0], worst = sorted[sorted.length-1];
+  const best   = sorted[0], worst = sorted[sorted.length-1];
   if (best) {
     document.getElementById("mkt-best").textContent     = "+" + parseFloat(best.priceChangePercent).toFixed(1) + "%";
     document.getElementById("mkt-best-sym").textContent = best.symbol.replace("USDT","");
@@ -1293,9 +1352,11 @@ function renderMarketPage() {
     document.getElementById("mkt-worst-sym").textContent = worst.symbol.replace("USDT","");
   }
 
+  // Build market data lookup
   const bySymbol = {};
   marketData.forEach(t => { bySymbol[t.symbol] = t; });
 
+  // Render tier-grouped
   const grid = document.getElementById("mktPairsGrid");
   grid.innerHTML = Object.entries(COIN_TIERS).map(([key, tier]) => {
     const tiledCoins = tier.coins.map(sym => {
@@ -1317,7 +1378,9 @@ function renderMarketPage() {
         </div>
         <div class="mc-price">${fmtUSD(price)}</div>
         <div class="mc-vol">Vol $${volFmt}</div>
-        <div class="mc-range"><div class="mc-range-fill" style="left:${Math.min(pos,95)}%;width:5%;background:${tier.color}"></div></div>
+        <div class="mc-range">
+          <div class="mc-range-fill" style="left:${Math.min(pos,95)}%;width:5%;background:${tier.color}"></div>
+        </div>
         <div class="mc-range-labels"><span>${fmtUSD(low)}</span><span>${fmtUSD(high)}</span></div>
       </div>`;
     }).join("");
@@ -1333,7 +1396,7 @@ function renderMarketPage() {
 // ══ FEAR & GREED ═════════════════════════════════════════
 async function fetchFearGreed() {
   try {
-    const r = await fetch("https://api.alternative.me/fng/", {signal: AbortSignal.timeout(15000)});
+    const r = await fetch("https://api.alternative.me/fng/", {signal: AbortSignal.timeout(35000)});
     const d = await r.json();
     const val = parseInt(d.data[0].value);
     const lbl = d.data[0].value_classification;
@@ -1346,6 +1409,7 @@ async function fetchFearGreed() {
                   val < 55 ? "var(--text2)" : val < 75 ? "var(--amber)" : "var(--red)";
     document.getElementById("fgNum").style.color = color;
 
+    // Highlight active zone
     const zones = ["fgz0","fgz1","fgz2","fgz3","fgz4"];
     const thresholds = [25,45,55,75,101];
     zones.forEach((id,i) => {
@@ -1353,6 +1417,7 @@ async function fetchFearGreed() {
       if (z) z.classList.toggle("active-zone", val < thresholds[i] && (i===0 || val >= thresholds[i-1]));
     });
 
+    // Advice
     const advice = val < 25  ? "🟢 Extreme Fear — historically strong buying opportunity" :
                    val < 45  ? "🔵 Fear — be cautious, wait for confirmation before entry" :
                    val < 55  ? "⚪ Neutral — follow individual coin signals" :
@@ -1365,7 +1430,7 @@ async function fetchFearGreed() {
 // ══ LOG ══════════════════════════════════════════════════
 async function fetchLog() {
   try {
-    const r = await fetch(API_BASE + "/api/log", {signal: AbortSignal.timeout(15000)});
+    const r = await fetch(API_BASE + "/api/log", {signal: AbortSignal.timeout(35000)});
     if (!r.ok) return;
     const d  = await r.json();
     const panel = document.getElementById("logPanel");
@@ -1385,7 +1450,7 @@ async function fetchLog() {
 // ══ HISTORY ══════════════════════════════════════════════
 async function fetchHistory() {
   try {
-    const r = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(15000)});
+    const r = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(35000)});
     if (!r.ok) return;
     const history = await r.json();
 
@@ -1421,114 +1486,167 @@ async function fetchHistory() {
 
 // ══ PERFORMANCE ══════════════════════════════════════════
 function renderPerformancePage() {
-  fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(15000)})
-    .then(r => r.json()).then(history => {
-      if (!history.length) return;
-      const wins   = history.filter(h => (h.pnl||0) > 0);
-      const losses = history.filter(h => (h.pnl||0) <= 0);
-      const best   = Math.max(...history.map(h => h.pnl||0));
-      const worst  = Math.min(...history.map(h => h.pnl||0));
-      const avgWin = wins.length   ? wins.reduce((s,h)=>s+(h.pnl||0),0)/wins.length     : 0;
-      const avgLoss= losses.length ? losses.reduce((s,h)=>s+(h.pnl||0),0)/losses.length : 0;
-      const bestH  = history.find(h => h.pnl === best);
-      const worstH = history.find(h => h.pnl === worst);
+  try {
+    fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(35000)})
+      .then(r => r.json()).then(history => {
+        if (!history.length) return;
+        const wins   = history.filter(h => (h.pnl||0) > 0);
+        const losses = history.filter(h => (h.pnl||0) <= 0);
+        const best   = Math.max(...history.map(h => h.pnl||0));
+        const worst  = Math.min(...history.map(h => h.pnl||0));
+        const avgWin = wins.length   ? wins.reduce((s,h)=>s+(h.pnl||0),0)/wins.length     : 0;
+        const avgLoss= losses.length ? losses.reduce((s,h)=>s+(h.pnl||0),0)/losses.length : 0;
+        const bestH  = history.find(h => h.pnl === best);
+        const worstH = history.find(h => h.pnl === worst);
 
-      document.getElementById("p-best").textContent      = fmtPnl(best);
-      document.getElementById("p-best-sym").textContent  = bestH?.symbol?.replace("USDT","") || "—";
-      document.getElementById("p-worst").textContent     = fmtPnl(worst);
-      document.getElementById("p-worst-sym").textContent = worstH?.symbol?.replace("USDT","") || "—";
-      document.getElementById("p-avgwin").textContent    = fmtPnl(avgWin);
-      document.getElementById("p-avgloss").textContent   = fmtPnl(avgLoss);
+        document.getElementById("p-best").textContent      = fmtPnl(best);
+        document.getElementById("p-best-sym").textContent  = bestH?.symbol?.replace("USDT","") || "—";
+        document.getElementById("p-worst").textContent     = fmtPnl(worst);
+        document.getElementById("p-worst-sym").textContent = worstH?.symbol?.replace("USDT","") || "—";
+        document.getElementById("p-avgwin").textContent    = fmtPnl(avgWin);
+        document.getElementById("p-avgloss").textContent   = fmtPnl(avgLoss);
 
-      const maxAbs = Math.max(...history.map(h => Math.abs(h.pnl||0)), 0.001);
-      document.getElementById("perfBars").innerHTML = history.slice(-20).map(h => {
-        const pnl = h.pnl || 0;
-        const h_  = Math.round((Math.abs(pnl) / maxAbs) * 76) + 4;
-        const cls = pnl >= 0 ? "win" : "loss";
-        return `<div class="perf-bar-wrap"><div class="perf-bar ${cls}" style="height:${h_}px" title="${fmtPnl(pnl)} USDT"></div></div>`;
-      }).join("");
-
-      const wr = wins.length / history.length * 100;
-      document.getElementById("wlRatioBody").innerHTML = `
-        <div style="text-align:center">
-          <div style="font-family:var(--sans);font-size:40px;font-weight:800;color:${wr>=50?"var(--green)":"var(--red)"}">${wr.toFixed(1)}%</div>
-          <div style="font-size:11px;color:var(--text2);margin:4px 0 14px">Win Rate</div>
-          <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px">
-            <div style="flex:${wins.length};background:var(--green);border-radius:4px 0 0 4px"></div>
-            <div style="flex:${losses.length};background:var(--red);border-radius:0 4px 4px 0"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:5px">
-            <span style="color:var(--green)">${wins.length} wins</span>
-            <span style="color:var(--red)">${losses.length} losses</span>
-          </div>
-        </div>`;
-
-      const byCoin = {};
-      history.forEach(h => {
-        const s = h.symbol;
-        if (!byCoin[s]) byCoin[s] = {wins:0,losses:0,pnl:0};
-        if ((h.pnl||0) > 0) byCoin[s].wins++; else byCoin[s].losses++;
-        byCoin[s].pnl += (h.pnl||0);
-      });
-      const tierHtml = Object.entries(COIN_TIERS).map(([key, tier]) => {
-        const tierCoins = tier.coins.filter(s => byCoin[s]);
-        if (!tierCoins.length) return "";
-        const coinCards = tierCoins.map(sym => {
-          const d = byCoin[sym];
-          const wr2 = d.wins/(d.wins+d.losses)*100;
-          return `<div style="background:var(--bg3);border:1px solid ${tier.color}30;border-radius:7px;padding:12px">
-            <div style="font-family:var(--sans);font-weight:700;color:${tier.color};margin-bottom:6px">${sym.replace("USDT","")}</div>
-            <div style="font-size:11px;color:${d.pnl>=0?"var(--green)":"var(--red)"};font-weight:600;margin-bottom:4px">${fmtPnl(d.pnl)} USDT</div>
-            <div style="font-size:10px;color:var(--text3)">${d.wins}W ${d.losses}L · ${wr2.toFixed(0)}%</div>
-          </div>`;
+        // PnL bars
+        const maxAbs = Math.max(...history.map(h => Math.abs(h.pnl||0)), 0.001);
+        document.getElementById("perfBars").innerHTML = history.slice(-20).map(h => {
+          const pnl = h.pnl || 0;
+          const h_  = Math.round((Math.abs(pnl) / maxAbs) * 76) + 4;
+          const cls = pnl >= 0 ? "win" : "loss";
+          return `<div class="perf-bar-wrap"><div class="perf-bar ${cls}" style="height:${h_}px" title="${fmtPnl(pnl)} USDT"></div></div>`;
         }).join("");
-        return `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:6px 0 2px">
-            <span style="font-size:11px;color:${tier.color};font-weight:600">${tier.label}</span>
-            <div style="flex:1;height:1px;background:${tier.color}25"></div>
-          </div>${coinCards}`;
-      }).join("");
-      document.getElementById("coinPerfGrid").innerHTML = tierHtml ||
-        `<div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>`;
-    }).catch(() => {});
+
+        // W/L ratio donut (CSS based)
+        const wr = wins.length / history.length * 100;
+        document.getElementById("wlRatioBody").innerHTML = `
+          <div style="text-align:center">
+            <div style="font-family:var(--sans);font-size:40px;font-weight:800;color:${wr>=50?"var(--green)":"var(--red)"}">${wr.toFixed(1)}%</div>
+            <div style="font-size:11px;color:var(--text2);margin:4px 0 14px">Win Rate</div>
+            <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px">
+              <div style="flex:${wins.length};background:var(--green);border-radius:4px 0 0 4px"></div>
+              <div style="flex:${losses.length};background:var(--red);border-radius:0 4px 4px 0"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:5px">
+              <span style="color:var(--green)">${wins.length} wins</span>
+              <span style="color:var(--red)">${losses.length} losses</span>
+            </div>
+          </div>`;
+
+        // Coin performance grouped by tier
+        const byCoin = {};
+        history.forEach(h => {
+          const s = h.symbol;
+          if (!byCoin[s]) byCoin[s] = {wins:0,losses:0,pnl:0};
+          if ((h.pnl||0) > 0) byCoin[s].wins++; else byCoin[s].losses++;
+          byCoin[s].pnl += (h.pnl||0);
+        });
+        // Render grouped by tier
+        const tierHtml = Object.entries(COIN_TIERS).map(([key, tier]) => {
+          const tierCoins = tier.coins.filter(s => byCoin[s]);
+          if (!tierCoins.length) return "";
+          const coinCards = tierCoins.map(sym => {
+            const d = byCoin[sym];
+            const wr2 = d.wins/(d.wins+d.losses)*100;
+            return `<div style="background:var(--bg3);border:1px solid ${tier.color}30;border-radius:7px;padding:12px">
+              <div style="font-family:var(--sans);font-weight:700;color:${tier.color};margin-bottom:6px">${sym.replace("USDT","")}</div>
+              <div style="font-size:11px;color:${d.pnl>=0?"var(--green)":"var(--red)"};font-weight:600;margin-bottom:4px">${fmtPnl(d.pnl)} USDT</div>
+              <div style="font-size:10px;color:var(--text3)">${d.wins}W ${d.losses}L · ${wr2.toFixed(0)}%</div>
+            </div>`;
+          }).join("");
+          return `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:6px 0 2px">
+              <span style="font-size:11px;color:${tier.color};font-weight:600">${tier.label}</span>
+              <div style="flex:1;height:1px;background:${tier.color}25"></div>
+            </div>${coinCards}`;
+        }).join("");
+        document.getElementById("coinPerfGrid").innerHTML = tierHtml ||
+          `<div class="empty" style="grid-column:1/-1"><div class="emsg">No data yet</div></div>`;
+      }).catch(() => {});
+  } catch {}
 }
 
 // ══ SCAN + CLOSE ═════════════════════════════════════════
+
 async function triggerScan() {
   if (isScanning) return;
   isScanning = true;
   const btn = document.getElementById("scanBtn");
-  btn.textContent = "⟳ Scanning...";
+  btn.textContent = "⟳ Triggering...";
   btn.classList.add("running");
   btn.disabled = true;
+
   try {
-    const r = await fetch(API_BASE + "/api/scan", {method:"POST", signal: AbortSignal.timeout(15000)});
+    // Longer timeout — Render may be sleeping
+    const r = await fetch(API_BASE + "/api/scan", {
+      method: "POST",
+      signal: AbortSignal.timeout(35000)
+    });
     const d = await r.json();
-    btn.textContent = d.ok ? "✓ Started" : "✕ Failed";
-  } catch {
-    btn.textContent = "✕ Offline";
+
+    if (d.ok) {
+      btn.textContent = "✓ Triggered!";
+      // Show success note
+      const note = document.createElement("div");
+      note.style.cssText = "position:fixed;bottom:20px;right:20px;background:#10b981;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;z-index:9998;animation:fadeIn 0.3s ease";
+      note.textContent = "✅ Scan triggered on GitHub Actions!";
+      document.body.appendChild(note);
+      setTimeout(() => note.remove(), 4000);
+    } else {
+      btn.textContent = "⚠ See info";
+      // Show helpful popup instead of generic error
+      const msg = d.help
+        ? `${d.message}\n\n${d.help}\n\nAlternatively: GitHub → Actions → Run workflow`
+        : d.message;
+      alert("ℹ️ Scan Info:\n\n" + msg);
+    }
+  } catch (e) {
+    btn.textContent = "⏳ Waking...";
+    // Render free tier is sleeping — show helpful message
+    const note = document.createElement("div");
+    note.style.cssText = "position:fixed;bottom:20px;right:20px;background:#f59e0b;color:#000;padding:12px 16px;border-radius:8px;font-size:12px;z-index:9998;line-height:1.5";
+    note.innerHTML = "⏳ <b>Render server is waking up</b> (~30 sec)<br>Try again in a moment, or use<br>GitHub Actions → Run workflow";
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 8000);
   }
+
   setTimeout(() => {
     btn.textContent = "▶ Scan Now";
     btn.classList.remove("running");
     btn.disabled = false;
     isScanning = false;
-  }, 4000);
+  }, 5000);
 }
 
 async function closeTrade(symbol) {
-  if (!confirm(`Close ${symbol} at market price now?`)) return;
+  // Show warning about geo-restriction before confirming
+  const confirmed = confirm(
+    `⚠️ Close ${symbol}?\n\n` +
+    `NOTE: Auto-close from dashboard may be geo-blocked (India restriction).\n\n` +
+    `If it fails, go to:\ntestnet.binance.vision → Open Orders → Cancel manually\n\n` +
+    `Click OK to attempt close anyway.`
+  );
+  if (!confirmed) return;
+
   try {
     const r = await fetch(API_BASE + "/api/close_trade", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({symbol})
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({symbol}),
+      signal: AbortSignal.timeout(35000)
     });
     const d = await r.json();
-    if (d.ok) { alert(`${symbol} closed. PnL: ${fmtPnl(d.pnl)} USDT`); refreshAll(); }
-    else alert("Error: " + d.error);
-  } catch (e) { alert("API error: " + e.message); }
+    if (d.ok) {
+      alert(`✅ ${symbol} closed!\nPnL: ${fmtPnl(d.pnl)} USDT`);
+      refreshAll();
+    } else {
+      // Show the action to take instead of just an error
+      alert(`ℹ️ ${d.message || "Close not available"}\n\n${d.action || ""}`);
+    }
+  } catch (e) {
+    alert("ℹ️ Could not reach server.\n\nTo close trade manually:\nGo to testnet.binance.vision → Open Orders tab → Cancel orders");
+  }
 }
 
-// ══ FULL REFRESH ════════════════════════════════════════
+// ══ FULL REFRESH ═════════════════════════════════════════
+
 async function refreshAll() {
   updateScanMode();
   await Promise.allSettled([
@@ -1543,14 +1661,91 @@ async function refreshAll() {
   ]);
 }
 
-// ══ INIT ════════════════════════════════════════════════
-buildCoinChips();
-refreshAll();
+// Fix remaining timeouts in other fetch calls
+async function fetchSignals() {
+  try {
+    const r = await fetch(API_BASE + "/api/signals", {signal: AbortSignal.timeout(35000)});
+    if (r.ok) {
+      allSignals = await r.json();
+    } else {
+      const r2 = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(35000)});
+      if (r2.ok) {
+        const h = await r2.json();
+        allSignals = h.map(t => ({...t, generated_at: t.opened_at}));
+      }
+    }
+  } catch {}
+  renderSignalsPage();
+  renderRecentSignals();
+  updateSignalStats();
+}
 
-setInterval(refreshAll,        30000);
-setInterval(fetchMarketPrices,  8000);
-setInterval(updateScanMode,    60000);
-setInterval(fetchOpenTrades,   15000);
+async function fetchLog() {
+  try {
+    const r = await fetch(API_BASE + "/api/log", {signal: AbortSignal.timeout(35000)});
+    if (!r.ok) return;
+    const d = await r.json();
+    const panel = document.getElementById("logPanel");
+    panel.innerHTML = d.lines.map(line => {
+      const cls = line.includes("SIGNAL")||line.includes("✅") ? "sig" :
+                  line.includes("ERROR")||line.includes("error") ? "err" :
+                  line.includes("warn")||line.includes("Warning") ? "wrn" : "";
+      return `<span class="log-line ${cls}">${esc(line)}</span>`;
+    }).join("\n");
+    panel.scrollTop = panel.scrollHeight;
+    document.getElementById("logBadge").textContent = d.lines.length + " lines";
+  } catch {
+    document.getElementById("logPanel").innerHTML =
+      '<span class="log-line wrn">API sleeping — first load takes ~30s on Render free tier</span>';
+  }
+}
+
+async function fetchHistory() {
+  try {
+    const r = await fetch(API_BASE + "/api/trades/history", {signal: AbortSignal.timeout(35000)});
+    if (!r.ok) return;
+    const history = await r.json();
+    document.getElementById("histBadge").textContent = history.length + " trades";
+    const totalPnl = history.reduce((s,h) => s+(h.pnl||0), 0);
+    const pEl = document.getElementById("h-pnl");
+    pEl.textContent = fmtPnl(totalPnl) + " USDT";
+    pEl.className   = "stat-value " + (totalPnl >= 0 ? "green" : "red");
+    if (!history.length) return;
+    document.getElementById("histBody").innerHTML = [...history].reverse().map(h => {
+      const dec     = (h.entry||0) < 10 ? 4 : 2;
+      const pnl     = h.pnl ?? 0;
+      const res     = pnl > 0 ? "win" : "loss";
+      const tierInf = getTier(h.symbol);
+      const tierCol = tierInf ? tierInf[1].color : "var(--text3)";
+      const tierLbl = tierInf ? tierInf[1].label.split(' ').slice(1).join(' ') : "—";
+      return `<tr>
+        <td style="font-weight:600;color:${tierCol}">${(h.symbol||"").replace("USDT","")}</td>
+        <td style="font-size:9px;color:${tierCol};opacity:0.7">${tierLbl}</td>
+        <td><span class="tag ${(h.signal||"buy").toLowerCase()}">${h.signal||"BUY"}</span></td>
+        <td style="color:var(--blue)">${fmtUSD(h.entry)}</td>
+        <td>${fmtUSD(h.close_price)}</td>
+        <td style="color:${pnl>=0?"var(--green)":"var(--red)"};font-weight:600">${fmtPnl(pnl)}</td>
+        <td><span class="tag ${res}">${res.toUpperCase()}</span></td>
+        <td style="color:var(--text3)">${timeAgo(h.opened_at)}</td>
+        <td style="color:var(--text3)">${duration(h.opened_at, h.closed_at)}</td>
+        <td style="color:var(--text3)">${(h.close_reason||"auto").substring(0,12)}</td>
+      </tr>`;
+    }).join("");
+  } catch {}
+}
+
+// ══ INIT ═════════════════════════════════════════════════
+
+buildCoinChips();
+
+// Wake up Render first, then do full refresh
+wakeUpRender().then(() => refreshAll());
+
+// Auto-refresh intervals
+setInterval(refreshAll,        30000);   // full refresh every 30s
+setInterval(fetchMarketPrices,  8000);   // prices every 8s (public API, fast)
+setInterval(updateScanMode,    60000);   // mode check every 1 min
+setInterval(fetchOpenTrades,   15000);   // trades every 15s
 </script>
 </body>
 </html>
