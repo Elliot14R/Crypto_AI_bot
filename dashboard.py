@@ -420,12 +420,17 @@ def root():
 def static_files(path):
     return send_from_directory("dashboard_static", path)
 
-if __name__ == "__main__":
+
+# ── STARTUP TASKS (Runs automatically when Gunicorn boots) ──
+try:
     restore_on_startup()
+    threading.Thread(target=telegram_listener, daemon=True).start()
+    log.info("✅ GitHub Restore and Telegram Listener started successfully!")
+except Exception as e:
+    log.error(f"Startup task error: {e}")
+
+# (This block is only used if you run it locally on your laptop)
+if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     log.info(f"Dashboard API → http://localhost:{port}")
-    
-    # ── START TELEGRAM LISTENER ──
-    threading.Thread(target=telegram_listener, daemon=True).start()
-    
     app.run(host="0.0.0.0", port=port, debug=False)
