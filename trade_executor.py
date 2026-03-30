@@ -290,9 +290,15 @@ def auto_recover_trades(ex):
     trades = load_trades()
     try:
         log.info("  🔄 Checking Binance for orphaned trades...")
-        open_orders    = ex.fetch_open_orders()
+        open_orders = ex.fetch_open_orders()
+        
+        # ── THE FIX: Remove the slash from CCXT's symbol formatting ──
+        for o in open_orders:
+            o["symbol"] = o["symbol"].replace("/", "")
+            
         active_symbols = list(set(o["symbol"] for o in open_orders))
         recovered      = 0
+        
         for sym in active_symbols:
             if sym not in trades:
                 sym_orders = [o for o in open_orders if o["symbol"] == sym]
