@@ -21,7 +21,7 @@
     "opened_at": "2026-03-30T14:32:39.334036+00:00",
     "tp1_hit": true,
     "tp2_hit": false,
-    "closed": false,
+    "closed": true,
     "confidence": 73.1,
     "score": 4,
     "reasons": [
