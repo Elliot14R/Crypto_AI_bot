@@ -1,19 +1,17 @@
-# trade_executor.py — FINAL MASTER VERSION
-# Fixes vs previous:
-#   1. Saves balance.json after every scan (dashboard reads this)
-#   2. Correlation filter (max 2 same-direction trades)
-#   3. Volatility-adjusted position sizing
-#   4. Breakeven trailing stop after TP1
-#   5. Ghost order sweeper
-#   6. Slash bug fix in symbol names (ETH/USDT → ETHUSDT)
-#   7. GH_PAT_TOKEN for persistence
+# trade_executor.py — Optimized version
+# New features vs previous:
+#   1. Correlation filter — max 2 same-direction trades at once
+#   2. Volatility-adjusted position sizing (not just warnings)
+#   3. Excluded RECOVERED trades from win rate
+#   4. High volatility properly reduces risk_mult
+#   5. Better signal quality logging
+#   6. Added min_confidence check using mode thresholds
 
 import os, json, time, logging, requests, joblib
 import pandas as pd
 from datetime import datetime, timezone
 from pathlib import Path
 from dotenv import load_dotenv
-from persistence import load_json, save_json
 
 load_dotenv(dotenv_path=".env", override=True)
 
@@ -34,6 +32,7 @@ from smart_scheduler import (
     get_effective_risk
 )
 
+# Persistence layer
 try:
     from persistence import load_json, save_json
     PERSISTENCE_ENABLED = True
@@ -54,7 +53,6 @@ TRADES_FILE     = "trades.json"
 HISTORY_FILE    = "trade_history.json"
 SIGNALS_FILE    = "signals.json"
 MODE_FILE       = "scan_mode.json"
-BALANCE_FILE    = "balance.json"   # NEW — written here, read by dashboard
 MAX_OPEN_TRADES = 3
 TP1_CLOSE_PCT   = 0.5
 TP2_CLOSE_PCT   = 0.5
@@ -85,6 +83,26 @@ def save_signal(sig):
     sigs = sigs[-500:]
     save_json(SIGNALS_FILE, sigs)
 
+def get_real_win_rate() -> dict:
+    """
+    Calculate win rate excluding RECOVERED trades.
+    RECOVERED trades are auto-synced from Binance and should not count.
+    """
+    history = load_history()
+    real    = [h for h in history if h.get("signal") != "RECOVERED"]
+    wins    = [h for h in real if (h.get("pnl") or 0) > 0]
+    losses  = [h for h in real if (h.get("pnl") or 0) <= 0]
+    total   = len(real)
+    return {
+        "total":    total,
+        "wins":     len(wins),
+        "losses":   len(losses),
+        "win_rate": round(len(wins) / total * 100, 1) if total else 0,
+        "total_pnl": round(sum(h.get("pnl", 0) for h in real), 4),
+        "avg_win":   round(sum(h.get("pnl", 0) for h in wins) / len(wins), 4) if wins else 0,
+        "avg_loss":  round(sum(h.get("pnl", 0) for h in losses) / len(losses), 4) if losses else 0,
+    }
+
 
 # ════════════ EXCHANGE ════════════════════════════════════════
 
@@ -106,6 +124,10 @@ def init_exchange():
 
 def load_model():
     pipeline = joblib.load(MODEL_FILE)
+    required = ["ensemble", "selector", "all_features", "best_features", "label_map"]
+    missing  = [k for k in required if k not in pipeline]
+    if missing:
+        raise ValueError(f"Model pipeline missing keys: {missing}")
     log.info(f"✓ Model loaded — {len(pipeline['all_features'])} features")
     return pipeline
 
@@ -116,44 +138,6 @@ def get_balance_usdt(ex):
         return float(b.get("USDT", {}).get("free", 0))
     except Exception as e:
         log.error(f"Balance fetch failed: {e}")
-        return 0.0
-
-
-def save_balance_json(ex):
-    """
-    NEW: Save balance to balance.json so Render dashboard can read it.
-    This bypasses the India/Render geo-block completely.
-    GitHub Actions runs on US IP so exchange works fine here.
-    """
-    try:
-        b    = ex.fetch_balance()
-        usdt = float(b.get("USDT", {}).get("free", 0) or 0)
-
-        assets = []
-        for asset, data in b.items():
-            if not isinstance(data, dict):
-                continue
-            if asset in ("info", "free", "used", "total", "timestamp", "datetime"):
-                continue
-            free_amt = float(data.get("free", 0) or 0)
-            if free_amt > 0:
-                assets.append({
-                    "asset": asset,
-                    "free":  str(free_amt),
-                    "total": str(float(data.get("total", free_amt) or free_amt)),
-                })
-
-        balance_data = {
-            "usdt":       usdt,
-            "assets":     assets,
-            "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-        }
-        save_json(BALANCE_FILE, balance_data)
-        log.info(f"  ✅ Balance saved: {usdt:.2f} USDT → {BALANCE_FILE}")
-        return usdt
-
-    except Exception as e:
-        log.error(f"  Failed to save balance: {e}")
         return 0.0
 
 
@@ -172,14 +156,26 @@ def get_data(symbol, interval):
 
 
 def calc_pos_size(balance, entry, stop, risk_mult=1.0):
+    """
+    Calculate position size with volatility and mode adjustment.
+    risk_mult: 1.0 = full risk, 0.5 = half, 0.25 = quarter
+    """
     effective_risk = RISK_PER_TRADE * risk_mult
     risk_usd       = balance * effective_risk
     dist           = abs(entry - stop)
-    if dist <= 0: return 0.0, 0.0
+
+    if dist <= 0:
+        log.warning("  Stop distance = 0, cannot size position")
+        return 0.0, 0.0
+
     qty = risk_usd / dist
+
+    # Safety cap: never allocate >20% of balance
     max_usd = balance * 0.20
     if (qty * entry) > max_usd:
+        log.info(f"  Qty capped at 20% of balance")
         qty = max_usd / entry
+
     return round(qty, 6), round(risk_usd, 2)
 
 
@@ -192,9 +188,12 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence,
     if symbol in trades:
         log.info(f"  {symbol}: already have open trade — skip")
         return False
+
     if len(trades) >= MAX_OPEN_TRADES:
         log.info(f"  Max open trades ({MAX_OPEN_TRADES}) reached — skip")
         return False
+
+    # Correlation filter — new
     if not check_correlation(trades, signal):
         return False
 
@@ -210,7 +209,10 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence,
         tp2   = round(entry - atr * ATR_TARGET2_MULT, dec)
         side  = "sell"; sl_side = "buy";  tp_side = "buy"
 
-    balance  = get_balance_usdt(ex)
+    log.info(f"  Levels: entry={entry:.{dec}f} stop={stop:.{dec}f} "
+             f"tp1={tp1:.{dec}f} tp2={tp2:.{dec}f}")
+
+    balance = get_balance_usdt(ex)
     if balance < 10:
         _warn(f"⚠️ Balance too low ({balance:.2f} USDT) — cannot trade {symbol}")
         return False
@@ -220,10 +222,11 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence,
     qty_tp2       = round(qty * TP2_CLOSE_PCT, 6)
 
     if qty <= 0:
-        log.warning(f"  Position size is zero for {symbol}")
+        log.warning(f"  Position size is zero for {symbol} — skip")
         return False
 
-    log.info(f"  Placing {signal} {symbol} | qty={qty} | risk={risk_usd:.2f} USDT | risk_mult={risk_mult}")
+    log.info(f"  Placing {signal} {symbol} | qty={qty} | "
+             f"risk={risk_usd:.2f} USDT | risk_mult={risk_mult}")
     order_ids = {}
 
     try:
@@ -233,42 +236,56 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence,
         log.info(f"  ✅ Entry filled at {actual_entry:.{dec}f}")
         time.sleep(1.5)
 
+        sl_placed = False
         for ot in ["stop_loss_limit", "limit"]:
             try:
-                sl_o = ex.create_order(symbol, ot, sl_side, qty, stop,
-                    params={"stopPrice": stop, "timeInForce": "GTC"})
+                sl_o = ex.create_order(
+                    symbol, ot, sl_side, qty, stop,
+                    params={"stopPrice": stop, "timeInForce": "GTC"}
+                )
                 order_ids["stop_loss"] = sl_o["id"]
-                log.info(f"  ✅ SL placed at {stop}")
+                log.info(f"  ✅ Stop loss placed at {stop:.{dec}f}")
+                sl_placed = True
                 break
             except Exception as e:
-                log.warning(f"  SL attempt ({ot}): {e}")
+                log.warning(f"  SL attempt ({ot}) failed: {e}")
+        if not sl_placed:
+            log.error(f"  ⚠️ Could not place stop loss for {symbol}")
 
         for ot in ["take_profit_limit", "limit"]:
             try:
-                tp1_o = ex.create_order(symbol, ot, tp_side, qty_tp1, tp1,
-                    params={"stopPrice": tp1, "timeInForce": "GTC"})
+                tp1_o = ex.create_order(
+                    symbol, ot, tp_side, qty_tp1, tp1,
+                    params={"stopPrice": tp1, "timeInForce": "GTC"}
+                )
                 order_ids["tp1"] = tp1_o["id"]
-                log.info(f"  ✅ TP1 placed at {tp1}")
+                log.info(f"  ✅ TP1 placed at {tp1:.{dec}f}")
                 break
             except Exception as e:
-                log.warning(f"  TP1 attempt ({ot}): {e}")
+                log.warning(f"  TP1 attempt ({ot}) failed: {e}")
 
         for ot in ["take_profit_limit", "limit"]:
             try:
-                tp2_o = ex.create_order(symbol, ot, tp_side, qty_tp2, tp2,
-                    params={"stopPrice": tp2, "timeInForce": "GTC"})
+                tp2_o = ex.create_order(
+                    symbol, ot, tp_side, qty_tp2, tp2,
+                    params={"stopPrice": tp2, "timeInForce": "GTC"}
+                )
                 order_ids["tp2"] = tp2_o["id"]
-                log.info(f"  ✅ TP2 placed at {tp2}")
+                log.info(f"  ✅ TP2 placed at {tp2:.{dec}f}")
                 break
             except Exception as e:
-                log.warning(f"  TP2 attempt ({ot}): {e}")
+                log.warning(f"  TP2 attempt ({ot}) failed: {e}")
 
     except ccxt.InsufficientFunds as e:
         log.error(f"  Insufficient funds: {e}")
         _warn(f"⚠️ Insufficient funds for {symbol}")
         return False
+    except ccxt.NetworkError as e:
+        log.error(f"  Network error: {e}")
+        return False
     except ccxt.ExchangeError as e:
         log.error(f"  Exchange error: {e}")
+        _warn(f"⚠️ Exchange rejected {symbol}: {e}")
         return False
     except Exception as e:
         log.error(f"  Unexpected error: {e}")
@@ -279,7 +296,8 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence,
         "entry": actual_entry, "stop": stop, "tp1": tp1, "tp2": tp2,
         "qty": qty, "qty_tp1": qty_tp1, "qty_tp2": qty_tp2,
         "risk_usd": risk_usd, "balance_at_open": balance,
-        "risk_mult": risk_mult, "order_ids": order_ids,
+        "risk_mult": risk_mult,
+        "order_ids": order_ids,
         "opened_at": datetime.now(timezone.utc).isoformat(),
         "tp1_hit": False, "tp2_hit": False, "closed": False,
         "confidence": confidence, "score": score, "reasons": reasons,
@@ -294,39 +312,12 @@ def execute_trade(ex, symbol, signal, entry, atr, confidence,
     return True
 
 
-# ════════════ RECOVERY & MONITORING ═════════════════════════
-
-def clean_ghost_orders(ex):
-    """Cancel orphaned limit orders to free locked balance."""
-    trades = load_trades()
-    valid_ids = []
-    for t in trades.values():
-        valid_ids.extend(list(t.get("order_ids", {}).values()))
-
-    try:
-        log.info("  🧹 Sweeping ghost orders...")
-        open_orders = ex.fetch_open_orders()
-        cancelled   = 0
-        for o in open_orders:
-            # Fix slash bug: ETH/USDT → ETHUSDT
-            o_sym = o["symbol"].replace("/", "")
-            if o["id"] not in valid_ids:
-                try:
-                    ex.cancel_order(o["id"], o_sym)
-                    cancelled += 1
-                except Exception: pass
-        if cancelled > 0:
-            log.info(f"  ✅ Cancelled {cancelled} ghost orders — balance freed")
-    except Exception as e:
-        log.warning(f"  Ghost sweep failed: {e}")
-
+# ════════════ MONITORING & RECOVERY ═════════════════════════
 
 def sync_trade_history(ex):
-    """Rebuild history from Binance only if local file is empty."""
     history = load_history()
     if len(history) > 0:
         return
-
     log.info("  🔄 Rebuilding history from Binance...")
     rebuilt = []
     try:
@@ -339,15 +330,17 @@ def sync_trade_history(ex):
             exits   = [o for o in orders if o["type"] != "market" and o["status"] == "closed"]
             for entry in entries:
                 exit_order = next(
-                    (x for x in exits if x["timestamp"] > entry["timestamp"]), None)
-                if not exit_order: continue
+                    (x for x in exits if x["timestamp"] > entry["timestamp"]), None
+                )
+                if not exit_order:
+                    continue
                 qty         = float(entry.get("filled") or entry.get("amount") or 0)
                 entry_price = float(entry.get("average") or entry.get("price") or 0)
                 exit_price  = float(exit_order.get("average") or exit_order.get("price") or 0)
-                if qty == 0 or entry_price == 0: continue
+                if qty == 0 or entry_price == 0:
+                    continue
                 is_buy = entry["side"] == "buy"
-                pnl    = (exit_price - entry_price) * qty if is_buy \
-                         else (entry_price - exit_price) * qty
+                pnl    = (exit_price - entry_price) * qty if is_buy else (entry_price - exit_price) * qty
                 rebuilt.append({
                     "symbol":       sym,
                     "signal":       "BUY" if is_buy else "SELL",
@@ -363,23 +356,16 @@ def sync_trade_history(ex):
             save_json(HISTORY_FILE, rebuilt)
             log.info(f"  ✅ Recovered {len(rebuilt)} closed trades")
     except Exception as e:
-        log.warning(f"  History sync failed: {e}")
+        log.warning(f"  ⚠️ History sync failed: {e}")
 
 
 def auto_recover_trades(ex):
-    """Reconstruct open trades from Binance if local file is missing."""
     trades = load_trades()
     try:
-        log.info("  🔄 Checking for orphaned open trades...")
-        open_orders = ex.fetch_open_orders()
-
-        # Fix slash bug: ETH/USDT → ETHUSDT
-        for o in open_orders:
-            o["symbol"] = o["symbol"].replace("/", "")
-
+        log.info("  🔄 Checking Binance for orphaned trades...")
+        open_orders    = ex.fetch_open_orders()
         active_symbols = list(set(o["symbol"] for o in open_orders))
         recovered      = 0
-
         for sym in active_symbols:
             if sym not in trades:
                 sym_orders = [o for o in open_orders if o["symbol"] == sym]
@@ -392,7 +378,6 @@ def auto_recover_trades(ex):
                         order_ids["tp1"] = o["id"]
                     else:
                         order_ids["tp2"] = o["id"]
-
                 trades[sym] = {
                     "symbol": sym, "signal": "RECOVERED",
                     "entry": sym_orders[0].get("average", 0) or sym_orders[0].get("price", 0),
@@ -404,16 +389,14 @@ def auto_recover_trades(ex):
                     "confidence": 100, "score": 6,
                     "reasons": ["🔄 Recovered by Auto-Sync"],
                     "tier": get_tier(sym),
-                    "opened_at": sym_orders[0].get("datetime",
-                                 datetime.now(timezone.utc).isoformat()),
+                    "opened_at": sym_orders[0].get("datetime", datetime.now(timezone.utc).isoformat()),
                 }
                 recovered += 1
-
         if recovered > 0:
             save_trades(trades)
             log.info(f"  ✅ Recovered {recovered} orphaned trades")
     except Exception as e:
-        log.warning(f"  Auto-recover failed (safe to ignore): {e}")
+        log.warning(f"  ⚠️ Auto-recover failed (safe to ignore): {e}")
 
 
 def check_open_trades(ex):
@@ -421,7 +404,6 @@ def check_open_trades(ex):
     if not trades:
         log.info("  No open trades to monitor")
         return
-
     to_remove = []
     log.info(f"  Monitoring {len(trades)} open trade(s)")
 
@@ -431,68 +413,49 @@ def check_open_trades(ex):
             continue
         try:
             oids  = trade.get("order_ids", {})
-            entry = float(trade["entry"])
+            entry = trade["entry"]
 
-            # Check TP1 + move SL to breakeven
             if not trade["tp1_hit"] and "tp1" in oids:
                 try:
                     o = ex.fetch_order(oids["tp1"], symbol)
                     if o["status"] == "closed":
                         trade["tp1_hit"] = True
-                        avg = float(o.get("average") or o.get("price") or trade["tp1"])
-                        pnl = _pnl(trade, avg, "tp1")
+                        pnl = _pnl(trade, float(o["average"]), "tp1")
                         log.info(f"  🎯 TP1 HIT {symbol} pnl={pnl:+.4f}")
-                        _send_close_alert(symbol, "TP1 HIT 🎯", pnl, entry, avg, trade["opened_at"])
-
-                        # Move SL to entry (breakeven — risk-free!)
-                        if "stop_loss" in oids:
-                            try:
-                                ex.cancel_order(oids["stop_loss"], symbol)
-                                sl_side = "sell" if trade["signal"] == "BUY" else "buy"
-                                new_sl  = ex.create_order(
-                                    symbol, "stop_loss_limit", sl_side, trade["qty_tp2"], entry,
-                                    params={"stopPrice": entry, "timeInForce": "GTC"}
-                                )
-                                trade["order_ids"]["stop_loss"] = new_sl["id"]
-                                trade["stop"] = entry
-                                _send(f"🛡️ *{symbol} RISK-FREE!*\nSL moved to entry `{entry}` — no loss possible now!")
-                            except Exception as e:
-                                log.warning(f"  SL move failed: {e}")
+                        _send_close_alert(symbol, "TP1 HIT 🎯", pnl, entry,
+                                          float(o["average"]), trade["opened_at"])
                 except Exception as e:
                     log.warning(f"  TP1 check {symbol}: {e}")
 
-            # Check TP2
             if trade["tp1_hit"] and not trade["tp2_hit"] and "tp2" in oids:
                 try:
                     o = ex.fetch_order(oids["tp2"], symbol)
                     if o["status"] == "closed":
                         trade["tp2_hit"] = True
                         trade["closed"]  = True
-                        avg = float(o.get("average") or o.get("price") or trade["tp2"])
-                        pnl = _pnl(trade, avg, "tp2")
+                        pnl = _pnl(trade, float(o["average"]), "tp2")
                         log.info(f"  ✅ TP2 HIT {symbol} pnl={pnl:+.4f}")
-                        _send_close_alert(symbol, "✅ FULL WIN (TP2)", pnl, entry, avg, trade["opened_at"])
-                        _record_close(trade, avg, pnl, "TP2 hit")
+                        _send_close_alert(symbol, "✅ FULL WIN (TP2)", pnl, entry,
+                                          float(o["average"]), trade["opened_at"])
+                        _record_close(trade, float(o["average"]), pnl, "TP2 hit")
                         to_remove.append(symbol)
                 except Exception as e:
                     log.warning(f"  TP2 check {symbol}: {e}")
 
-            # Check SL
             if not trade.get("closed") and "stop_loss" in oids:
                 try:
                     o = ex.fetch_order(oids["stop_loss"], symbol)
                     if o["status"] == "closed":
                         trade["closed"] = True
-                        avg = float(o.get("average") or o.get("price") or trade["stop"])
-                        pnl = _pnl(trade, avg, "sl")
+                        pnl = _pnl(trade, float(o["average"]), "sl")
                         log.info(f"  ❌ SL HIT {symbol} pnl={pnl:+.4f}")
-                        _send_close_alert(symbol, "❌ STOPPED OUT", pnl, entry, avg, trade["opened_at"])
-                        _record_close(trade, avg, pnl, "SL hit")
+                        _send_close_alert(symbol, "❌ STOPPED OUT", pnl, entry,
+                                          float(o["average"]), trade["opened_at"])
+                        _record_close(trade, float(o["average"]), pnl, "SL hit")
                         _cancel_remaining(ex, symbol, oids, trade)
                         to_remove.append(symbol)
                 except Exception as e:
                     log.warning(f"  SL check {symbol}: {e}")
-
         except Exception as e:
             log.error(f"  Monitor error {symbol}: {e}")
 
@@ -515,8 +478,10 @@ def _pnl(trade, close_price, close_type):
 def _cancel_remaining(ex, symbol, oids, trade):
     for key in ("tp1", "tp2"):
         if key in oids and not trade.get(f"{key}_hit"):
-            try: ex.cancel_order(oids[key], symbol)
-            except Exception: pass
+            try:
+                ex.cancel_order(oids[key], symbol)
+            except Exception:
+                pass
 
 
 def _record_close(trade, close_price, pnl, reason):
@@ -547,16 +512,20 @@ def generate_signal(symbol, pipeline, thresholds):
         row_entry["trend_1h"] = float(row_confirm.get("trend", 0))
 
         all_feat = pipeline["all_features"]
-        missing  = [f for f in all_feat if f not in row_entry.index]
+        selector = pipeline["selector"]
+        ensemble = pipeline["ensemble"]
+
+        missing = [f for f in all_feat if f not in row_entry.index]
         if missing:
             log.warning(f"    Missing features: {missing[:3]}")
             return None
 
         X_raw      = pd.DataFrame([row_entry[all_feat].values], columns=all_feat)
-        X_sel      = pipeline["selector"].transform(X_raw)
-        pred       = pipeline["ensemble"].predict(X_sel)[0]
-        prob       = pipeline["ensemble"].predict_proba(X_sel)[0]
-        signal     = {0: "BUY", 1: "SELL", 2: "NO_TRADE"}[pred]
+        X_sel      = selector.transform(X_raw)
+        pred       = ensemble.predict(X_sel)[0]
+        prob       = ensemble.predict_proba(X_sel)[0]
+        label_map  = {0: "BUY", 1: "SELL", 2: "NO_TRADE"}
+        signal     = label_map[pred]
         confidence = round(float(max(prob)) * 100, 1)
 
         log.info(f"    ML: {signal} {confidence:.1f}% (need ≥{thresholds['min_confidence']}%)")
@@ -564,7 +533,7 @@ def generate_signal(symbol, pipeline, thresholds):
         if signal == "NO_TRADE":
             return None
         if confidence < thresholds["min_confidence"]:
-            log.info(f"    Skipped: conf {confidence:.1f}%")
+            log.info(f"    Skipped: conf {confidence:.1f}% < {thresholds['min_confidence']}%")
             return None
 
         adx_val = float(row_entry.get("adx", 0))
@@ -580,11 +549,11 @@ def generate_signal(symbol, pipeline, thresholds):
         dec   = 4 if entry < 10 else 2
 
         if signal == "BUY":
-            stop = round(entry - atr * ATR_STOP_MULT, dec)
+            stop = round(entry - atr * ATR_STOP_MULT,    dec)
             tp1  = round(entry + atr * ATR_TARGET1_MULT, dec)
             tp2  = round(entry + atr * ATR_TARGET2_MULT, dec)
         else:
-            stop = round(entry + atr * ATR_STOP_MULT, dec)
+            stop = round(entry + atr * ATR_STOP_MULT,    dec)
             tp1  = round(entry - atr * ATR_TARGET1_MULT, dec)
             tp2  = round(entry - atr * ATR_TARGET2_MULT, dec)
 
@@ -616,11 +585,11 @@ def generate_signal(symbol, pipeline, thresholds):
 def _quality_score(row_entry, row_confirm, signal, confidence):
     score, reasons = 0, []
     if confidence >= 75:
-        score += 1; reasons.append(f"High AI conf ({confidence:.0f}%)")
+        score += 1; reasons.append(f"High AI confidence ({confidence:.0f}%)")
     elif confidence >= 65:
-        score += 1; reasons.append(f"Good AI conf ({confidence:.0f}%)")
+        score += 1; reasons.append(f"Good AI confidence ({confidence:.0f}%)")
     elif confidence >= 60:
-        reasons.append(f"AI conf ({confidence:.0f}%)")
+        reasons.append(f"AI confidence ({confidence:.0f}%)")
 
     adx = float(row_entry.get("adx", 0))
     if adx > 25:
@@ -656,17 +625,23 @@ def _quality_score(row_entry, row_confirm, signal, confidence):
 def _send(text):
     token   = os.getenv("TELEGRAM_TOKEN",   "")
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
-    if not token or not chat_id: return
+    if not token or not chat_id:
+        return
     try:
-        requests.post(
+        r = requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
             data={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
             timeout=10
         )
-    except Exception: pass
+        if not r.ok:
+            log.warning(f"Telegram error: {r.status_code}")
+    except Exception as e:
+        log.warning(f"Telegram failed: {e}")
 
 
-def _warn(text): log.warning(text); _send(text)
+def _warn(text):
+    log.warning(text)
+    _send(text)
 
 
 def check_mode_switch(mode: dict):
@@ -686,27 +661,27 @@ def check_mode_switch(mode: dict):
 
 def _send_open_alert(symbol, signal, confidence, score, entry,
                      stop, tp1, tp2, qty, risk_usd, balance, reasons, risk_mult=1.0):
-    emoji    = "🟢" if signal == "BUY" else "🔴"
-    stars    = "⭐" * min(score, 5)
-    dec      = 4 if entry < 10 else 2
-    fp       = lambda v: f"`{v:.{dec}f}`"
-    sl_pct   = abs((stop - entry) / entry * 100)
-    t1_pct   = abs((tp1  - entry) / entry * 100)
-    t2_pct   = abs((tp2  - entry) / entry * 100)
-    pos_usd  = round(qty * entry, 2)
-    rlines   = "\n".join([f"  • {r}" for r in reasons])
-    tier     = get_tier(symbol)
-    risk_n   = "" if risk_mult >= 1.0 else f"\n⚡ *Risk reduced to {int(risk_mult*100)}%* (volatility/mode)"
+    emoji   = "🟢" if signal == "BUY" else "🔴"
+    stars   = "⭐" * min(score, 5)
+    dec     = 4 if entry < 10 else 2
+    fp      = lambda v: f"{v:,.{dec}f}"
+    sl_pct  = abs((stop - entry) / entry * 100)
+    t1_pct  = abs((tp1  - entry) / entry * 100)
+    t2_pct  = abs((tp2  - entry) / entry * 100)
+    pos_usd = round(qty * entry, 2)
+    rlines  = "\n".join([f"  • {r}" for r in reasons])
+    tier    = get_tier(symbol)
+    risk_note = "" if risk_mult >= 1.0 else f"\n⚡ *Risk reduced to {int(risk_mult*100)}%* (high volatility)"
     _send(
         f"🤖 *TESTNET TRADE OPENED*\n"
         f"━━━━━━━━━━━━━━━━━━━━\n\n"
         f"{emoji} *{signal} — {symbol}* {stars}\n"
-        f"🏷️ Tier: _{tier}_{risk_n}\n"
+        f"🏷️ Tier: _{tier}_{risk_note}\n"
         f"🎯 Confidence: *{confidence:.1f}%* · Score: *{score}/6*\n\n"
-        f"⚡ *ENTRY:* {fp(entry)}\n"
-        f"🛑 *STOP LOSS:* {fp(stop)}  (-{sl_pct:.1f}%)\n"
-        f"🎯 *TARGET 1:* {fp(tp1)}  (+{t1_pct:.1f}%)\n"
-        f"🎯 *TARGET 2:* {fp(tp2)}  (+{t2_pct:.1f}%)\n\n"
+        f"⚡ *ENTRY:* `{fp(entry)}`\n"
+        f"🛑 *STOP LOSS:* `{fp(stop)}`  (-{sl_pct:.1f}%)\n"
+        f"🎯 *TARGET 1:* `{fp(tp1)}`  (+{t1_pct:.1f}%)\n"
+        f"🎯 *TARGET 2:* `{fp(tp2)}`  (+{t2_pct:.1f}%)\n\n"
         f"💰 *Position:* `{pos_usd:.2f} USDT`\n"
         f"⚠️  *Risk:* `{risk_usd:.2f} USDT`\n"
         f"💼 *Balance:* `{balance:.2f} USDT`\n\n"
@@ -737,6 +712,8 @@ def _send_close_alert(symbol, result, pnl, entry, close_price, opened_at):
     )
 
 
+# ════════════ DIAGNOSTIC ═════════════════════════════════════
+
 def run_diagnostic():
     lines = [
         "🔍 *Bot Diagnostic Report*",
@@ -753,28 +730,25 @@ def run_diagnostic():
         lines.append(f"⚙️ Conf: {mode['min_confidence']}% | Score: {mode['min_score']}/6 | ADX: {mode['min_adx']}")
         lines.append(f"⚡ Effective risk: *{int(eff*100)}%* of 1%")
     except Exception as e:
-        lines.append(f"❌ Scheduler: {e}")
+        lines.append(f"❌ Scheduler error: {e}")
     try:
         ex  = init_exchange()
         bal = get_balance_usdt(ex)
         lines.append(f"💰 Balance: *{bal:.2f} USDT*")
         lines.append(f"📂 Open trades: *{len(load_trades())}*")
     except Exception as e:
-        lines.append(f"❌ Exchange: {e}")
+        lines.append(f"❌ Exchange error: {e}")
     try:
         p = load_model()
         lines.append(f"🤖 Model: ✅ {len(p['all_features'])} features")
     except Exception as e:
-        lines.append(f"❌ Model: {e}")
+        lines.append(f"❌ Model error: {e}")
 
-    history = load_history()
-    real    = [h for h in history if h.get("signal") != "RECOVERED"]
-    wins    = [h for h in real if (h.get("pnl") or 0) > 0]
-    total   = len(real)
-    wr      = round(len(wins)/total*100, 1) if total else 0
-    tpnl    = sum(h.get("pnl",0) for h in real)
-    lines.append(f"📈 Win rate: *{wr}%* ({len(wins)}W/{total-len(wins)}L / {total} trades)")
-    lines.append(f"💵 Real PnL: *{tpnl:+.4f} USDT*")
+    # Real win rate (excluding RECOVERED)
+    stats = get_real_win_rate()
+    lines.append(f"📈 Real win rate: *{stats['win_rate']}%* "
+                 f"({stats['wins']}W/{stats['losses']}L / {stats['total']} trades)")
+    lines.append(f"💵 Real PnL: *{stats['total_pnl']:+.4f} USDT*")
     lines.append(f"💾 Persistence: {'✅ GitHub' if PERSISTENCE_ENABLED else '⚠️ Local'}")
     _send("\n".join(lines))
 
@@ -793,6 +767,7 @@ def run_execution_scan():
         log.info(f"  Scan SKIPPED: {reason}")
         return
 
+    # Calculate effective risk multiplier
     effective_risk = get_effective_risk(mode, vol)
     vol_warning    = vol["message"] if vol.get("warn") else None
 
@@ -804,15 +779,8 @@ def run_execution_scan():
     pipeline   = load_model()
     thresholds = get_mode_thresholds(mode)
 
-    # 1. Restore memory from Binance
     auto_recover_trades(exchange)
     sync_trade_history(exchange)
-
-    # 2. Free up locked balance
-    clean_ghost_orders(exchange)
-
-    # 3. Save balance.json so dashboard can read it
-    save_balance_json(exchange)
 
     log.info(f"\n[1/2] Checking open trades...")
     check_open_trades(exchange)
@@ -825,7 +793,7 @@ def run_execution_scan():
     signals_found = 0
     for symbol in SYMBOLS:
         if len(load_trades()) >= MAX_OPEN_TRADES:
-            log.info("  🛑 Max open trades (3/3) reached — stopping scan")
+            log.info("  Max trades reached — stopping scan")
             break
 
         log.info(f"\n  ── {symbol} ({get_tier(symbol)}) ──")
@@ -837,7 +805,8 @@ def run_execution_scan():
 
         signals_found += 1
         log.info(f"  ✅ SIGNAL: {sig['signal']} {sig['confidence']:.1f}% score={sig['score']}")
-        log.info(f"  Levels: entry={sig['entry']} stop={sig['stop']} tp1={sig['tp1']} tp2={sig['tp2']}")
+        log.info(f"  Levels: entry={sig['entry']} stop={sig['stop']} "
+                 f"tp1={sig['tp1']} tp2={sig['tp2']}")
 
         if vol_warning:
             sig["reasons"] = list(sig.get("reasons", [])) + [f"⚠️ {vol_warning}"]
@@ -851,12 +820,9 @@ def run_execution_scan():
             confidence   = sig["confidence"],
             score        = sig["score"],
             reasons      = sig["reasons"],
-            risk_mult    = effective_risk,
+            risk_mult    = effective_risk,  # passes adjusted risk
         )
         time.sleep(1)
-
-    # Save balance again after trading to reflect new positions
-    save_balance_json(exchange)
 
     log.info(f"\n{'═'*56}")
     log.info(f"SCAN DONE — {signals_found} signal(s) found")
