@@ -1,17 +1,7 @@
-# dashboard_api.py — Complete fixed version
-#
-# ROOT CAUSE OF ALL ISSUES:
-#   1. 'from persistence import ...' — persistence.py does not exist → crash on startup → OFFLINE
-#   2. /api/balance calls init_exchange() from Render = 451 India geo-block
-#   3. /api/close_trade calls init_exchange() from Render = 451 geo-block
-#   4. automated_scanner() subprocess on Render free tier = killed after 30s
-#
-# FIXES:
-#   - ALL exchange calls removed from dashboard_api.py
-#   - Balance read from balance.json (written by GitHub Actions trade_executor.py)
-#   - Scan button triggers GitHub Actions via repository_dispatch webhook
-#   - persistence import replaced with simple file I/O
-#   - Telegram listener kept (works fine, no geo-block)
+# dashboard_api.py — Fixed version
+# Fix 1: GITHUB_TOKEN → GH_PAT_TOKEN (matches Render env var)
+# Fix 2: balance.json read properly with fallback message
+# Fix 3: Scan button shows clear error if token missing
 
 import os, json, time, threading, logging, requests
 from datetime import datetime, timezone
@@ -28,10 +18,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler("bot.log"),
-        logging.StreamHandler()
-    ]
+    handlers=[logging.FileHandler("bot.log"), logging.StreamHandler()]
 )
 log = logging.getLogger(__name__)
 
@@ -39,13 +26,12 @@ TRADES_FILE  = "trades.json"
 LOG_FILE     = "bot.log"
 HISTORY_FILE = "trade_history.json"
 SIGNALS_FILE = "signals.json"
-BALANCE_FILE = "balance.json"   # Written by GitHub Actions, read here
+BALANCE_FILE = "balance.json"
 
 
-# ════════════ SIMPLE FILE I/O (no persistence.py needed) ════════════
+# ════════════ FILE I/O ═══════════════════════════════════════
 
 def load_json(path, default):
-    """Load JSON from local file. Falls back to default if missing."""
     try:
         if Path(path).exists():
             with open(path) as f:
@@ -56,7 +42,6 @@ def load_json(path, default):
 
 
 def save_json(path, data):
-    """Save JSON atomically."""
     try:
         tmp = str(path) + ".tmp"
         with open(tmp, "w") as f:
@@ -66,23 +51,18 @@ def save_json(path, data):
         log.error(f"save_json {path}: {e}")
 
 
-# ════════════ PRICE FETCHING (public API — no geo-block) ═════════════
+# ════════════ PRICE FETCHING ═════════════════════════════════
 
 _price_cache   = {}
 _price_cache_t = 0
 PRICE_CACHE_TTL = 10
 
+
 def get_live_prices(symbols):
-    """
-    Fetch prices from Binance PUBLIC API — no auth, no geo-block.
-    Returns dict: {symbol: {"price": float, "change_pct": float, ...}}
-    """
     global _price_cache, _price_cache_t
     now = time.time()
-
     if now - _price_cache_t < PRICE_CACHE_TTL and _price_cache:
         return {s: _price_cache.get(s) for s in symbols}
-
     try:
         sym_json = json.dumps(list(symbols))
         r = requests.get(
@@ -102,7 +82,6 @@ def get_live_prices(symbols):
             _price_cache_t = now
     except Exception as e:
         log.warning(f"Price fetch failed: {e}")
-
     return {s: _price_cache.get(s) for s in symbols}
 
 
@@ -141,43 +120,55 @@ def enrich_trades(trades, prices):
     return result
 
 
-# ════════════ GITHUB ACTIONS TRIGGER ════════════════════════════════
+# ════════════ GITHUB ACTIONS TRIGGER ════════════════════════
 
 def trigger_github_scan():
     """
-    Trigger a GitHub Actions workflow_dispatch event.
-    Requires GITHUB_TOKEN and GITHUB_REPO secrets in .env
-    Format: GITHUB_REPO=username/repo-name
+    FIX: Now reads GH_PAT_TOKEN (matches Render env var name).
+    Also tries GITHUB_TOKEN as fallback for GitHub Actions built-in token.
     """
-    token = os.getenv("GITHUB_TOKEN", "")
-    repo  = os.getenv("GITHUB_REPO",  "")
+    # Try GH_PAT_TOKEN first (what Render has), then GITHUB_TOKEN fallback
+    token = (
+        os.getenv("GH_PAT_TOKEN",  "") or
+        os.getenv("GITHUB_TOKEN",  "")
+    )
+    repo  = os.getenv("GITHUB_REPO", "")
 
-    if not token or not repo:
-        return False, "GITHUB_TOKEN or GITHUB_REPO not set in .env"
+    if not token:
+        return False, "GH_PAT_TOKEN not set in Render environment variables. Add it at: dashboard.render.com → Your service → Environment"
+    if not repo:
+        return False, "GITHUB_REPO not set in Render environment variables. Add it as: Elliot14R/Crypto_AI_bot"
 
     try:
-        url = f"https://api.github.com/repos/{repo}/actions/workflows/crypto_bot.yml/dispatches"
+        # Try the workflow file name
+        workflow = os.getenv("GITHUB_WORKFLOW", "crypto_bot.yml")
+        url = f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches"
         r   = requests.post(
             url,
             headers={
                 "Authorization": f"token {token}",
                 "Accept":        "application/vnd.github.v3+json",
+                "X-GitHub-Api-Version": "2022-11-28",
             },
-            json={"ref": "main"},
+            json={"ref": os.getenv("GITHUB_BRANCH", "main")},
             timeout=10,
         )
         if r.status_code == 204:
-            return True, "Scan triggered on GitHub Actions"
+            log.info(f"✅ GitHub Actions scan triggered successfully")
+            return True, "✅ Scan triggered on GitHub Actions! Check Actions tab for progress."
+        elif r.status_code == 404:
+            return False, f"Workflow '{workflow}' not found. Check your .yml filename in .github/workflows/"
+        elif r.status_code == 401:
+            return False, "GH_PAT_TOKEN is invalid or expired. Generate a new token at github.com → Settings → Developer Settings → Personal Access Tokens"
         else:
-            return False, f"GitHub API error: {r.status_code} {r.text[:100]}"
+            return False, f"GitHub API error {r.status_code}: {r.text[:150]}"
     except Exception as e:
-        return False, str(e)
+        return False, f"Request failed: {str(e)}"
 
 
-# ════════════ TELEGRAM LISTENER ═════════════════════════════════════
+# ════════════ TELEGRAM LISTENER ══════════════════════════════
 
 def telegram_listener():
-    """Background thread — listens for /status /close commands via Telegram."""
     token = os.getenv("TELEGRAM_TOKEN", "")
     if not token:
         log.warning("Telegram: no token — listener disabled")
@@ -190,7 +181,6 @@ def telegram_listener():
             params = {"timeout": 10, "allowed_updates": ["message"]}
             if offset:
                 params["offset"] = offset
-
             r = requests.get(url, params=params, timeout=15)
             if r.ok:
                 for item in r.json().get("result", []):
@@ -198,49 +188,40 @@ def telegram_listener():
                     msg     = item.get("message", {})
                     text    = msg.get("text", "").strip()
                     chat_id = msg.get("chat", {}).get("id")
+                    if not chat_id:
+                        continue
 
                     if text == "/status":
                         trades = load_json(TRADES_FILE, {})
                         bal    = load_json(BALANCE_FILE, {})
-                        usdt   = bal.get("usdt", "?")
-                        reply  = f"📡 *Bot Status*\nBalance: {usdt} USDT\nOpen trades: {len(trades)}\n"
-                        if trades:
-                            for sym, t in trades.items():
-                                reply += f"• {sym} ({t.get('signal','?')}) @ {t.get('entry','?')}\n"
-                        else:
+                        usdt   = bal.get("usdt", "Not fetched yet")
+                        reply  = f"📡 *Bot Status*\nBalance: `{usdt}` USDT\nOpen trades: {len(trades)}\n"
+                        for sym, t in trades.items():
+                            reply += f"• {sym} ({t.get('signal','?')}) @ {t.get('entry','?')}\n"
+                        if not trades:
                             reply += "_No open trades_"
-                        requests.post(
-                            f"https://api.telegram.org/bot{token}/sendMessage",
-                            data={"chat_id": chat_id, "text": reply, "parse_mode": "Markdown"},
-                            timeout=10
-                        )
+                        requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                            data={"chat_id": chat_id, "text": reply, "parse_mode": "Markdown"}, timeout=10)
 
                     elif text == "/scan":
                         ok, msg_txt = trigger_github_scan()
-                        requests.post(
-                            f"https://api.telegram.org/bot{token}/sendMessage",
-                            data={"chat_id": chat_id,
-                                  "text": ("✅ " if ok else "❌ ") + msg_txt},
-                            timeout=10
-                        )
+                        requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                            data={"chat_id": chat_id, "text": ("✅ " if ok else "❌ ") + msg_txt}, timeout=10)
 
                     elif text == "/balance":
-                        bal  = load_json(BALANCE_FILE, {})
-                        usdt = bal.get("usdt", "Not fetched yet")
+                        bal     = load_json(BALANCE_FILE, {})
+                        usdt    = bal.get("usdt", "Not fetched yet — trigger a scan first")
                         updated = bal.get("updated_at", "unknown")
-                        requests.post(
-                            f"https://api.telegram.org/bot{token}/sendMessage",
+                        requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
                             data={"chat_id": chat_id,
-                                  "text": f"💰 Balance: *{usdt} USDT*\nUpdated: {updated}",
-                                  "parse_mode": "Markdown"},
-                            timeout=10
-                        )
+                                  "text": f"💰 *Balance: {usdt} USDT*\nUpdated: {updated}",
+                                  "parse_mode": "Markdown"}, timeout=10)
         except Exception:
             pass
         time.sleep(3)
 
 
-# ════════════ API ROUTES ════════════════════════════════════════════
+# ════════════ API ROUTES ═════════════════════════════════════
 
 @app.route("/api/status")
 def api_status():
@@ -248,14 +229,17 @@ def api_status():
     history = load_json(HISTORY_FILE, [])
     signals = load_json(SIGNALS_FILE, [])
 
-    wins   = [h for h in history if (h.get("pnl") or 0) > 0]
-    losses = [h for h in history if (h.get("pnl") or 0) <= 0]
-    total  = len(history)
+    # Exclude RECOVERED trades from real stats
+    real   = [h for h in history if h.get("signal") != "RECOVERED"]
+    wins   = [h for h in real if (h.get("pnl") or 0) > 0]
+    losses = [h for h in real if (h.get("pnl") or 0) <= 0]
+    total  = len(real)
     wr     = round(len(wins) / total * 100, 1) if total else 0
-    totpnl = round(sum(h.get("pnl") or 0 for h in history), 4)
+    totpnl = round(sum(h.get("pnl") or 0 for h in real), 4)
 
     today      = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    today_sigs = [s for s in signals if (s.get("generated_at") or "")[:10] == today]
+    today_sigs = [s for s in signals if (s.get("generated_at") or "")[:10] == today
+                  and not s.get("rejected")]
 
     try:
         with open("model_performance.json") as f:
@@ -267,21 +251,21 @@ def api_status():
     bal       = load_json(BALANCE_FILE, {})
 
     return jsonify({
-        "ok":            True,
-        "timestamp":     datetime.now(timezone.utc).isoformat(),
-        "open_trades":   len(trades),
-        "max_trades":    3,
-        "total_closed":  total,
-        "wins":          len(wins),
-        "losses":        len(losses),
-        "win_rate":      wr,
-        "total_pnl":     totpnl,
-        "model_acc":     model_acc,
-        "today_signals": len(today_sigs),
-        "today_buy":     len([s for s in today_sigs if s.get("signal") == "BUY"]),
-        "today_sell":    len([s for s in today_sigs if s.get("signal") == "SELL"]),
-        "scan_mode":     mode_data.get("mode", "active"),
-        "balance_usdt":  bal.get("usdt"),
+        "ok":              True,
+        "timestamp":       datetime.now(timezone.utc).isoformat(),
+        "open_trades":     len(trades),
+        "max_trades":      3,
+        "total_closed":    total,
+        "wins":            len(wins),
+        "losses":          len(losses),
+        "win_rate":        wr,
+        "total_pnl":       totpnl,
+        "model_acc":       model_acc,
+        "today_signals":   len(today_sigs),
+        "today_buy":       len([s for s in today_sigs if s.get("signal") == "BUY"]),
+        "today_sell":      len([s for s in today_sigs if s.get("signal") == "SELL"]),
+        "scan_mode":       mode_data.get("mode", "active"),
+        "balance_usdt":    bal.get("usdt"),
         "balance_updated": bal.get("updated_at"),
     })
 
@@ -289,21 +273,21 @@ def api_status():
 @app.route("/api/balance")
 def api_balance():
     """
-    Reads balance.json — written by trade_executor.py on GitHub Actions (US IP).
-    NEVER calls exchange directly (avoids India/Render 451 geo-block).
+    Reads balance.json — written by GitHub Actions trade_executor.py.
+    This bypasses India/Render geo-block completely.
     """
     bal = load_json(BALANCE_FILE, {})
+
     if not bal or bal.get("usdt") is None:
         return jsonify({
-            "ok":    False,
-            "usdt":  None,
-            "equity": None,
+            "ok":       False,
+            "usdt":     None,
+            "equity":   None,
             "unrealised": 0,
-            "assets": [],
-            "note":  "Balance not yet fetched. Trigger a scan on GitHub Actions first.",
+            "assets":   [],
+            "note":     "Balance not yet fetched. Go to GitHub → Actions → Run workflow to trigger first scan.",
         })
 
-    # Compute live unrealised PnL for open trades
     trades  = load_json(TRADES_FILE, {})
     symbols = list(trades.keys())
     prices  = get_live_prices(symbols) if symbols else {}
@@ -311,21 +295,18 @@ def api_balance():
     for sym, t in trades.items():
         live = (prices.get(sym) or {}).get("price")
         if live and t.get("entry") and t.get("qty"):
-            if t["signal"] == "BUY":
-                upnl += (live - t["entry"]) * t["qty"]
-            else:
-                upnl += (t["entry"] - live) * t["qty"]
+            upnl += (live - t["entry"]) * t["qty"] if t["signal"] == "BUY" \
+                    else (t["entry"] - live) * t["qty"]
 
     usdt = float(bal.get("usdt", 0))
     return jsonify({
-        "ok":          True,
-        "usdt":        usdt,
-        "equity":      round(usdt + upnl, 2),
-        "unrealised":  round(upnl, 4),
-        "assets":      bal.get("assets", []),
-        "other_count": len(bal.get("assets", [])),
-        "updated_at":  bal.get("updated_at"),
-        "note":        "Balance fetched on GitHub Actions (US IP, geo-block bypassed)",
+        "ok":         True,
+        "usdt":       usdt,
+        "equity":     round(usdt + upnl, 2),
+        "unrealised": round(upnl, 4),
+        "assets":     bal.get("assets", []),
+        "updated_at": bal.get("updated_at"),
+        "note":       "Balance written by GitHub Actions (US IP, bypasses geo-block)",
     })
 
 
@@ -405,49 +386,26 @@ def api_log():
 
 @app.route("/api/scan", methods=["POST"])
 def api_scan():
-    """
-    Triggers a scan via GitHub Actions workflow_dispatch.
-    Requires GITHUB_TOKEN + GITHUB_REPO in .env / Render environment variables.
-    Falls back to a helpful message if not configured.
-    """
+    """Triggers GitHub Actions scan. Uses GH_PAT_TOKEN from Render env."""
     ok, message = trigger_github_scan()
-    if ok:
-        log.info(f"Scan triggered via GitHub Actions")
-        return jsonify({"ok": True, "message": message})
-    else:
-        log.warning(f"Scan trigger failed: {message}")
-        return jsonify({
-            "ok":      False,
-            "message": message,
-            "help":    "Set GITHUB_TOKEN and GITHUB_REPO in Render environment variables. "
-                       "Or go to GitHub → Actions → Run workflow manually.",
-        })
+    status_code = 200
+    return jsonify({
+        "ok":      ok,
+        "message": message,
+    }), status_code
 
 
 @app.route("/api/close_trade", methods=["POST"])
 def api_close():
-    """
-    Cannot close from Render — exchange geo-blocked from India/Render IPs.
-    Returns clear instructions.
-    """
+    """Cannot close from Render — Binance geo-blocks India IPs."""
     data   = request.get_json() or {}
     symbol = data.get("symbol", "?")
     return jsonify({
         "ok":      False,
-        "message": f"Cannot close {symbol} from dashboard — Binance blocks this server IP (India geo-restriction).",
-        "action":  "Go to testnet.binance.vision → Open Orders tab → Cancel the orders manually.",
-        "note":    "Trades close automatically when Stop Loss or Take Profit is hit by GitHub Actions bot.",
+        "message": f"Cannot close {symbol} from Render server (India geo-restriction).",
+        "action":  "Trades close automatically when SL or TP is hit by GitHub Actions bot.",
+        "manual":  "To close manually: go to testnet.binance.vision → Open Orders → Cancel.",
     }), 200
-
-
-@app.route("/api/persistence/restore", methods=["POST"])
-def api_persistence_restore():
-    """Stub — persistence handled via GitHub Actions cache."""
-    return jsonify({
-        "ok":     True,
-        "note":   "State files (trades.json, balance.json, signals.json) are managed by GitHub Actions cache.",
-        "action": "Trigger a scan on GitHub Actions to refresh all state files.",
-    })
 
 
 @app.route("/")
@@ -459,13 +417,13 @@ def static_files(path):
     return send_from_directory("dashboard_static", path)
 
 
-# ════════════ STARTUP ════════════════════════════════════════════════
+# ════════════ STARTUP ════════════════════════════════════════
 
 log.info("=" * 50)
 log.info("CryptoBot Dashboard API starting...")
-log.info("Exchange calls: DISABLED (geo-restriction fix)")
-log.info("Balance source: balance.json (written by GitHub Actions)")
-log.info("Scan trigger:   GitHub Actions workflow_dispatch")
+log.info(f"GH_PAT_TOKEN: {'SET' if os.getenv('GH_PAT_TOKEN') else 'MISSING'}")
+log.info(f"GITHUB_REPO:  {os.getenv('GITHUB_REPO', 'NOT SET')}")
+log.info(f"TELEGRAM:     {'SET' if os.getenv('TELEGRAM_TOKEN') else 'NOT SET'}")
 log.info("=" * 50)
 
 try:
