@@ -17,11 +17,13 @@ HEADERS      = {
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
+# 👈 balance.json is now officially tracked!
 PERSISTENT_FILES = [
     "trades.json",
     "trade_history.json",
     "signals.json",
     "scan_mode.json",
+    "balance.json",    
 ]
 
 # 🚦 Thread lock to prevent 409 SHA conflicts when saving
@@ -43,7 +45,6 @@ def save_json(filename: str, data: dict | list) -> bool:
     Thread-safe save to GitHub repo under /data/ folder.
     Uses a lock and retry loop to permanently stop 409 Conflicts.
     """
-    # If a full path is passed, extract just the filename
     filename = Path(filename).name 
     
     if not GITHUB_TOKEN:
