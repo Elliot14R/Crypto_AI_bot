@@ -2,7 +2,6 @@ name: CryptoBot AI — Smart Scanner
 
 on:
   schedule:
-    # Every 15 minutes — smart_scheduler decides if it actually runs
     - cron: '0,15,30,45 * * * *'
   workflow_dispatch:
     inputs:
@@ -20,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
 
-    # ── Job-level env vars (available to ALL steps) ──────────
     env:
       GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
       GITHUB_REPO:  Elliot14R/Crypto_AI_bot
@@ -56,7 +54,6 @@ jobs:
           path: pro_crypto_ai_model.pkl
           key: model-${{ hashFiles('model_performance.json') }}
 
-      # State files — restore from previous run
       - name: Restore state files
         uses: actions/cache@v4
         id: state-cache
@@ -66,17 +63,18 @@ jobs:
             trade_history.json
             signals.json
             scan_mode.json
+            balance.json
           key: bot-state-${{ github.run_id }}
           restore-keys: |
             bot-state-
 
-      # If no state cache found, create empty defaults
       - name: Init state files if missing
         run: |
           [ -f trades.json ]        || echo '{}'  > trades.json
           [ -f trade_history.json ] || echo '[]'  > trade_history.json
           [ -f signals.json ]       || echo '[]'  > signals.json
           [ -f scan_mode.json ]     || echo '{}'  > scan_mode.json
+          [ -f balance.json ]       || echo '{}'  > balance.json
 
       - name: Run bot
         run: |
@@ -87,7 +85,6 @@ jobs:
             python trade_executor.py
           fi
 
-      # Always save state even if scan fails
       - name: Save state files
         if: always()
         uses: actions/cache/save@v4
@@ -97,6 +94,7 @@ jobs:
             trade_history.json
             signals.json
             scan_mode.json
+            balance.json
           key: bot-state-${{ github.run_id }}
 
       - name: Upload log
