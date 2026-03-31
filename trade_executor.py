@@ -13,6 +13,7 @@ import pandas as pd
 from datetime import datetime, timezone
 from pathlib import Path
 from dotenv import load_dotenv
+from persistence import load_json, save_json
 
 load_dotenv(dotenv_path=".env", override=True)
 
