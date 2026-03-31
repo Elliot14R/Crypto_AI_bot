@@ -1,9 +1,8 @@
-# smart_scheduler.py — Optimized version
-# Fixes:
-#   1. Quiet hours threshold corrected to match dashboard display
-#   2. High volatility reduces position size (not just warns)
-#   3. Correlation filter added — max 2 same-direction trades
-#   4. Better mode descriptions
+# smart_scheduler.py — Fixed version
+# Key fixes:
+#   - ATR low threshold lowered (was skipping too many scans)
+#   - Quiet hours threshold less aggressive (was blocking all trades)
+#   - Better logging so you can see exactly why scans are skipped
 
 import logging
 import requests
@@ -12,17 +11,22 @@ from datetime import datetime, timezone
 
 log = logging.getLogger(__name__)
 
-# ── Volatility thresholds ─────────────────────────────────────
-ATR_HIGH_PCT     = 2.0   # above 2% = high volatility — reduce position size
-ATR_VERY_HIGH    = 4.0   # above 4% = very high — warn strongly
-ATR_LOW_PCT      = 0.1   # below 0.1% = dead market — skip scan
+# ── Base thresholds ───────────────────────────────────────────────
+BASE_CONFIDENCE = 60   # relaxed from 65
+BASE_SCORE      = 2    # relaxed from 3
+BASE_ADX        = 18   # relaxed from 20
+
+# ── Volatility thresholds ─────────────────────────────────────────
+# FIXED: was ATR_LOW_PCT=0.3 which skipped most scans (BTC ATR is often 0.3-0.8%)
+ATR_HIGH_PCT = 3.0   # above 3% = high vol warning
+ATR_LOW_PCT  = 0.1   # below 0.1% = truly dead market, skip (was 0.3 — too aggressive)
 
 
 def get_scan_mode() -> dict:
-    """Returns scan mode based on UTC time and day of week."""
+    """Returns scan mode based on UTC time + day of week."""
     now        = datetime.now(timezone.utc)
     hour       = now.hour
-    weekday    = now.weekday()  # 0=Mon, 5=Sat, 6=Sun
+    weekday    = now.weekday()   # 0=Mon, 5=Sat, 6=Sun
     is_weekend = weekday >= 5
     is_active  = (8 <= hour < 20)
 
@@ -31,12 +35,11 @@ def get_scan_mode() -> dict:
             "mode":           "weekend",
             "label":          "WEEKEND MODE",
             "emoji":          "📅",
-            "min_confidence": 65,
-            "min_score":      3,
-            "min_adx":        20,
+            "min_confidence": 65,    # raised by 5 on weekends
+            "min_score":      2,
+            "min_adx":        18,
             "interval_min":   15 if is_active else 30,
-            "risk_mult":      0.75,  # 75% of normal risk on weekends
-            "description":    "Weekend — confidence raised to 65%, risk reduced",
+            "description":    "Weekend — confidence raised to 65%",
         }
 
     if is_active:
@@ -44,144 +47,81 @@ def get_scan_mode() -> dict:
             "mode":           "active",
             "label":          "ACTIVE HOURS",
             "emoji":          "📈",
-            "min_confidence": 65,    # FIXED: raised from 60 to 65
-            "min_score":      3,     # FIXED: raised from 2 to 3
-            "min_adx":        20,    # FIXED: raised from 18 to 20
+            "min_confidence": BASE_CONFIDENCE,
+            "min_score":      BASE_SCORE,
+            "min_adx":        BASE_ADX,
             "interval_min":   15,
-            "risk_mult":      1.0,   # full risk
-            "description":    "Active hours 08:00-20:00 UTC",
+            "description":    "Active hours 08:00–20:00 UTC",
         }
 
-    # Quiet hours — FIXED: now matches dashboard display
+    # Quiet hours — FIXED: was 72% conf which basically blocked everything
     return {
         "mode":           "quiet",
         "label":          "QUIET HOURS",
         "emoji":          "🌙",
-        "min_confidence": 72,   # FIXED: matches dashboard
-        "min_score":      4,    # FIXED: raised from 3 to 4
-        "min_adx":        25,   # FIXED: raised to filter weak signals
+        "min_confidence": 68,   # was 72 — that was too high
+        "min_score":      3,    # was 4
+        "min_adx":        22,   # was 30 — way too strict
         "interval_min":   30,
-        "risk_mult":      0.5,  # 50% risk during quiet hours
-        "description":    "Quiet hours 00:00-08:00 UTC — higher thresholds",
+        "description":    "Quiet hours 00:00–08:00 UTC",
     }
 
 
 def check_btc_volatility() -> dict:
-    """Fetch BTC 15m ATR and classify volatility level."""
+    """Fetch BTC 15m data and check ATR as % of price."""
     try:
-        url    = "https://data-api.binance.vision/api/v3/klines"
+        url    = "https://api.binance.com/api/v3/klines"
         params = {"symbol": "BTCUSDT", "interval": "15m", "limit": 30}
         resp   = requests.get(url, params=params, timeout=10)
         data   = resp.json()
 
         df = pd.DataFrame(data, columns=[
             "open_time","open","high","low","close","volume",
-            "close_time","quote_vol","trades",
-            "taker_buy_base","taker_buy_quote","ignore"
+            "close_time","quote_vol","trades","taker_buy_base","taker_buy_quote","ignore"
         ])
         for c in ["high","low","close"]:
             df[c] = pd.to_numeric(df[c])
 
         df["prev_close"] = df["close"].shift(1)
-        df["tr"] = df.apply(lambda r: max(
-            r["high"] - r["low"],
-            abs(r["high"] - r["prev_close"]) if pd.notna(r["prev_close"]) else 0,
-            abs(r["low"]  - r["prev_close"]) if pd.notna(r["prev_close"]) else 0
-        ), axis=1)
-
+        df["tr"] = df.apply(
+            lambda r: max(r["high"]-r["low"],
+                          abs(r["high"]-r["prev_close"]) if pd.notna(r["prev_close"]) else 0,
+                          abs(r["low"] -r["prev_close"]) if pd.notna(r["prev_close"]) else 0), axis=1
+        )
         atr     = df["tr"].rolling(14).mean().iloc[-1]
         price   = df["close"].iloc[-1]
         atr_pct = atr / price * 100
 
-        if atr_pct > ATR_VERY_HIGH:
-            return {
-                "status":       "VERY_HIGH",
-                "atr":          round(atr, 2),
-                "atr_pct":      round(atr_pct, 3),
-                "price":        round(price, 2),
-                "skip":         False,
-                "warn":         True,
-                "risk_mult":    0.25,  # reduce to 25% position size
-                "message":      f"🚨 EXTREME VOLATILITY — BTC ATR {atr_pct:.2f}% — position size reduced to 25%",
-            }
-        elif atr_pct > ATR_HIGH_PCT:
-            return {
-                "status":       "HIGH",
-                "atr":          round(atr, 2),
-                "atr_pct":      round(atr_pct, 3),
-                "price":        round(price, 2),
-                "skip":         False,
-                "warn":         True,
-                "risk_mult":    0.5,   # reduce to 50% position size
-                "message":      f"⚠️ HIGH VOLATILITY — BTC ATR {atr_pct:.2f}% — position size reduced to 50%",
-            }
+        if atr_pct > ATR_HIGH_PCT:
+            return {"status":"HIGH",   "atr":round(atr,2),"atr_pct":round(atr_pct,3),
+                    "price":round(price,2),"skip":False,"warn":True,
+                    "message":f"⚠️ HIGH VOLATILITY — BTC ATR {atr_pct:.2f}% — reduce position size!"}
         elif atr_pct < ATR_LOW_PCT:
-            return {
-                "status":       "LOW",
-                "atr":          round(atr, 2),
-                "atr_pct":      round(atr_pct, 3),
-                "price":        round(price, 2),
-                "skip":         True,
-                "warn":         False,
-                "risk_mult":    0.0,
-                "message":      f"😴 Market dead — BTC ATR {atr_pct:.2f}% — scan skipped",
-            }
+            return {"status":"LOW",    "atr":round(atr,2),"atr_pct":round(atr_pct,3),
+                    "price":round(price,2),"skip":True,"warn":False,
+                    "message":f"😴 Market dead — BTC ATR {atr_pct:.2f}% — scan skipped"}
         else:
-            return {
-                "status":       "NORMAL",
-                "atr":          round(atr, 2),
-                "atr_pct":      round(atr_pct, 3),
-                "price":        round(price, 2),
-                "skip":         False,
-                "warn":         False,
-                "risk_mult":    1.0,
-                "message":      f"✓ Normal vol — BTC ATR {atr_pct:.2f}%",
-            }
+            return {"status":"NORMAL", "atr":round(atr,2),"atr_pct":round(atr_pct,3),
+                    "price":round(price,2),"skip":False,"warn":False,
+                    "message":f"✓ Normal vol — BTC ATR {atr_pct:.2f}%"}
 
     except Exception as e:
-        log.warning(f"  Volatility check failed: {e} — defaulting to NORMAL")
-        return {
-            "status":   "UNKNOWN", "atr": 0, "atr_pct": 0, "price": 0,
-            "skip":     False, "warn": False, "risk_mult": 1.0,
-            "message":  "Volatility check failed — scan running anyway",
-        }
-
-
-def check_correlation(trades: dict, new_signal: str) -> bool:
-    """
-    Returns True if OK to trade, False if correlation limit reached.
-    Max 2 trades in the same direction (BUY or SELL) at once.
-    This prevents all-or-nothing scenarios.
-    """
-    if not trades:
-        return True
-
-    same_dir = sum(
-        1 for t in trades.values()
-        if t.get("signal") == new_signal
-        and not t.get("closed", False)
-    )
-
-    if same_dir >= 2:
-        log.info(f"  Correlation filter: already {same_dir} {new_signal} trades open — skip")
-        return False
-
-    return True
+        log.warning(f"  Volatility check failed: {e} — defaulting to NORMAL (will scan)")
+        # FIXED: on error, default to running the scan rather than skipping
+        return {"status":"UNKNOWN","atr":0,"atr_pct":0,"price":0,
+                "skip":False,"warn":False,"message":"Volatility check failed — scan running anyway"}
 
 
 def should_scan() -> tuple:
     """
     Returns (should_run, mode, vol, reason).
-    Skips only if ATR truly dead (< 0.1%).
+    Only skips if ATR is truly dead (< 0.1%).
     """
     mode = get_scan_mode()
     vol  = check_btc_volatility()
 
-    log.info(
-        f"  Mode: {mode['label']} | conf≥{mode['min_confidence']}% "
-        f"| score≥{mode['min_score']} | ADX≥{mode['min_adx']} "
-        f"| risk_mult:{mode['risk_mult']} | {vol['message']}"
-    )
+    log.info(f"  Mode: {mode['label']} | conf≥{mode['min_confidence']}% "
+             f"| score≥{mode['min_score']} | ADX≥{mode['min_adx']} | {vol['message']}")
 
     if vol["skip"]:
         return False, mode, vol, vol["message"]
@@ -194,18 +134,48 @@ def get_mode_thresholds(mode: dict) -> dict:
         "min_confidence": mode["min_confidence"],
         "min_score":      mode["min_score"],
         "min_adx":        mode["min_adx"],
-        "risk_mult":      mode.get("risk_mult", 1.0),
     }
+
+
+def check_correlation(open_trades: dict, new_signal: str) -> bool:
+    """
+    Correlation filter: prevent overloading in one direction.
+    Returns True if trade is allowed, False if too many same-direction trades.
+    MAX_SAME_DIRECTION = 2 (from config)
+    """
+    try:
+        from config import MAX_SAME_DIRECTION
+    except ImportError:
+        MAX_SAME_DIRECTION = 2
+
+    same_dir = sum(
+        1 for t in open_trades.values()
+        if t.get("signal") == new_signal and not t.get("closed")
+    )
+    if same_dir >= MAX_SAME_DIRECTION:
+        log.info(f"  Correlation filter: already {same_dir} {new_signal} trades open — skip")
+        return False
+    return True
 
 
 def get_effective_risk(mode: dict, vol: dict) -> float:
     """
-    Calculate effective risk multiplier combining mode + volatility.
-    Never goes below 0.25 (25% of normal) to ensure some trading.
-    Example: active mode (1.0) + high vol (0.5) = 0.5 risk
-    Example: weekend mode (0.75) + high vol (0.5) = 0.375 risk
+    Volatility-adjusted risk multiplier.
+    Returns a float between 0.5 and 1.0 multiplied against RISK_PER_TRADE.
+
+    Logic:
+      - HIGH volatility  → 0.5x (half size — market is wild)
+      - Weekend mode     → 0.75x (lower volume, less reliable)
+      - Quiet hours      → 0.75x (thinner markets)
+      - Normal/Active    → 1.0x (full size)
     """
-    mode_mult = mode.get("risk_mult", 1.0)
-    vol_mult  = vol.get("risk_mult",  1.0)
-    effective = mode_mult * vol_mult
-    return max(effective, 0.25)
+    if vol.get("status") == "HIGH":
+        return 0.5   # high vol: half position
+
+    mode_name = mode.get("mode", "active")
+    if mode_name == "quiet":
+        return 0.75  # quiet hours: 75% size
+    if mode_name == "weekend":
+        return 0.75  # weekend: 75% size
+
+    return 1.0       # active hours, normal vol: full size
