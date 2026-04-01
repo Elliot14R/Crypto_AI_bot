@@ -47,6 +47,7 @@ jobs:
           echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"         >> .env
           echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"              >> .env
           echo "GITHUB_BRANCH=main"                               >> .env
+          echo "PROXY_URL=${{ secrets.PROXY_URL }}"               >> .env
 
       - name: Restore model cache
         uses: actions/cache@v4
