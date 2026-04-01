@@ -146,14 +146,14 @@ def enrich_trades(trades, prices):
 def trigger_github_scan():
     """
     Trigger a GitHub Actions workflow_dispatch event.
-    Requires GITHUB_TOKEN and GITHUB_REPO secrets in .env
+    Requires GH_PAT_TOKEN and GITHUB_REPO secrets in .env
     Format: GITHUB_REPO=username/repo-name
     """
-    token = os.getenv("GITHUB_TOKEN", "")
+    token = os.getenv("GH_PAT_TOKEN", "")
     repo  = os.getenv("GITHUB_REPO",  "")
 
     if not token or not repo:
-        return False, "GITHUB_TOKEN or GITHUB_REPO not set in .env"
+        return False, "GH_PAT_TOKEN or GITHUB_REPO not set in .env"
 
     try:
         url = f"https://api.github.com/repos/{repo}/actions/workflows/crypto_bot.yml/dispatches"
@@ -422,7 +422,7 @@ def api_log():
 def api_scan():
     """
     Triggers a scan via GitHub Actions workflow_dispatch.
-    Requires GITHUB_TOKEN + GITHUB_REPO in .env / Render environment variables.
+    Requires GH_PAT_TOKEN + GITHUB_REPO in .env / Render environment variables.
     Falls back to a helpful message if not configured.
     """
     ok, message = trigger_github_scan()
@@ -434,7 +434,7 @@ def api_scan():
         return jsonify({
             "ok":      False,
             "message": message,
-            "help":    "Set GITHUB_TOKEN and GITHUB_REPO in Render environment variables. "
+            "help":    "Set GH_PAT_TOKEN and GITHUB_REPO in Render environment variables. "
                        "Or go to GitHub → Actions → Run workflow manually.",
         })
 
