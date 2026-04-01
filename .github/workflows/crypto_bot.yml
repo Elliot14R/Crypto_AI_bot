@@ -23,6 +23,7 @@ jobs:
       GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
       GITHUB_REPO:  Elliot14R/Crypto_AI_bot
       GITHUB_BRANCH: main
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
