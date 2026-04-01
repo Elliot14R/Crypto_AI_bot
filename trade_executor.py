@@ -492,9 +492,9 @@ def check_mode_switch(mode: dict):
     last = load_json(MODE_FILE, {})
     if last.get("mode") != mode["mode"]:
         msgs = {
-            "active":  "📈 *Active hours* — conf ≥65% | score ≥3 | full risk",
-            "quiet":   "🌙 *Quiet hours* — conf ≥72% | score ≥4 | 50% risk",
-            "weekend": "📅 *Weekend mode* — conf ≥65% | score ≥3 | 75% risk",
+            "active":  "📈 *Active hours* — conf ≥60% | score ≥2 | full risk",
+            "quiet":   "🌙 *Quiet hours* — conf ≥68% | score ≥3 | 75% risk",
+            "weekend": "📅 *Weekend mode* — conf ≥65% | score ≥2 | 75% risk",
         }
         _send(msgs.get(mode["mode"], "Mode changed"))
         save_json(MODE_FILE, {"mode":  mode["mode"], "since": datetime.now(timezone.utc).isoformat()})
