@@ -195,5 +195,23 @@
     ],
     "tier": "\ud83e\udd16 AI & Momentum",
     "generated_at": "2026-03-30T19:01:46.187639+00:00"
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "signal": "SELL",
+    "confidence": 61.3,
+    "score": 1,
+    "entry": 1.793,
+    "atr": 0.013161596115162806,
+    "reasons": [
+      "AI confidence (61%)",
+      "Strong trend ADX 32"
+    ],
+    "rejected": true,
+    "reject_reason": "score 1 < 2",
+    "stop": 1.8127,
+    "tp1": 1.7667,
+    "tp2": 1.7535,
+    "generated_at": "2026-04-01T10:34:05.027717+00:00"
   }
 ]
