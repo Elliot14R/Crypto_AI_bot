@@ -1,17 +1,9 @@
-# dashboard_api.py — Complete fixed version
-#
-# ROOT CAUSE OF ALL ISSUES:
-#   1. 'from persistence import ...' — persistence.py does not exist → crash on startup → OFFLINE
-#   2. /api/balance calls init_exchange() from Render = 451 India geo-block
-#   3. /api/close_trade calls init_exchange() from Render = 451 geo-block
-#   4. automated_scanner() subprocess on Render free tier = killed after 30s
-#
+# dashboard.py — Complete fixed version
 # FIXES:
-#   - ALL exchange calls removed from dashboard_api.py
-#   - Balance read from balance.json (written by GitHub Actions trade_executor.py)
+#   - ALL exchange calls removed from dashboard.py to prevent 451 India geo-block
+#   - Balance read from balance.json (written by GitHub Actions)
 #   - Scan button triggers GitHub Actions via repository_dispatch webhook
-#   - persistence import replaced with simple file I/O
-#   - Telegram listener kept (works fine, no geo-block)
+#   - Simple file I/O replaces complex persistence imports
 
 import os, json, time, threading, logging, requests
 from datetime import datetime, timezone
@@ -29,7 +21,7 @@ logging.basicConfig(
     format="%(asctime)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
-        logging.FileHandler("bot.log"),
+        logging.FileHandler("bot.log", mode='a'),
         logging.StreamHandler()
     ]
 )
@@ -39,13 +31,12 @@ TRADES_FILE  = "trades.json"
 LOG_FILE     = "bot.log"
 HISTORY_FILE = "trade_history.json"
 SIGNALS_FILE = "signals.json"
-BALANCE_FILE = "balance.json"   # Written by GitHub Actions, read here
+BALANCE_FILE = "balance.json"   
 
 
-# ════════════ SIMPLE FILE I/O (no persistence.py needed) ════════════
+# ════════════ SIMPLE FILE I/O ════════════
 
 def load_json(path, default):
-    """Load JSON from local file. Falls back to default if missing."""
     try:
         if Path(path).exists():
             with open(path) as f:
@@ -54,9 +45,7 @@ def load_json(path, default):
         log.warning(f"load_json {path}: {e}")
     return default
 
-
 def save_json(path, data):
-    """Save JSON atomically."""
     try:
         tmp = str(path) + ".tmp"
         with open(tmp, "w") as f:
@@ -66,17 +55,13 @@ def save_json(path, data):
         log.error(f"save_json {path}: {e}")
 
 
-# ════════════ PRICE FETCHING (public API — no geo-block) ═════════════
+# ════════════ PRICE FETCHING (Public API — No Geo-Block) ═════════════
 
 _price_cache   = {}
 _price_cache_t = 0
 PRICE_CACHE_TTL = 10
 
 def get_live_prices(symbols):
-    """
-    Fetch prices from Binance PUBLIC API — no auth, no geo-block.
-    Returns dict: {symbol: {"price": float, "change_pct": float, ...}}
-    """
     global _price_cache, _price_cache_t
     now = time.time()
 
@@ -144,16 +129,11 @@ def enrich_trades(trades, prices):
 # ════════════ GITHUB ACTIONS TRIGGER ════════════════════════════════
 
 def trigger_github_scan():
-    """
-    Trigger a GitHub Actions workflow_dispatch event.
-    Requires GH_PAT_TOKEN and GITHUB_REPO secrets in .env
-    Format: GITHUB_REPO=username/repo-name
-    """
-    token = os.getenv("GH_PAT_TOKEN", "")
+    token = os.getenv("GH_PAT_TOKEN", "") or os.getenv("GITHUB_TOKEN", "")
     repo  = os.getenv("GITHUB_REPO",  "")
 
     if not token or not repo:
-        return False, "GH_PAT_TOKEN or GITHUB_REPO not set in .env"
+        return False, "GITHUB_TOKEN or GITHUB_REPO not set in .env"
 
     try:
         url = f"https://api.github.com/repos/{repo}/actions/workflows/crypto_bot.yml/dispatches"
@@ -163,7 +143,7 @@ def trigger_github_scan():
                 "Authorization": f"token {token}",
                 "Accept":        "application/vnd.github.v3+json",
             },
-            json={"ref": "main"},
+            json={"ref": os.getenv("GITHUB_BRANCH", "main")},
             timeout=10,
         )
         if r.status_code == 204:
@@ -177,7 +157,6 @@ def trigger_github_scan():
 # ════════════ TELEGRAM LISTENER ═════════════════════════════════════
 
 def telegram_listener():
-    """Background thread — listens for /status /close commands via Telegram."""
     token = os.getenv("TELEGRAM_TOKEN", "")
     if not token:
         log.warning("Telegram: no token — listener disabled")
@@ -219,8 +198,7 @@ def telegram_listener():
                         ok, msg_txt = trigger_github_scan()
                         requests.post(
                             f"https://api.telegram.org/bot{token}/sendMessage",
-                            data={"chat_id": chat_id,
-                                  "text": ("✅ " if ok else "❌ ") + msg_txt},
+                            data={"chat_id": chat_id, "text": ("✅ " if ok else "❌ ") + msg_txt},
                             timeout=10
                         )
 
@@ -230,9 +208,7 @@ def telegram_listener():
                         updated = bal.get("updated_at", "unknown")
                         requests.post(
                             f"https://api.telegram.org/bot{token}/sendMessage",
-                            data={"chat_id": chat_id,
-                                  "text": f"💰 Balance: *{usdt} USDT*\nUpdated: {updated}",
-                                  "parse_mode": "Markdown"},
+                            data={"chat_id": chat_id, "text": f"💰 Balance: *{usdt} USDT*\nUpdated: {updated}", "parse_mode": "Markdown"},
                             timeout=10
                         )
         except Exception:
@@ -288,13 +264,8 @@ def api_status():
 
 @app.route("/api/balance")
 def api_balance():
-    """
-    Reads balance.json — written by trade_executor.py on GitHub Actions (US IP).
-    NEVER calls exchange directly (avoids India/Render 451 geo-block).
-    """
     bal = load_json(BALANCE_FILE, {})
 
-    # No file yet
     if not bal:
         return jsonify({
             "ok":         False,
@@ -305,7 +276,6 @@ def api_balance():
             "note":       "Balance not yet fetched. Trigger a GitHub Actions scan first.",
         })
 
-    # File exists but has an error (e.g. geo-block)
     if bal.get("error") or bal.get("usdt") is None:
         return jsonify({
             "ok":         False,
@@ -318,7 +288,6 @@ def api_balance():
             "updated_at": bal.get("updated_at"),
         })
 
-    # Success — compute live unrealised PnL for open trades
     trades  = load_json(TRADES_FILE, {})
     symbols = list(trades.keys())
     prices  = get_live_prices(symbols) if symbols else {}
@@ -420,11 +389,6 @@ def api_log():
 
 @app.route("/api/scan", methods=["POST"])
 def api_scan():
-    """
-    Triggers a scan via GitHub Actions workflow_dispatch.
-    Requires GH_PAT_TOKEN + GITHUB_REPO in .env / Render environment variables.
-    Falls back to a helpful message if not configured.
-    """
     ok, message = trigger_github_scan()
     if ok:
         log.info(f"Scan triggered via GitHub Actions")
@@ -434,17 +398,13 @@ def api_scan():
         return jsonify({
             "ok":      False,
             "message": message,
-            "help":    "Set GH_PAT_TOKEN and GITHUB_REPO in Render environment variables. "
+            "help":    "Set GITHUB_TOKEN and GITHUB_REPO in Render environment variables. "
                        "Or go to GitHub → Actions → Run workflow manually.",
         })
 
 
 @app.route("/api/close_trade", methods=["POST"])
 def api_close():
-    """
-    Cannot close from Render — exchange geo-blocked from India/Render IPs.
-    Returns clear instructions.
-    """
     data   = request.get_json() or {}
     symbol = data.get("symbol", "?")
     return jsonify({
@@ -453,16 +413,6 @@ def api_close():
         "action":  "Go to testnet.binance.vision → Open Orders tab → Cancel the orders manually.",
         "note":    "Trades close automatically when Stop Loss or Take Profit is hit by GitHub Actions bot.",
     }), 200
-
-
-@app.route("/api/persistence/restore", methods=["POST"])
-def api_persistence_restore():
-    """Stub — persistence handled via GitHub Actions cache."""
-    return jsonify({
-        "ok":     True,
-        "note":   "State files (trades.json, balance.json, signals.json) are managed by GitHub Actions cache.",
-        "action": "Trigger a scan on GitHub Actions to refresh all state files.",
-    })
 
 
 @app.route("/")
@@ -491,5 +441,5 @@ except Exception as e:
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    log.info(f"Dashboard API → http://localhost:{port}")
+    log.info(f"Dashboard API → http://0.0.0.0:{port}")
     app.run(host="0.0.0.0", port=port, debug=False)
