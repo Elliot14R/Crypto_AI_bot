@@ -218,7 +218,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
       <div class="smode-dot"></div>
       <div style="flex:1">
         <div style="font-weight:600;font-size:12px" id="smodeTitleMain">ACTIVE HOURS — Scanning every 15 minutes</div>
-        <div style="font-size:10px;opacity:0.8;margin-top:1px" id="smodeSubMain">Min confidence: 65% · Min score: 3/6 · UTC 08:00–20:00</div>
+        <div style="font-size:10px;opacity:0.8;margin-top:1px" id="smodeSubMain">Min confidence: 60% · Min score: 2/6 · UTC 08:00–20:00</div>
       </div>
       <div style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.3);border:1px solid currentColor;opacity:0.7" id="smodeBadge">ACTIVE</div>
     </div>
@@ -438,9 +438,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
                 <div style="font-size:10px;color:var(--green);background:var(--green2);padding:2px 8px;border-radius:10px;border:1px solid #10b98130">15 min scan</div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--green)">65%</div></div>
-                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">3 / 6</div></div>
-                <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">20</div></div>
+                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--green)">60%</div></div>
+                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">2 / 6</div></div>
+                <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">18</div></div>
               </div>
             </div>
             <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
@@ -449,9 +449,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
                 <div style="font-size:10px;color:var(--purple);background:var(--purple2);padding:2px 8px;border-radius:10px;border:1px solid #8b5cf630">30 min scan</div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--purple)">72%</div></div>
-                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">4 / 6</div></div>
-                <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">25</div></div>
+                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--purple)">68%</div></div>
+                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">3 / 6</div></div>
+                <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">22</div></div>
               </div>
             </div>
             <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
@@ -461,7 +461,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
                 <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--amber)">65%</div></div>
-                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">3 / 6</div></div>
+                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">2 / 6</div></div>
                 <div class="price-box"><div class="price-lbl">Risk Mult</div><div class="price-val" style="color:var(--amber)">75%</div></div>
               </div>
             </div>
@@ -478,8 +478,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
             <div class="bal-row"><span style="color:var(--text3)">Stop Loss</span><span style="color:var(--red)">1.5x ATR</span></div>
             <div class="bal-row"><span style="color:var(--text3)">Target 1</span><span style="color:var(--green)">2.0x ATR</span></div>
             <div class="bal-row"><span style="color:var(--text3)">Target 2</span><span style="color:var(--green)">3.0x ATR</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">High Vol (&gt;2% ATR)</span><span style="color:var(--amber)">50% position size</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Extreme Vol (&gt;4%)</span><span style="color:var(--red)">25% position size</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">High Vol (&gt;3.0% ATR)</span><span style="color:var(--amber)">50% position size</span></div>
+            <div class="bal-row"><span style="color:var(--text3)">Low Vol (&lt;0.1% ATR)</span><span style="color:var(--red)">Scan skipped (dead market)</span></div>
             <div class="bal-row"><span style="color:var(--text3)">Position Cap</span><span style="color:var(--text2)">Max 20% of balance</span></div>
             <div class="bal-row"><span style="color:var(--text3)">Min Balance</span><span style="color:var(--text2)">10 USDT required</span></div>
           </div>
@@ -564,14 +564,18 @@ const timeAgo = ts => {
 // ═══════════════════════════════════════════════════════
 // API CALLS
 // ═══════════════════════════════════════════════════════
-async function apiFetch(path, fallback) {
+async function apiFetch(path, fallback, opts) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35000);
   try {
-    const r = await fetch(path, {cache:'no-store'});
+    const r = await fetch(path, {cache:'no-store', ...(opts||{}), signal: controller.signal});
     if (!r.ok) throw new Error(r.status);
     return await r.json();
   } catch(e) {
-    console.warn('API error:', path, e.message);
+    console.warn('API error:', path, e.message || e);
     return fallback;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -605,9 +609,9 @@ async function fetchStatus() {
   // Scan mode
   const mode = d.scan_mode || 'active';
   const modeInfo = {
-    active:  {cls:'active-mode',  title:'ACTIVE HOURS — Scanning every 15 minutes', sub:'Min confidence: 65% · Min score: 3/6 · UTC 08:00–20:00', badge:'ACTIVE'},
-    quiet:   {cls:'quiet-mode',   title:'QUIET HOURS — Scanning every 30 minutes',  sub:'Min confidence: 72% · Min score: 4/6 · UTC 00:00–08:00', badge:'QUIET'},
-    weekend: {cls:'weekend-mode', title:'WEEKEND MODE — Scanning every 15–30 min',  sub:'Confidence raised to 65% · Lower volume expected', badge:'WEEKEND'},
+    active:  {cls:'active-mode',  title:'ACTIVE HOURS — Scanning every 15 minutes', sub:'Min confidence: 60% · Min score: 2/6 · UTC 08:00–20:00', badge:'ACTIVE'},
+    quiet:   {cls:'quiet-mode',   title:'QUIET HOURS — Scanning every 30 minutes',  sub:'Min confidence: 68% · Min score: 3/6 · UTC 00:00–08:00', badge:'QUIET'},
+    weekend: {cls:'weekend-mode', title:'WEEKEND MODE — Scanning every 15–30 min',  sub:'Min confidence: 65% · Min score: 2/6 · Lower risk', badge:'WEEKEND'},
   };
   const mi = modeInfo[mode] || modeInfo.active;
   const modeBar = document.getElementById('scanModeBar');
@@ -627,11 +631,14 @@ async function fetchBalance() {
   if (!d || !d.ok) return;
 
   const usdt = d.usdt != null ? d.usdt.toFixed(2) : '—';
+  const usdtFree = d.usdt_free != null ? d.usdt_free.toFixed(2) : usdt;
   document.getElementById('statBalance').textContent = usdt;
   document.getElementById('topBalance').textContent  = usdt;
   document.getElementById('balMain').textContent     = usdt;
 
   const eq = d.equity;
+  const eqEl = document.getElementById('balEq');
+  if (eqEl) eqEl.textContent = eq != null ? eq.toFixed(2) : usdt;
   const uEl = document.getElementById('ot-upnl');
   if (uEl && d.unrealised != null) {
     uEl.textContent = (d.unrealised >= 0 ? '+' : '') + d.unrealised.toFixed(4);
@@ -640,10 +647,15 @@ async function fetchBalance() {
 
   if (d.assets && d.assets.length) {
     const html = d.assets.slice(0, 8).map(a =>
-      `<div class="bal-row"><span style="color:var(--text3)">${a.asset}</span><span style="color:var(--text)">${Number(a.free).toFixed(4)}</span></div>`
+      `<div class="bal-row"><span style="color:var(--text3)">${a.asset}</span><span style="color:var(--text)">${Number(a.total ?? a.free ?? 0).toFixed(4)}</span></div>`
     ).join('');
     document.getElementById('balAssets').innerHTML = `<div style="display:flex;flex-direction:column;gap:4px">${html}</div>`;
+  } else {
+    document.getElementById('balAssets').innerHTML = '';
   }
+
+  const balSub = document.querySelector('.bal-sub');
+  if (balSub) balSub.textContent = `USDT TOTAL (Free: ${usdtFree})`;
 }
 
 async function fetchOpenTrades() {
@@ -1012,10 +1024,10 @@ async function fetchBtcAtr() {
 
     const volEl  = document.getElementById('volBanner');
     const volTxt = document.getElementById('volText');
-    if (pctV > 4) {
+    if (pctV < 0.1) {
       volEl.className = 'vol-banner high';
-      volTxt.textContent = `🚨 EXTREME VOLATILITY — BTC ATR ${pctV.toFixed(2)}% — position size reduced to 25%`;
-    } else if (pctV > 2) {
+      volTxt.textContent = `😴 LOW VOLATILITY — BTC ATR ${pctV.toFixed(2)}% — scans may be skipped`;
+    } else if (pctV > 3) {
       volEl.className = 'vol-banner high';
       volTxt.textContent = `⚠️ HIGH VOLATILITY — BTC ATR ${pctV.toFixed(2)}% — position size reduced to 50%`;
     } else {
@@ -1101,20 +1113,6 @@ function updateCoinChips() {
 // ═══════════════════════════════════════════════════════
 // INIT & LOOP
 // ═══════════════════════════════════════════════════════
-async function apiFetchWithMethod(path, fallback, opts) {
-  try {
-    const r = await fetch(path, opts || {cache:'no-store'});
-    if (!r.ok) throw new Error(r.status);
-    return await r.json();
-  } catch(e) {
-    console.warn('API error:', path, e.message);
-    return fallback;
-  }
-}
-// Override apiFetch to support options
-const _apiFetch = apiFetch;
-window.apiFetch = apiFetchWithMethod;
-
 async function refreshAll() {
   await Promise.all([
     fetchStatus(),

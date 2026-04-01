@@ -210,11 +210,12 @@ def telegram_listener():
 
                     elif text == "/balance":
                         bal     = load_json(BALANCE_FILE, {})
-                        usdt    = bal.get("usdt", "Not fetched yet — trigger a scan first")
+                        usdt    = bal.get("usdt_total", bal.get("usdt", "Not fetched yet — trigger a scan first"))
+                        free    = bal.get("usdt_free", bal.get("usdt", 0))
                         updated = bal.get("updated_at", "unknown")
                         requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
                             data={"chat_id": chat_id,
-                                  "text": f"💰 *Balance: {usdt} USDT*\nUpdated: {updated}",
+                                  "text": f"💰 *Balance: {usdt} USDT*\nAvailable: {free} USDT\nUpdated: {updated}",
                                   "parse_mode": "Markdown"}, timeout=10)
         except Exception:
             pass
@@ -298,11 +299,13 @@ def api_balance():
             upnl += (live - t["entry"]) * t["qty"] if t["signal"] == "BUY" \
                     else (t["entry"] - live) * t["qty"]
 
-    usdt = float(bal.get("usdt", 0))
+    usdt_total = float(bal.get("usdt_total", bal.get("usdt", 0)) or 0)
+    usdt_free  = float(bal.get("usdt_free", bal.get("usdt", usdt_total)) or 0)
     return jsonify({
         "ok":         True,
-        "usdt":       usdt,
-        "equity":     round(usdt + upnl, 2),
+        "usdt":       usdt_total,
+        "usdt_free":  usdt_free,
+        "equity":     round(usdt_total + upnl, 2),
         "unrealised": round(upnl, 4),
         "assets":     bal.get("assets", []),
         "updated_at": bal.get("updated_at"),
@@ -420,7 +423,7 @@ def static_files(path):
 # ════════════ STARTUP ════════════════════════════════════════
 
 log.info("=" * 50)
-log.info("CryptoBot Dashboard API starting...")
+log.info("CryptoBot dashboard.py API starting...")
 log.info(f"GH_PAT_TOKEN: {'SET' if os.getenv('GH_PAT_TOKEN') else 'MISSING'}")
 log.info(f"GITHUB_REPO:  {os.getenv('GITHUB_REPO', 'NOT SET')}")
 log.info(f"TELEGRAM:     {'SET' if os.getenv('TELEGRAM_TOKEN') else 'NOT SET'}")

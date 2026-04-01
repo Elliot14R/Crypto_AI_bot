@@ -24,22 +24,22 @@ from smart_scheduler import (
     get_effective_risk
 )
 
-# Persistence layer
-try:
-    from persistence import load_json, save_json
-    PERSISTENCE_ENABLED = True
-except ImportError:
-    PERSISTENCE_ENABLED = False
-    def load_json(path, default):
-        try:
-            if Path(path).exists():
-                with open(path) as f: return json.load(f)
-        except Exception: pass
-        return default
-    def save_json(path, data):
-        tmp = str(path) + ".tmp"
-        with open(tmp, "w") as f: json.dump(data, f, indent=2, default=str)
-        os.replace(tmp, path)
+# Simple JSON persistence (no external persistence module)
+def load_json(path, default):
+    try:
+        if Path(path).exists():
+            with open(path) as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return default
+
+
+def save_json(path, data):
+    tmp = str(path) + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(data, f, indent=2, default=str)
+    os.replace(tmp, path)
 
 TRADES_FILE     = "trades.json"
 HISTORY_FILE    = "trade_history.json"
@@ -117,26 +117,50 @@ def get_balance_usdt(ex):
     """Fetches balance, saves it to GitHub, and catches errors."""
     try:
         b = ex.fetch_balance()
-        usdt = float(b.get("USDT", {}).get("free", 0))
-        
+        usdt_node  = b.get("USDT", {}) if isinstance(b.get("USDT", {}), dict) else {}
+        usdt_free  = float(usdt_node.get("free", 0) or 0)
+        usdt_used  = float(usdt_node.get("used", 0) or 0)
+        usdt_total = float(usdt_node.get("total", usdt_free + usdt_used) or (usdt_free + usdt_used))
+
+        # Build asset list from TOTAL balances (not only free), so held coins are visible on dashboard.
         assets = []
-        for asset, data in b.items():
-            if isinstance(data, dict) and float(data.get("free", 0)) > 0:
-                if asset not in ("info", "free", "used", "total", "timestamp", "datetime"):
-                    assets.append({"asset": asset, "free": float(data["free"])})
-        
+        totals = b.get("total", {}) if isinstance(b.get("total", {}), dict) else {}
+        frees  = b.get("free", {}) if isinstance(b.get("free", {}), dict) else {}
+        useds  = b.get("used", {}) if isinstance(b.get("used", {}), dict) else {}
+
+        for asset, total_amt in totals.items():
+            try:
+                total_amt = float(total_amt or 0)
+                free_amt  = float(frees.get(asset, 0) or 0)
+                used_amt  = float(useds.get(asset, 0) or 0)
+            except Exception:
+                continue
+            if total_amt > 0:
+                assets.append({
+                    "asset": asset,
+                    "free": round(free_amt, 8),
+                    "used": round(used_amt, 8),
+                    "total": round(total_amt, 8),
+                })
+
         save_json(BALANCE_FILE, {
-            "usdt": usdt,
+            "usdt": usdt_free,
+            "usdt_free": usdt_free,
+            "usdt_used": usdt_used,
+            "usdt_total": usdt_total,
             "assets": assets,
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "error": None
         })
-        return usdt
+        return usdt_free
     except Exception as e:
         log.error(f"Balance fetch failed: {e}")
         # Save the error so we can read it!
         save_json(BALANCE_FILE, {
             "usdt": 0.0,
+            "usdt_free": 0.0,
+            "usdt_used": 0.0,
+            "usdt_total": 0.0,
             "assets": [],
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "error": str(e)
@@ -492,9 +516,9 @@ def check_mode_switch(mode: dict):
     last = load_json(MODE_FILE, {})
     if last.get("mode") != mode["mode"]:
         msgs = {
-            "active":  "📈 *Active hours* — conf ≥65% | score ≥3 | full risk",
-            "quiet":   "🌙 *Quiet hours* — conf ≥72% | score ≥4 | 50% risk",
-            "weekend": "📅 *Weekend mode* — conf ≥65% | score ≥3 | 75% risk",
+            "active":  "📈 *Active hours* — conf ≥60% | score ≥2 | full risk",
+            "quiet":   "🌙 *Quiet hours* — conf ≥68% | score ≥3 | 75% risk",
+            "weekend": "📅 *Weekend mode* — conf ≥65% | score ≥2 | 75% risk",
         }
         _send(msgs.get(mode["mode"], "Mode changed"))
         save_json(MODE_FILE, {"mode":  mode["mode"], "since": datetime.now(timezone.utc).isoformat()})

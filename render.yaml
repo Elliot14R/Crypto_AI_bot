@@ -6,7 +6,7 @@ services:
     name: cryptobot-dashboard
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn dashboard_api:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    startCommand: gunicorn dashboard:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
       - key: TELEGRAM_TOKEN
         sync: false
