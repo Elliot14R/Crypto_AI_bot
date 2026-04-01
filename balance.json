@@ -1,0 +1,2277 @@
+{
+  "usdt": 10000.0,
+  "assets": [
+    {
+      "asset": "\u8fd9\u662f\u6d4b\u8bd5\u5e01",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "456",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "BNB",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "BTC",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "USDT",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "ETH",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "LTC",
+      "free": 9.0,
+      "total": 9.0
+    },
+    {
+      "asset": "TRX",
+      "free": 1583.0,
+      "total": 1583.0
+    },
+    {
+      "asset": "XRP",
+      "free": 369.0,
+      "total": 369.0
+    },
+    {
+      "asset": "NEO",
+      "free": 182.0,
+      "total": 182.0
+    },
+    {
+      "asset": "GAS",
+      "free": 308.0,
+      "total": 308.0
+    },
+    {
+      "asset": "KNC",
+      "free": 3593.0,
+      "total": 3593.0
+    },
+    {
+      "asset": "IOTA",
+      "free": 8814.0,
+      "total": 8814.0
+    },
+    {
+      "asset": "LINK",
+      "free": 55.0,
+      "total": 55.0
+    },
+    {
+      "asset": "ETC",
+      "free": 60.0,
+      "total": 60.0
+    },
+    {
+      "asset": "ZEC",
+      "free": 2.0,
+      "total": 2.0
+    },
+    {
+      "asset": "DASH",
+      "free": 15.0,
+      "total": 15.0
+    },
+    {
+      "asset": "BAT",
+      "free": 4902.0,
+      "total": 4902.0
+    },
+    {
+      "asset": "ADX",
+      "free": 7071.0,
+      "total": 7071.0
+    },
+    {
+      "asset": "ADA",
+      "free": 2008.0,
+      "total": 2008.0
+    },
+    {
+      "asset": "XLM",
+      "free": 2891.0,
+      "total": 2891.0
+    },
+    {
+      "asset": "RLC",
+      "free": 1216.0,
+      "total": 1216.0
+    },
+    {
+      "asset": "STEEM",
+      "free": 8523.0,
+      "total": 8523.0
+    },
+    {
+      "asset": "ONT",
+      "free": 4632.0,
+      "total": 4632.0
+    },
+    {
+      "asset": "QTUM",
+      "free": 554.0,
+      "total": 554.0
+    },
+    {
+      "asset": "WAN",
+      "free": 7439.0,
+      "total": 7439.0
+    },
+    {
+      "asset": "TUSD",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "ZEN",
+      "free": 89.0,
+      "total": 89.0
+    },
+    {
+      "asset": "THETA",
+      "free": 3267.0,
+      "total": 3267.0
+    },
+    {
+      "asset": "ICX",
+      "free": 14357.0,
+      "total": 14357.0
+    },
+    {
+      "asset": "VET",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "USDC",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "ONG",
+      "free": 7463.0,
+      "total": 7463.0
+    },
+    {
+      "asset": "HOT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ZIL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ZRX",
+      "free": 4813.0,
+      "total": 4813.0
+    },
+    {
+      "asset": "FET",
+      "free": 2046.0,
+      "total": 2046.0
+    },
+    {
+      "asset": "IOST",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "CELR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ENJ",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ATOM",
+      "free": 290.0,
+      "total": 290.0
+    },
+    {
+      "asset": "TFUEL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ONE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ALGO",
+      "free": 4754.0,
+      "total": 4754.0
+    },
+    {
+      "asset": "DOGE",
+      "free": 5404.0,
+      "total": 5404.0
+    },
+    {
+      "asset": "DUSK",
+      "free": 4840.0,
+      "total": 4840.0
+    },
+    {
+      "asset": "ANKR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "WIN",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "COS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "MTL",
+      "free": 1818.0,
+      "total": 1818.0
+    },
+    {
+      "asset": "DENT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "FUN",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "CVC",
+      "free": 17062.0,
+      "total": 17062.0
+    },
+    {
+      "asset": "CHZ",
+      "free": 11907.0,
+      "total": 11907.0
+    },
+    {
+      "asset": "BAND",
+      "free": 2427.0,
+      "total": 2427.0
+    },
+    {
+      "asset": "XTZ",
+      "free": 1407.0,
+      "total": 1407.0
+    },
+    {
+      "asset": "RVN",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "HBAR",
+      "free": 5538.0,
+      "total": 5538.0
+    },
+    {
+      "asset": "STX",
+      "free": 2205.0,
+      "total": 2205.0
+    },
+    {
+      "asset": "KAVA",
+      "free": 9287.0,
+      "total": 9287.0
+    },
+    {
+      "asset": "ARPA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "IOTX",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BCH",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "FTT",
+      "free": 1644.0,
+      "total": 1644.0
+    },
+    {
+      "asset": "TRY",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "EUR",
+      "free": 431.0,
+      "total": 431.0
+    },
+    {
+      "asset": "OGN",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "LSK",
+      "free": 4098.0,
+      "total": 4098.0
+    },
+    {
+      "asset": "BNT",
+      "free": 1728.0,
+      "total": 1728.0
+    },
+    {
+      "asset": "MBL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "COTI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ZAR",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "SOL",
+      "free": 5.0,
+      "total": 5.0
+    },
+    {
+      "asset": "CTSI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "HIVE",
+      "free": 8532.0,
+      "total": 8532.0
+    },
+    {
+      "asset": "CHR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ARDR",
+      "free": 11705.0,
+      "total": 11705.0
+    },
+    {
+      "asset": "MDT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "UAH",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "COMP",
+      "free": 29.0,
+      "total": 29.0
+    },
+    {
+      "asset": "SC",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SNX",
+      "free": 1743.0,
+      "total": 1743.0
+    },
+    {
+      "asset": "VTHO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "DGB",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "RUNE",
+      "free": 1216.0,
+      "total": 1216.0
+    },
+    {
+      "asset": "DCR",
+      "free": 24.0,
+      "total": 24.0
+    },
+    {
+      "asset": "STORJ",
+      "free": 5412.0,
+      "total": 5412.0
+    },
+    {
+      "asset": "AVA",
+      "free": 2583.0,
+      "total": 2583.0
+    },
+    {
+      "asset": "MANA",
+      "free": 5665.0,
+      "total": 5665.0
+    },
+    {
+      "asset": "YFI",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "DAI",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "JST",
+      "free": 7915.0,
+      "total": 7915.0
+    },
+    {
+      "asset": "CRV",
+      "free": 2264.0,
+      "total": 2264.0
+    },
+    {
+      "asset": "SAND",
+      "free": 6393.0,
+      "total": 6393.0
+    },
+    {
+      "asset": "NMR",
+      "free": 74.0,
+      "total": 74.0
+    },
+    {
+      "asset": "DOT",
+      "free": 390.0,
+      "total": 390.0
+    },
+    {
+      "asset": "LUNA",
+      "free": 8978.0,
+      "total": 8978.0
+    },
+    {
+      "asset": "RSR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PAXG",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "TRB",
+      "free": 33.0,
+      "total": 33.0
+    },
+    {
+      "asset": "WBTC",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "SUSHI",
+      "free": 2521.0,
+      "total": 2521.0
+    },
+    {
+      "asset": "KSM",
+      "free": 119.0,
+      "total": 119.0
+    },
+    {
+      "asset": "EGLD",
+      "free": 130.0,
+      "total": 130.0
+    },
+    {
+      "asset": "DIA",
+      "free": 2883.0,
+      "total": 2883.0
+    },
+    {
+      "asset": "FIO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "UMA",
+      "free": 1210.0,
+      "total": 1210.0
+    },
+    {
+      "asset": "BEL",
+      "free": 5274.0,
+      "total": 5274.0
+    },
+    {
+      "asset": "UNI",
+      "free": 139.0,
+      "total": 139.0
+    },
+    {
+      "asset": "OXT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SUN",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AVAX",
+      "free": 54.0,
+      "total": 54.0
+    },
+    {
+      "asset": "CAKE",
+      "free": 355.0,
+      "total": 355.0
+    },
+    {
+      "asset": "UTK",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "XVS",
+      "free": 182.0,
+      "total": 182.0
+    },
+    {
+      "asset": "BRL",
+      "free": 97.0,
+      "total": 97.0
+    },
+    {
+      "asset": "AAVE",
+      "free": 5.0,
+      "total": 5.0
+    },
+    {
+      "asset": "NEAR",
+      "free": 415.0,
+      "total": 415.0
+    },
+    {
+      "asset": "FIL",
+      "free": 594.0,
+      "total": 594.0
+    },
+    {
+      "asset": "INJ",
+      "free": 171.0,
+      "total": 171.0
+    },
+    {
+      "asset": "AUDIO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "CTK",
+      "free": 3087.0,
+      "total": 3087.0
+    },
+    {
+      "asset": "AXS",
+      "free": 434.0,
+      "total": 434.0
+    },
+    {
+      "asset": "STRAX",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ROSE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SKL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "GLM",
+      "free": 3909.0,
+      "total": 3909.0
+    },
+    {
+      "asset": "GRT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "JUV",
+      "free": 1008.0,
+      "total": 1008.0
+    },
+    {
+      "asset": "PSG",
+      "free": 620.0,
+      "total": 620.0
+    },
+    {
+      "asset": "1INCH",
+      "free": 5447.0,
+      "total": 5447.0
+    },
+    {
+      "asset": "OG",
+      "free": 175.0,
+      "total": 175.0
+    },
+    {
+      "asset": "ATM",
+      "free": 490.0,
+      "total": 490.0
+    },
+    {
+      "asset": "ASR",
+      "free": 387.0,
+      "total": 387.0
+    },
+    {
+      "asset": "CELO",
+      "free": 6018.0,
+      "total": 6018.0
+    },
+    {
+      "asset": "RIF",
+      "free": 14662.0,
+      "total": 14662.0
+    },
+    {
+      "asset": "TRU",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "CKB",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TWT",
+      "free": 1453.0,
+      "total": 1453.0
+    },
+    {
+      "asset": "SFP",
+      "free": 1800.0,
+      "total": 1800.0
+    },
+    {
+      "asset": "DODO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ACM",
+      "free": 1229.0,
+      "total": 1229.0
+    },
+    {
+      "asset": "POND",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "DEGO",
+      "free": 1817.0,
+      "total": 1817.0
+    },
+    {
+      "asset": "ALICE",
+      "free": 4625.0,
+      "total": 4625.0
+    },
+    {
+      "asset": "SUPER",
+      "free": 4718.0,
+      "total": 4718.0
+    },
+    {
+      "asset": "CFX",
+      "free": 9278.0,
+      "total": 9278.0
+    },
+    {
+      "asset": "TKO",
+      "free": 9671.0,
+      "total": 9671.0
+    },
+    {
+      "asset": "PUNDIX",
+      "free": 3472.0,
+      "total": 3472.0
+    },
+    {
+      "asset": "TLM",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BAR",
+      "free": 931.0,
+      "total": 931.0
+    },
+    {
+      "asset": "SLP",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SHIB",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ICP",
+      "free": 215.0,
+      "total": 215.0
+    },
+    {
+      "asset": "AR",
+      "free": 287.0,
+      "total": 287.0
+    },
+    {
+      "asset": "MASK",
+      "free": 1197.0,
+      "total": 1197.0
+    },
+    {
+      "asset": "LPT",
+      "free": 237.0,
+      "total": 237.0
+    },
+    {
+      "asset": "XVG",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ATA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "GTC",
+      "free": 6666.0,
+      "total": 6666.0
+    },
+    {
+      "asset": "PHA",
+      "free": 14881.0,
+      "total": 14881.0
+    },
+    {
+      "asset": "MLN",
+      "free": 158.0,
+      "total": 158.0
+    },
+    {
+      "asset": "DEXE",
+      "free": 62.0,
+      "total": 62.0
+    },
+    {
+      "asset": "C98",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "QNT",
+      "free": 7.0,
+      "total": 7.0
+    },
+    {
+      "asset": "FLOW",
+      "free": 17074.0,
+      "total": 17074.0
+    },
+    {
+      "asset": "MINA",
+      "free": 8457.0,
+      "total": 8457.0
+    },
+    {
+      "asset": "RAY",
+      "free": 714.0,
+      "total": 714.0
+    },
+    {
+      "asset": "FARM",
+      "free": 44.0,
+      "total": 44.0
+    },
+    {
+      "asset": "QUICK",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "MBOX",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "REQ",
+      "free": 7596.0,
+      "total": 7596.0
+    },
+    {
+      "asset": "WAXP",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "GNO",
+      "free": 4.0,
+      "total": 4.0
+    },
+    {
+      "asset": "XEC",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "DYDX",
+      "free": 4917.0,
+      "total": 4917.0
+    },
+    {
+      "asset": "USDP",
+      "free": 499.0,
+      "total": 499.0
+    },
+    {
+      "asset": "GALA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ILV",
+      "free": 124.0,
+      "total": 124.0
+    },
+    {
+      "asset": "YGG",
+      "free": 14148.0,
+      "total": 14148.0
+    },
+    {
+      "asset": "SYS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "FIDA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AGLD",
+      "free": 2109.0,
+      "total": 2109.0
+    },
+    {
+      "asset": "RAD",
+      "free": 2294.0,
+      "total": 2294.0
+    },
+    {
+      "asset": "RARE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "LAZIO",
+      "free": 746.0,
+      "total": 746.0
+    },
+    {
+      "asset": "AUCTION",
+      "free": 108.0,
+      "total": 108.0
+    },
+    {
+      "asset": "MOVR",
+      "free": 381.0,
+      "total": 381.0
+    },
+    {
+      "asset": "CITY",
+      "free": 968.0,
+      "total": 968.0
+    },
+    {
+      "asset": "ENS",
+      "free": 86.0,
+      "total": 86.0
+    },
+    {
+      "asset": "QI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PORTO",
+      "free": 505.0,
+      "total": 505.0
+    },
+    {
+      "asset": "POWR",
+      "free": 7949.0,
+      "total": 7949.0
+    },
+    {
+      "asset": "JASMY",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AMP",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PYR",
+      "free": 1900.0,
+      "total": 1900.0
+    },
+    {
+      "asset": "ALCX",
+      "free": 97.0,
+      "total": 97.0
+    },
+    {
+      "asset": "SANTOS",
+      "free": 452.0,
+      "total": 452.0
+    },
+    {
+      "asset": "BICO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "FLUX",
+      "free": 8892.0,
+      "total": 8892.0
+    },
+    {
+      "asset": "HIGH",
+      "free": 3968.0,
+      "total": 3968.0
+    },
+    {
+      "asset": "CVX",
+      "free": 278.0,
+      "total": 278.0
+    },
+    {
+      "asset": "PEOPLE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SPELL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "JOE",
+      "free": 13440.0,
+      "total": 13440.0
+    },
+    {
+      "asset": "ACH",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "IMX",
+      "free": 3553.0,
+      "total": 3553.0
+    },
+    {
+      "asset": "GLMR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SCRT",
+      "free": 6638.0,
+      "total": 6638.0
+    },
+    {
+      "asset": "API3",
+      "free": 1821.0,
+      "total": 1821.0
+    },
+    {
+      "asset": "BTTC",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "XNO",
+      "free": 1102.0,
+      "total": 1102.0
+    },
+    {
+      "asset": "WOO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ALPINE",
+      "free": 1254.0,
+      "total": 1254.0
+    },
+    {
+      "asset": "T",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ASTR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "GMT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "APE",
+      "free": 5487.0,
+      "total": 5487.0
+    },
+    {
+      "asset": "BIFI",
+      "free": 4.0,
+      "total": 4.0
+    },
+    {
+      "asset": "NEXO",
+      "free": 573.0,
+      "total": 573.0
+    },
+    {
+      "asset": "LDO",
+      "free": 1483.0,
+      "total": 1483.0
+    },
+    {
+      "asset": "OP",
+      "free": 4471.0,
+      "total": 4471.0
+    },
+    {
+      "asset": "STG",
+      "free": 1932.0,
+      "total": 1932.0
+    },
+    {
+      "asset": "LUNC",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "GMX",
+      "free": 77.0,
+      "total": 77.0
+    },
+    {
+      "asset": "POLYX",
+      "free": 10749.0,
+      "total": 10749.0
+    },
+    {
+      "asset": "APT",
+      "free": 554.0,
+      "total": 554.0
+    },
+    {
+      "asset": "PLN",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "OSMO",
+      "free": 16323.0,
+      "total": 16323.0
+    },
+    {
+      "asset": "HFT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PHB",
+      "free": 5434.0,
+      "total": 5434.0
+    },
+    {
+      "asset": "MAGIC",
+      "free": 8585.0,
+      "total": 8585.0
+    },
+    {
+      "asset": "RPL",
+      "free": 284.0,
+      "total": 284.0
+    },
+    {
+      "asset": "GNS",
+      "free": 674.0,
+      "total": 674.0
+    },
+    {
+      "asset": "SYN",
+      "free": 10989.0,
+      "total": 10989.0
+    },
+    {
+      "asset": "SSV",
+      "free": 224.0,
+      "total": 224.0
+    },
+    {
+      "asset": "LQTY",
+      "free": 1760.0,
+      "total": 1760.0
+    },
+    {
+      "asset": "USTC",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PROM",
+      "free": 495.0,
+      "total": 495.0
+    },
+    {
+      "asset": "QKC",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ID",
+      "free": 13898.0,
+      "total": 13898.0
+    },
+    {
+      "asset": "ARB",
+      "free": 5268.0,
+      "total": 5268.0
+    },
+    {
+      "asset": "ARS",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "EDU",
+      "free": 8667.0,
+      "total": 8667.0
+    },
+    {
+      "asset": "SUI",
+      "free": 561.0,
+      "total": 561.0
+    },
+    {
+      "asset": "PEPE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "FLOKI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "WBETH",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "MAV",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PENDLE",
+      "free": 444.0,
+      "total": 444.0
+    },
+    {
+      "asset": "ARKM",
+      "free": 4962.0,
+      "total": 4962.0
+    },
+    {
+      "asset": "WLD",
+      "free": 1772.0,
+      "total": 1772.0
+    },
+    {
+      "asset": "FDUSD",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "SEI",
+      "free": 9075.0,
+      "total": 9075.0
+    },
+    {
+      "asset": "CYBER",
+      "free": 1003.0,
+      "total": 1003.0
+    },
+    {
+      "asset": "ARK",
+      "free": 3015.0,
+      "total": 3015.0
+    },
+    {
+      "asset": "IQ",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TIA",
+      "free": 1664.0,
+      "total": 1664.0
+    },
+    {
+      "asset": "MEME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ORDI",
+      "free": 214.0,
+      "total": 214.0
+    },
+    {
+      "asset": "BEAMX",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PIVX",
+      "free": 6211.0,
+      "total": 6211.0
+    },
+    {
+      "asset": "VIC",
+      "free": 11619.0,
+      "total": 11619.0
+    },
+    {
+      "asset": "BLUR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "VANRY",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AEUR",
+      "free": 435.0,
+      "total": 435.0
+    },
+    {
+      "asset": "JTO",
+      "free": 1797.0,
+      "total": 1797.0
+    },
+    {
+      "asset": "1000SATS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BONK",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ACE",
+      "free": 4237.0,
+      "total": 4237.0
+    },
+    {
+      "asset": "NFP",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "XAI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "MANTA",
+      "free": 8072.0,
+      "total": 8072.0
+    },
+    {
+      "asset": "ALT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "JUP",
+      "free": 2990.0,
+      "total": 2990.0
+    },
+    {
+      "asset": "PYTH",
+      "free": 12470.0,
+      "total": 12470.0
+    },
+    {
+      "asset": "RONIN",
+      "free": 5680.0,
+      "total": 5680.0
+    },
+    {
+      "asset": "DYM",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PIXEL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "STRK",
+      "free": 14086.0,
+      "total": 14086.0
+    },
+    {
+      "asset": "PORTAL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AXL",
+      "free": 10614.0,
+      "total": 10614.0
+    },
+    {
+      "asset": "WIF",
+      "free": 2717.0,
+      "total": 2717.0
+    },
+    {
+      "asset": "METIS",
+      "free": 174.0,
+      "total": 174.0
+    },
+    {
+      "asset": "JPY",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "AEVO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BOME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ETHFI",
+      "free": 1041.0,
+      "total": 1041.0
+    },
+    {
+      "asset": "ENA",
+      "free": 5455.0,
+      "total": 5455.0
+    },
+    {
+      "asset": "W",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TNSR",
+      "free": 12572.0,
+      "total": 12572.0
+    },
+    {
+      "asset": "SAGA",
+      "free": 17921.0,
+      "total": 17921.0
+    },
+    {
+      "asset": "MXN",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "TAO",
+      "free": 1.0,
+      "total": 1.0
+    },
+    {
+      "asset": "REZ",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BB",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "NOT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "COP",
+      "free": 18466.0,
+      "total": 18466.0
+    },
+    {
+      "asset": "IO",
+      "free": 4672.0,
+      "total": 4672.0
+    },
+    {
+      "asset": "ZK",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "LISTA",
+      "free": 5734.0,
+      "total": 5734.0
+    },
+    {
+      "asset": "ZRO",
+      "free": 267.0,
+      "total": 267.0
+    },
+    {
+      "asset": "G",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BANANA",
+      "free": 151.0,
+      "total": 151.0
+    },
+    {
+      "asset": "RENDER",
+      "free": 279.0,
+      "total": 279.0
+    },
+    {
+      "asset": "TON",
+      "free": 410.0,
+      "total": 410.0
+    },
+    {
+      "asset": "DOGS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "EURI",
+      "free": 431.0,
+      "total": 431.0
+    },
+    {
+      "asset": "POL",
+      "free": 5292.0,
+      "total": 5292.0
+    },
+    {
+      "asset": "NEIRO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TURBO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "1MBABYDOGE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "CATI",
+      "free": 9542.0,
+      "total": 9542.0
+    },
+    {
+      "asset": "HMSTR",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "EIGEN",
+      "free": 2994.0,
+      "total": 2994.0
+    },
+    {
+      "asset": "BNSOL",
+      "free": 5.0,
+      "total": 5.0
+    },
+    {
+      "asset": "SCR",
+      "free": 12137.0,
+      "total": 12137.0
+    },
+    {
+      "asset": "LUMIA",
+      "free": 7655.0,
+      "total": 7655.0
+    },
+    {
+      "asset": "KAIA",
+      "free": 10425.0,
+      "total": 10425.0
+    },
+    {
+      "asset": "COW",
+      "free": 2429.0,
+      "total": 2429.0
+    },
+    {
+      "asset": "CETUS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PNUT",
+      "free": 12437.0,
+      "total": 12437.0
+    },
+    {
+      "asset": "ACT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "USUAL",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "THE",
+      "free": 4749.0,
+      "total": 4749.0
+    },
+    {
+      "asset": "ACX",
+      "free": 11764.0,
+      "total": 11764.0
+    },
+    {
+      "asset": "ORCA",
+      "free": 563.0,
+      "total": 563.0
+    },
+    {
+      "asset": "MOVE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ME",
+      "free": 4942.0,
+      "total": 4942.0
+    },
+    {
+      "asset": "VELODROME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "VANA",
+      "free": 399.0,
+      "total": 399.0
+    },
+    {
+      "asset": "1000CAT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PENGU",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BIO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "D",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AIXBT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "CGPT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "COOKIE",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "S",
+      "free": 11523.0,
+      "total": 11523.0
+    },
+    {
+      "asset": "SOLV",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TRUMP",
+      "free": 165.0,
+      "total": 165.0
+    },
+    {
+      "asset": "ANIME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BERA",
+      "free": 1123.0,
+      "total": 1123.0
+    },
+    {
+      "asset": "1000CHEEMS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TST",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "LAYER",
+      "free": 6287.0,
+      "total": 6287.0
+    },
+    {
+      "asset": "HEI",
+      "free": 6784.0,
+      "total": 6784.0
+    },
+    {
+      "asset": "KAITO",
+      "free": 1231.0,
+      "total": 1231.0
+    },
+    {
+      "asset": "SHELL",
+      "free": 17340.0,
+      "total": 17340.0
+    },
+    {
+      "asset": "RED",
+      "free": 4740.0,
+      "total": 4740.0
+    },
+    {
+      "asset": "GPS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "EPIC",
+      "free": 1968.0,
+      "total": 1968.0
+    },
+    {
+      "asset": "BMT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "FORM",
+      "free": 2096.0,
+      "total": 2096.0
+    },
+    {
+      "asset": "XUSD",
+      "free": 499.0,
+      "total": 499.0
+    },
+    {
+      "asset": "NIL",
+      "free": 14925.0,
+      "total": 14925.0
+    },
+    {
+      "asset": "PARTI",
+      "free": 5883.0,
+      "total": 5883.0
+    },
+    {
+      "asset": "MUBARAK",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "TUT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BROCCOLI714",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BANANAS31",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "GUN",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BABY",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ONDO",
+      "free": 1828.0,
+      "total": 1828.0
+    },
+    {
+      "asset": "BIGTIME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "VIRTUAL",
+      "free": 747.0,
+      "total": 747.0
+    },
+    {
+      "asset": "KERNEL",
+      "free": 5070.0,
+      "total": 5070.0
+    },
+    {
+      "asset": "WCT",
+      "free": 8852.0,
+      "total": 8852.0
+    },
+    {
+      "asset": "HYPER",
+      "free": 5959.0,
+      "total": 5959.0
+    },
+    {
+      "asset": "INIT",
+      "free": 6314.0,
+      "total": 6314.0
+    },
+    {
+      "asset": "SIGN",
+      "free": 15630.0,
+      "total": 15630.0
+    },
+    {
+      "asset": "STO",
+      "free": 1967.0,
+      "total": 1967.0
+    },
+    {
+      "asset": "SYRUP",
+      "free": 2383.0,
+      "total": 2383.0
+    },
+    {
+      "asset": "KMNO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SXT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "NXPC",
+      "free": 1778.0,
+      "total": 1778.0
+    },
+    {
+      "asset": "AWE",
+      "free": 10111.0,
+      "total": 10111.0
+    },
+    {
+      "asset": "HAEDAL",
+      "free": 18181.0,
+      "total": 18181.0
+    },
+    {
+      "asset": "USD1",
+      "free": 499.0,
+      "total": 499.0
+    },
+    {
+      "asset": "HUMA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "A",
+      "free": 6401.0,
+      "total": 6401.0
+    },
+    {
+      "asset": "SOPH",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "RESOLV",
+      "free": 12562.0,
+      "total": 12562.0
+    },
+    {
+      "asset": "HOME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "SPK",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "NEWT",
+      "free": 7264.0,
+      "total": 7264.0
+    },
+    {
+      "asset": "SAHARA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "LA",
+      "free": 2682.0,
+      "total": 2682.0
+    },
+    {
+      "asset": "ERA",
+      "free": 3984.0,
+      "total": 3984.0
+    },
+    {
+      "asset": "C",
+      "free": 7351.0,
+      "total": 7351.0
+    },
+    {
+      "asset": "TREE",
+      "free": 8461.0,
+      "total": 8461.0
+    },
+    {
+      "asset": "TOWNS",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "PROVE",
+      "free": 2212.0,
+      "total": 2212.0
+    },
+    {
+      "asset": "BFUSD",
+      "free": 500.0,
+      "total": 500.0
+    },
+    {
+      "asset": "PLUME",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "DOLO",
+      "free": 15699.0,
+      "total": 15699.0
+    },
+    {
+      "asset": "MITO",
+      "free": 13859.0,
+      "total": 13859.0
+    },
+    {
+      "asset": "WLFI",
+      "free": 4983.0,
+      "total": 4983.0
+    },
+    {
+      "asset": "SOMI",
+      "free": 3220.0,
+      "total": 3220.0
+    },
+    {
+      "asset": "OPEN",
+      "free": 3073.0,
+      "total": 3073.0
+    },
+    {
+      "asset": "USDE",
+      "free": 500.0,
+      "total": 500.0
+    },
+    {
+      "asset": "LINEA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "HOLO",
+      "free": 9416.0,
+      "total": 9416.0
+    },
+    {
+      "asset": "PUMP",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "AVNT",
+      "free": 3779.0,
+      "total": 3779.0
+    },
+    {
+      "asset": "ZKC",
+      "free": 7092.0,
+      "total": 7092.0
+    },
+    {
+      "asset": "SKY",
+      "free": 6715.0,
+      "total": 6715.0
+    },
+    {
+      "asset": "BARD",
+      "free": 1428.0,
+      "total": 1428.0
+    },
+    {
+      "asset": "0G",
+      "free": 1008.0,
+      "total": 1008.0
+    },
+    {
+      "asset": "HEMI",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "XPL",
+      "free": 5227.0,
+      "total": 5227.0
+    },
+    {
+      "asset": "MIRA",
+      "free": 6538.0,
+      "total": 6538.0
+    },
+    {
+      "asset": "FF",
+      "free": 7041.0,
+      "total": 7041.0
+    },
+    {
+      "asset": "EDEN",
+      "free": 17298.0,
+      "total": 17298.0
+    },
+    {
+      "asset": "NOM",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "2Z",
+      "free": 6310.0,
+      "total": 6310.0
+    },
+    {
+      "asset": "MORPHO",
+      "free": 303.0,
+      "total": 303.0
+    },
+    {
+      "asset": "ASTER",
+      "free": 738.0,
+      "total": 738.0
+    },
+    {
+      "asset": "WAL",
+      "free": 6973.0,
+      "total": 6973.0
+    },
+    {
+      "asset": "EUL",
+      "free": 518.0,
+      "total": 518.0
+    },
+    {
+      "asset": "ENSO",
+      "free": 494.0,
+      "total": 494.0
+    },
+    {
+      "asset": "YB",
+      "free": 4732.0,
+      "total": 4732.0
+    },
+    {
+      "asset": "ZBT",
+      "free": 5452.0,
+      "total": 5452.0
+    },
+    {
+      "asset": "TURTLE",
+      "free": 12254.0,
+      "total": 12254.0
+    },
+    {
+      "asset": "GIGGLE",
+      "free": 21.0,
+      "total": 21.0
+    },
+    {
+      "asset": "F",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "KITE",
+      "free": 3185.0,
+      "total": 3185.0
+    },
+    {
+      "asset": "MMT",
+      "free": 4574.0,
+      "total": 4574.0
+    },
+    {
+      "asset": "SAPIEN",
+      "free": 7621.0,
+      "total": 7621.0
+    },
+    {
+      "asset": "ALLO",
+      "free": 4811.0,
+      "total": 4811.0
+    },
+    {
+      "asset": "BANK",
+      "free": 12820.0,
+      "total": 12820.0
+    },
+    {
+      "asset": "MET",
+      "free": 3789.0,
+      "total": 3789.0
+    },
+    {
+      "asset": "USD",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "IDR",
+      "free": 10000.0,
+      "total": 10000.0
+    },
+    {
+      "asset": "AT",
+      "free": 3301.0,
+      "total": 3301.0
+    },
+    {
+      "asset": "KGST",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "BREV",
+      "free": 4414.0,
+      "total": 4414.0
+    },
+    {
+      "asset": "\u5e01\u5b89\u4eba\u751f",
+      "free": 10408.0,
+      "total": 10408.0
+    },
+    {
+      "asset": "ZKP",
+      "free": 7204.0,
+      "total": 7204.0
+    },
+    {
+      "asset": "U",
+      "free": 499.0,
+      "total": 499.0
+    },
+    {
+      "asset": "FRAX",
+      "free": 1207.0,
+      "total": 1207.0
+    },
+    {
+      "asset": "FOGO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "RLUSD",
+      "free": 499.0,
+      "total": 499.0
+    },
+    {
+      "asset": "SENT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ZAMA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ESP",
+      "free": 6205.0,
+      "total": 6205.0
+    },
+    {
+      "asset": "MANTRA",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "ROBO",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "OPN",
+      "free": 2865.0,
+      "total": 2865.0
+    },
+    {
+      "asset": "NIGHT",
+      "free": 10834.0,
+      "total": 10834.0
+    },
+    {
+      "asset": "CFG",
+      "free": 3196.0,
+      "total": 3196.0
+    },
+    {
+      "asset": "KAT",
+      "free": 18446.0,
+      "total": 18446.0
+    },
+    {
+      "asset": "XAUT",
+      "free": 1.0,
+      "total": 1.0
+    }
+  ],
+  "updated_at": "2026-04-01T21:56:49.748774+00:00",
+  "source": "ccxt"
+}
