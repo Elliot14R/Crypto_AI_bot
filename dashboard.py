@@ -36,23 +36,26 @@ BALANCE_FILE = "balance.json"
 
 # ════════════ SIMPLE FILE I/O ════════════
 
+# ════════════ FILE I/O (The Bridge) ═══════════════════════════════════════
 def load_json(path, default):
+    try:
+        from persistence import load_from_github
+        # Fetch directly from GitHub so Render always has fresh data!
+        data = load_from_github(path, None)
+        if data is not None:
+            return data
+    except Exception:
+        pass
     try:
         if Path(path).exists():
             with open(path) as f:
                 return json.load(f)
-    except Exception as e:
-        log.warning(f"load_json {path}: {e}")
+    except Exception:
+        pass
     return default
 
 def save_json(path, data):
-    try:
-        tmp = str(path) + ".tmp"
-        with open(tmp, "w") as f:
-            json.dump(data, f, indent=2, default=str)
-        os.replace(tmp, path)
-    except Exception as e:
-        log.error(f"save_json {path}: {e}")
+    pass 
 
 
 # ════════════ PRICE FETCHING (Public API — No Geo-Block) ═════════════
