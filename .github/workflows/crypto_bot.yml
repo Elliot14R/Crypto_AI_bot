@@ -21,7 +21,7 @@ jobs:
 
     env:
       GH_PAT_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
-      GITHUB_REPO: Elliot14R/Crypto_AI_bot
+      GITHUB_REPO:  Elliot14R/Crypto_AI_bot
       GITHUB_BRANCH: main
 
     steps:
@@ -70,11 +70,11 @@ jobs:
 
       - name: Init state files if missing
         run: |
-          [ -f trades.json ]        || echo '{}' > trades.json
-          [ -f trade_history.json ] || echo '[]' > trade_history.json
-          [ -f signals.json ]       || echo '[]' > signals.json
-          [ -f scan_mode.json ]     || echo '{}' > scan_mode.json
-          [ -f balance.json ]       || echo '{}' > balance.json
+          [ -f trades.json ]        || echo '{}'  > trades.json
+          [ -f trade_history.json ] || echo '[]'  > trade_history.json
+          [ -f signals.json ]       || echo '[]'  > signals.json
+          [ -f scan_mode.json ]     || echo '{}'  > scan_mode.json
+          [ -f balance.json ]       || echo '{}'  > balance.json
 
       - name: Run bot
         run: |
