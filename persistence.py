@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 log = logging.getLogger(__name__)
 
 # ── Config ────────────────────────────────────────────────────
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+GITHUB_TOKEN = os.getenv("GH_PAT_TOKEN", "")
 GITHUB_REPO  = os.getenv("GITHUB_REPO",  "Elliot14R/Crypto_AI_bot")
 GITHUB_BRANCH= os.getenv("GITHUB_BRANCH","main")
 
