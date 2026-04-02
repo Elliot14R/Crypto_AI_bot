@@ -2,7 +2,6 @@ name: CryptoBot AI — Smart Scanner
 
 on:
   schedule:
-    # Every 15 minutes — smart_scheduler decides if it actually runs
     - cron: '0,15,30,45 * * * *'
   workflow_dispatch:
     inputs:
@@ -20,6 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
 
+    env:
+      GH_PAT_TOKEN:   ${{ secrets.GH_PAT_TOKEN }}
+      GITHUB_REPO:    Elliot14R/Crypto_AI_bot
+      GITHUB_BRANCH:  main
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,11 +39,14 @@ jobs:
 
       - name: Write .env from secrets
         run: |
+          echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"   >> .env
+          echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"     >> .env
           echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"     >> .env
           echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
           echo "CRYPTOPANIC_KEY=${{ secrets.CRYPTOPANIC_KEY }}"   >> .env
-          echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"   >> .env
-          echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"     >> .env
+          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"        >> .env
+          echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"              >> .env
+          echo "GITHUB_BRANCH=main"                                >> .env
 
       - name: Restore model cache
         uses: actions/cache@v4
@@ -47,8 +54,6 @@ jobs:
           path: pro_crypto_ai_model.pkl
           key: model-${{ hashFiles('model_performance.json') }}
 
-      # State files — restore from previous run
-      # Uses restore-keys so if no exact match it grabs the latest available
       - name: Restore state files
         uses: actions/cache@v4
         id: state-cache
@@ -58,28 +63,27 @@ jobs:
             trade_history.json
             signals.json
             scan_mode.json
+            balance.json
           key: bot-state-${{ github.run_id }}
           restore-keys: |
             bot-state-
 
-      # If no state cache found, create empty defaults so bot doesn't crash
       - name: Init state files if missing
         run: |
-          [ -f trades.json ]       || echo '{}'  > trades.json
-          [ -f trade_history.json ]|| echo '[]'  > trade_history.json
-          [ -f signals.json ]      || echo '[]'  > signals.json
-          [ -f scan_mode.json ]    || echo '{}'  > scan_mode.json
+          [ -f trades.json ]        || echo '{}'  > trades.json
+          [ -f trade_history.json ] || echo '[]'  > trade_history.json
+          [ -f signals.json ]       || echo '[]'  > signals.json
+          [ -f scan_mode.json ]     || echo '{}'  > scan_mode.json
+          [ -f balance.json ]       || echo '{}'  > balance.json
 
       - name: Run bot
         run: |
           if [ "${{ github.event.inputs.mode }}" = "diagnostic" ]; then
-            echo "Running diagnostic..."
             python trade_executor.py diagnostic
           else
             python trade_executor.py
           fi
 
-      # Always save state even if scan fails
       - name: Save state files
         if: always()
         uses: actions/cache/save@v4
@@ -89,6 +93,7 @@ jobs:
             trade_history.json
             signals.json
             scan_mode.json
+            balance.json
           key: bot-state-${{ github.run_id }}
 
       - name: Upload log
