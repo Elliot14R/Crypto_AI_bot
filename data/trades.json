@@ -1,3 +1,120 @@
 {
-  
+  "INJUSDT": {
+    "symbol": "INJUSDT",
+    "signal": "BUY",
+    "entry": 2.917,
+    "stop": 2.901,
+    "tp1": 2.9383,
+    "tp2": 2.949,
+    "qty": 251.384993,
+    "qty_tp1": 125.692497,
+    "qty_tp2": 125.692497,
+    "risk_usd": 36.66,
+    "balance_at_open": 3666.4501171,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "1122206",
+      "stop_loss": "1122207",
+      "tp1": "1122208"
+    },
+    "opened_at": "2026-03-30T14:33:23.139465+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 65.3,
+    "score": 4,
+    "reasons": [
+      "Good AI conf (65%)",
+      "Strong trend ADX 34",
+      "EMA20 > EMA50 uptrend",
+      "1h confirms uptrend"
+    ],
+    "tier": "\ud83e\udd16 AI & Momentum"
+  },
+  "FETUSDT": {
+    "symbol": "FETUSDT",
+    "signal": "BUY",
+    "entry": 0.2302,
+    "stop": 0.2271,
+    "tp1": 0.2343,
+    "tp2": 0.2363,
+    "qty": 3348.204051,
+    "qty_tp1": 1674.102026,
+    "qty_tp2": 1674.102026,
+    "risk_usd": 38.54,
+    "balance_at_open": 3853.7828631,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "869746",
+      "stop_loss": "869747",
+      "tp1": "869748"
+    },
+    "opened_at": "2026-03-30T19:01:45.377860+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 66.4,
+    "score": 3,
+    "reasons": [
+      "Good AI conf (66%)",
+      "Strong trend ADX 36",
+      "RSI bullish zone"
+    ],
+    "tier": "\ud83e\udd16 AI & Momentum"
+  },
+  "UNIUSDT": {
+    "symbol": "UNIUSDT",
+    "signal": "BUY",
+    "entry": 3.135,
+    "stop": 3.093,
+    "tp1": 3.1864,
+    "tp2": 3.2131,
+    "qty": 638.365784,
+    "qty_tp1": 319.182892,
+    "qty_tp2": 319.182892,
+    "risk_usd": 100.0,
+    "balance_at_open": 10000.0,
+    "order_ids": {
+      "entry": "28290",
+      "stop_loss": "28291"
+    },
+    "opened_at": "2026-04-02T18:17:17.552954+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 75.6,
+    "score": 3,
+    "reasons": [
+      "High AI confidence (76%)",
+      "Strong trend ADX 49",
+      "RSI bullish zone (31)"
+    ],
+    "tier": "\ud83c\udfdb Institutional Alts"
+  },
+  "UNI/USDT": {
+    "symbol": "UNI/USDT",
+    "signal": "RECOVERED",
+    "entry": 3.093,
+    "stop": 0,
+    "tp1": 0,
+    "tp2": 0,
+    "qty": 638.36,
+    "qty_tp1": 319.18,
+    "qty_tp2": 319.18,
+    "risk_usd": 0,
+    "balance_at_open": 0,
+    "order_ids": {
+      "stop_loss": "28291"
+    },
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 100,
+    "score": 6,
+    "reasons": [
+      "\ud83d\udd04 Recovered by Auto-Sync"
+    ],
+    "tier": "Unknown",
+    "opened_at": "2026-04-02T18:17:17.201Z"
+  }
 }
