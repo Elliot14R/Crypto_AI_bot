@@ -1,151 +1,170 @@
-# feature_engineering.py
-# CRITICAL: This file must have add_indicators(df) function.
-# trade_executor.py imports this function directly.
-# The old version was just a standalone script — this is the fix.
+# feature_engineering.py — Fixed version
+# Removed all .fillna(inplace=True) calls that cause FutureWarning in pandas 3.x
+# Replaced with df[col] = df[col].fillna(value) pattern
 
 import pandas as pd
 import numpy as np
+import ta
+from config import RAW_DATA_FILE, FEATURES_FILE, FEATURES
 
-def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Takes a raw OHLCV dataframe and returns it with all indicators added.
-    Called by trade_executor.py for every symbol during live scanning.
-    Uses pure pandas/numpy — no 'ta' library dependency issues.
-    """
+
+def add_indicators(df):
     df = df.copy()
-
-    # Ensure numeric types
-    for c in ["open", "high", "low", "close", "volume"]:
-        df[c] = pd.to_numeric(df[c], errors="coerce")
-
-    df = df.dropna(subset=["close"])
-    if len(df) < 20:
-        return df
+    for col in ["open","high","low","close","volume"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
 
     c = df["close"]
     h = df["high"]
     l = df["low"]
     v = df["volume"]
 
-    # ── EMAs ─────────────────────────────────────────────
-    df["ema9"]   = c.ewm(span=9,   adjust=False).mean()
-    df["ema20"]  = c.ewm(span=20,  adjust=False).mean()
-    df["ema50"]  = c.ewm(span=50,  adjust=False).mean()
-    df["ema200"] = c.ewm(span=200, adjust=False).mean()
+    # ── EMA Trend ──────────────────────────────────────────
+    df["ema9"]        = ta.trend.ema_indicator(c, window=9)
+    df["ema20"]       = ta.trend.ema_indicator(c, window=20)
+    df["ema50"]       = ta.trend.ema_indicator(c, window=50)
+    df["ema200"]      = ta.trend.ema_indicator(c, window=200)
+    df["ema20_slope"] = df["ema20"].diff(5) / df["ema20"].shift(5)
+    df["ema50_slope"] = df["ema50"].diff(5) / df["ema50"].shift(5)
 
-    df["ema20_slope"] = df["ema20"].diff(3) / df["ema20"].shift(3) * 100
-    df["ema50_slope"] = df["ema50"].diff(3) / df["ema50"].shift(3) * 100
+    df["price_vs_ema20"]  = (c - df["ema20"])  / df["ema20"]
+    df["price_vs_ema50"]  = (c - df["ema50"])  / df["ema50"]
+    df["price_vs_ema200"] = (c - df["ema200"]) / df["ema200"]
+    df["ema20_vs_ema50"]  = (df["ema20"] - df["ema50"]) / df["ema50"]
 
-    df["price_vs_ema20"]  = (c - df["ema20"])  / df["ema20"]  * 100
-    df["price_vs_ema50"]  = (c - df["ema50"])  / df["ema50"]  * 100
-    df["price_vs_ema200"] = (c - df["ema200"]) / df["ema200"] * 100
-    df["ema20_vs_ema50"]  = (df["ema20"] - df["ema50"]) / df["ema50"] * 100
+    # ── RSI ─────────────────────────────────────────────────
+    df["rsi"]       = ta.momentum.rsi(c, window=14)
+    df["rsi"]       = df["rsi"].fillna(50)          # FIX: was fillna(50, inplace=True)
+    df["rsi_slope"] = df["rsi"].diff(5)
+    df["rsi_fast"]  = ta.momentum.rsi(c, window=7)
+    df["rsi_fast"]  = df["rsi_fast"].fillna(50)     # FIX: was fillna(50, inplace=True)
 
-    # ── RSI ───────────────────────────────────────────────
-    delta   = c.diff()
-    gain    = delta.clip(lower=0)
-    loss    = (-delta).clip(lower=0)
-    avg_g   = gain.ewm(com=13, adjust=False).mean()
-    avg_l   = loss.ewm(com=13, adjust=False).mean()
-    rs      = avg_g / avg_l.replace(0, np.nan)
-    df["rsi"] = 100 - (100 / (1 + rs))
-    df["rsi"].fillna(50, inplace=True)
-    df["rsi_slope"] = df["rsi"].diff(3)
+    # ── MACD ────────────────────────────────────────────────
+    macd              = ta.trend.MACD(c)
+    df["macd"]        = macd.macd()
+    df["macd_signal"] = macd.macd_signal()
+    df["macd_hist"]   = macd.macd_diff()
+    df["macd_slope"]  = df["macd_hist"].diff(3)
 
-    # Fast RSI (7-period)
-    avg_g7  = gain.ewm(com=6, adjust=False).mean()
-    avg_l7  = loss.ewm(com=6, adjust=False).mean()
-    rs7     = avg_g7 / avg_l7.replace(0, np.nan)
-    df["rsi_fast"] = 100 - (100 / (1 + rs7))
-    df["rsi_fast"].fillna(50, inplace=True)
+    # ── Stochastic ──────────────────────────────────────────
+    stoch          = ta.momentum.StochasticOscillator(h, l, c)
+    df["stoch_k"]  = stoch.stoch()
+    df["stoch_d"]  = stoch.stoch_signal()
+    df["stoch_k"]  = df["stoch_k"].fillna(50)       # FIX
+    df["stoch_d"]  = df["stoch_d"].fillna(50)       # FIX
 
-    # ── Stochastic ────────────────────────────────────────
-    low14  = l.rolling(14).min()
-    high14 = h.rolling(14).max()
-    denom  = (high14 - low14).replace(0, np.nan)
-    df["stoch_k"] = ((c - low14) / denom * 100).fillna(50)
-    df["stoch_d"] = df["stoch_k"].rolling(3).mean().fillna(50)
-
-    # ── MACD ─────────────────────────────────────────────
-    ema12 = c.ewm(span=12, adjust=False).mean()
-    ema26 = c.ewm(span=26, adjust=False).mean()
-    df["macd"]        = ema12 - ema26
-    df["macd_signal"] = df["macd"].ewm(span=9, adjust=False).mean()
-    df["macd_hist"]   = df["macd"] - df["macd_signal"]
-    df["macd_slope"]  = df["macd"].diff(2)
-
-    # ── ADX ───────────────────────────────────────────────
-    prev_c  = c.shift(1)
-    tr      = pd.concat([
-        h - l,
-        (h - prev_c).abs(),
-        (l - prev_c).abs()
-    ], axis=1).max(axis=1)
-
-    up_move   = h - h.shift(1)
-    down_move = l.shift(1) - l
-    plus_dm   = up_move.where((up_move > down_move) & (up_move > 0), 0.0)
-    minus_dm  = down_move.where((down_move > up_move) & (down_move > 0), 0.0)
-
-    tr14       = tr.ewm(alpha=1/14, adjust=False).mean()
-    plus_di14  = 100 * plus_dm.ewm(alpha=1/14, adjust=False).mean() / tr14.replace(0, np.nan)
-    minus_di14 = 100 * minus_dm.ewm(alpha=1/14, adjust=False).mean() / tr14.replace(0, np.nan)
-
-    dx = 100 * (plus_di14 - minus_di14).abs() / (plus_di14 + minus_di14).replace(0, np.nan)
-    df["adx"]     = dx.ewm(alpha=1/14, adjust=False).mean().fillna(0)
-    df["adx_pos"] = plus_di14.fillna(0)
-    df["adx_neg"] = minus_di14.fillna(0)
+    # ── ADX trend strength ──────────────────────────────────
+    df["adx"]     = ta.trend.adx(h, l, c, window=14)
+    df["adx_pos"] = ta.trend.adx_pos(h, l, c, window=14)
+    df["adx_neg"] = ta.trend.adx_neg(h, l, c, window=14)
     df["di_diff"] = df["adx_pos"] - df["adx_neg"]
+    df["adx"]     = df["adx"].fillna(0)             # FIX
+    df["adx_pos"] = df["adx_pos"].fillna(0)         # FIX
+    df["adx_neg"] = df["adx_neg"].fillna(0)         # FIX
 
-    # ── ATR ───────────────────────────────────────────────
-    df["atr"]     = tr.ewm(alpha=1/14, adjust=False).mean()
-    df["atr_pct"] = df["atr"] / c * 100
+    # ── Bollinger Bands ─────────────────────────────────────
+    bb             = ta.volatility.BollingerBands(c, window=20, window_dev=2)
+    df["bb_high"]  = bb.bollinger_hband()
+    df["bb_low"]   = bb.bollinger_lband()
+    df["bb_pct"]   = bb.bollinger_pband()
+    df["bb_width"] = (df["bb_high"] - df["bb_low"]) / df["ema20"]
+    df["bb_pct"]   = df["bb_pct"].fillna(0.5)       # FIX
 
-    # ── Bollinger Bands ───────────────────────────────────
-    bb_mid   = c.rolling(20).mean()
-    bb_std   = c.rolling(20).std()
-    bb_upper = bb_mid + 2 * bb_std
-    bb_lower = bb_mid - 2 * bb_std
-    bb_range = (bb_upper - bb_lower).replace(0, np.nan)
-    df["bb_high"]  = bb_upper
-    df["bb_low"]   = bb_lower
-    df["bb_pct"]   = ((c - bb_lower) / bb_range * 100).fillna(50)
-    df["bb_width"] = (bb_range / bb_mid * 100).fillna(0)
+    # ── ATR volatility ──────────────────────────────────────
+    df["atr"]     = ta.volatility.average_true_range(h, l, c, window=14)
+    df["atr_pct"] = df["atr"] / c
+    df["atr"]     = df["atr"].fillna(0)             # FIX
 
-    # ── Volume ────────────────────────────────────────────
-    vol_ma = v.rolling(20).mean().replace(0, np.nan)
-    df["volume_ratio"] = (v / vol_ma).fillna(1)
-    df["volume_spike"] = (df["volume_ratio"] > 2).astype(float)
-    df["obv_slope"]    = (np.sign(c.diff()) * v).rolling(10).sum().diff(3).fillna(0)
+    # ── Volume analysis ─────────────────────────────────────
+    vol_ma20           = v.rolling(20).mean()
+    df["volume_ratio"] = v / vol_ma20
+    df["volume_spike"] = (v > vol_ma20 * 2).astype(int)
+    df["obv"]          = ta.volume.on_balance_volume(c, v)
+    df["obv_slope"]    = df["obv"].diff(5) / df["obv"].shift(5).abs()
+    df["volume_ratio"] = df["volume_ratio"].fillna(1.0)  # FIX
+    df["obv_slope"]    = df["obv_slope"].fillna(0)       # FIX
 
-    # ── Price Changes ─────────────────────────────────────
-    df["price_change"]  = c.pct_change(1) * 100
-    df["price_change3"] = c.pct_change(3) * 100
-    df["price_change6"] = c.pct_change(6) * 100
-
-    # ── Candle Properties ─────────────────────────────────
-    df["high_low_pct"]  = (h - l) / l * 100
-    body                = (c - df["open"]).abs()
-    wick_total          = (h - l).replace(0, np.nan)
-    df["body_pct"]      = (body / wick_total * 100).fillna(0)
+    # ── Price action ────────────────────────────────────────
+    df["price_change"]  = c.pct_change()
+    df["price_change3"] = c.pct_change(3)
+    df["price_change6"] = c.pct_change(6)
+    df["high_low_pct"]  = (h - l) / c
+    df["body_pct"]      = abs(c - df["open"]) / (h - l + 0.0001)
     df["momentum"]      = c - c.shift(10)
-    df["volatility"]    = c.rolling(20).std().fillna(0)
+    df["volatility"]    = c.rolling(20).std() / c
 
-    # ── Candle Patterns ───────────────────────────────────
-    df["bullish_candle"] = (c > df["open"]).astype(float)
-    total_range = (h - l).replace(0, np.nan)
-    df["doji"]   = ((c - df["open"]).abs() / total_range < 0.1).fillna(False).astype(float)
-    lower_wick   = pd.concat([df["open"], c], axis=1).min(axis=1) - l
-    df["hammer"] = ((lower_wick / total_range.replace(0, np.nan) > 0.6)
-                    & (body / total_range.replace(0, np.nan) < 0.3)).fillna(False).astype(float)
+    # ── Candlestick patterns ─────────────────────────────────
+    df["bullish_candle"] = (c > df["open"]).astype(int)
+    df["doji"]           = (df["body_pct"] < 0.1).astype(int)
+    df["hammer"]         = (
+        (df["body_pct"] < 0.3) &
+        ((l - c.shift(1).clip(lower=0)) > 2 * abs(c - df["open"]))
+    ).astype(int)
 
-    # ── Higher timeframe placeholders (filled by trade_executor) ──
-    # These get overwritten with actual 1h values in generate_signal()
+    # ── 1h placeholders (filled by generate_signal) ─────────
+    # These are set manually in trade_executor.generate_signal()
     if "rsi_1h"   not in df.columns: df["rsi_1h"]   = 50.0
     if "adx_1h"   not in df.columns: df["adx_1h"]   = 0.0
     if "trend_1h" not in df.columns: df["trend_1h"] = 0.0
 
-    # trend column used by higher timeframe check
-    df["trend"] = (df["ema20"] > df["ema50"]).astype(float)
+    return df
 
-    return df.fillna(0)
+
+def add_higher_tf_features(df_15m, df_1h):
+    """Add 1h trend context to 15m dataframe."""
+    df_1h = df_1h.copy()
+    df_1h["ema20_1h"] = ta.trend.ema_indicator(df_1h["close"], window=20)
+    df_1h["ema50_1h"] = ta.trend.ema_indicator(df_1h["close"], window=50)
+    df_1h["rsi_1h"]   = ta.momentum.rsi(df_1h["close"], window=14)
+    df_1h["adx_1h"]   = ta.trend.adx(df_1h["high"], df_1h["low"], df_1h["close"])
+    df_1h["trend_1h"] = (df_1h["ema20_1h"] > df_1h["ema50_1h"]).astype(int)
+
+    df_1h["open_time"]  = pd.to_datetime(df_1h["open_time"])
+    df_1h["merge_key"]  = df_1h["open_time"].dt.floor("1h")
+    df_15m["open_time"] = pd.to_datetime(df_15m["open_time"])
+    df_15m["merge_key"] = df_15m["open_time"].dt.floor("1h")
+
+    htf_cols   = ["merge_key","ema20_1h","ema50_1h","rsi_1h","adx_1h","trend_1h"]
+    df_merged  = df_15m.merge(
+        df_1h[htf_cols].drop_duplicates("merge_key"),
+        on="merge_key", how="left"
+    ).drop(columns=["merge_key"])
+
+    return df_merged
+
+
+def main():
+    print("Building professional features...\n")
+    df = pd.read_csv(RAW_DATA_FILE)
+    df["open_time"] = pd.to_datetime(df["open_time"])
+    print(f"  Loaded {len(df):,} rows")
+
+    all_groups = []
+    for symbol in df["symbol"].unique():
+        sym_df = df[df["symbol"] == symbol]
+        df_15m = sym_df[sym_df["interval"] == "15m"].copy().reset_index(drop=True)
+        df_1h  = sym_df[sym_df["interval"] == "1h"].copy().reset_index(drop=True)
+        if df_15m.empty: continue
+        df_15m = add_indicators(df_15m)
+        if not df_1h.empty:
+            df_1h = add_indicators(df_1h)
+            try:
+                df_15m = add_higher_tf_features(df_15m, df_1h)
+            except Exception as e:
+                print(f"  Warning: 1h merge failed for {symbol}: {e}")
+        df_15m["symbol"] = symbol
+        all_groups.append(df_15m)
+
+    result = pd.concat(all_groups, ignore_index=True)
+    result = result.dropna()    # FIX: was result.dropna(inplace=True)
+    result.to_csv(FEATURES_FILE, index=False)
+
+    missing = [f for f in FEATURES if f not in result.columns]
+    if missing:
+        print(f"  WARNING — missing features: {missing}")
+    else:
+        print(f"  All {len(FEATURES)} features present ✓")
+    print(f"  Saved {len(result):,} rows to {FEATURES_FILE}")
+
+
+if __name__ == "__main__":
+    main()
