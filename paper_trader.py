@@ -16,27 +16,40 @@ TRADES_FILE   = "trades.json"
 # ── 🔥 FIXED: Robust price fetch ────────────────
 
 def get_live_price(symbol: str) -> float:
-    """Reliable price fetch with retry"""
-    url = "https://api.binance.com/api/v3/ticker/price"
+    """Robust price fetch with fallback sources"""
 
-    for attempt in range(2):
-        try:
-            r = requests.get(url, params={"symbol": symbol}, timeout=10)
+    # 1️⃣ Primary: Binance
+    try:
+        r = requests.get(
+            "https://api.binance.com/api/v3/ticker/price",
+            params={"symbol": symbol},
+            timeout=10
+        )
+        if r.status_code == 200:
+            data = r.json()
+            price = float(data.get("price", 0))
+            if price > 0:
+                return price
+    except Exception as e:
+        log.warning(f"Binance price error {symbol}: {e}")
 
-            if r.status_code == 200:
-                data = r.json()
+    # 2️⃣ 🔥 Fallback: Binance data API (different endpoint)
+    try:
+        r = requests.get(
+            "https://data-api.binance.vision/api/v3/ticker/price",
+            params={"symbol": symbol},
+            timeout=10
+        )
+        if r.status_code == 200:
+            data = r.json()
+            price = float(data.get("price", 0))
+            if price > 0:
+                return price
+    except Exception as e:
+        log.warning(f"Fallback price error {symbol}: {e}")
 
-                if "price" in data:
-                    price = float(data["price"])
-                    if price > 0:
-                        return price
-
-        except Exception as e:
-            log.warning(f"Price fetch {symbol} attempt {attempt+1}: {e}")
-
-        time.sleep(0.5)
-
-    log.warning(f"❌ Failed to fetch price for {symbol}")
+    # 3️⃣ Final fail
+    log.warning(f"❌ All price sources failed for {symbol}")
     return 0.0
 
 
