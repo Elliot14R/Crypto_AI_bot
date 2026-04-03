@@ -45,23 +45,23 @@ log = logging.getLogger(__name__)
 # FILE I/O
 # ══════════════════════════════════════════════════════════
 
-def load_json(path, default):
-    try:
-        if Path(path).exists():
-            with open(path) as f:
-                return json.load(f)
-    except Exception: pass
-    return default
+# def load_json(path, default):
+#     try:
+#         if Path(path).exists():
+#             with open(path) as f:
+#                 return json.load(f)
+#     except Exception: pass
+#     return default
 
 
-def save_json(path, data):
-    try:
-        tmp = str(path) + ".tmp"
-        with open(tmp, "w") as f:
-            json.dump(data, f, indent=2, default=str)
-        os.replace(tmp, path)
-    except Exception as e:
-        log.error(f"save_json {path}: {e}")
+# def save_json(path, data):
+#     try:
+#         tmp = str(path) + ".tmp"
+#         with open(tmp, "w") as f:
+#             json.dump(data, f, indent=2, default=str)
+#         os.replace(tmp, path)
+#     except Exception as e:
+#         log.error(f"save_json {path}: {e}")
 
 
 def load_trades():  return load_json(TRADES_FILE,  {})
