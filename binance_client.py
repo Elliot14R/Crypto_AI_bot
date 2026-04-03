@@ -26,6 +26,7 @@ class BinanceTestnet:
     """
 
     def __init__(self, api_key: str, secret: str):
+        print("USING BASE URL:", self.base)
         self.api_key = api_key
         self.secret  = secret
         self.base    = TESTNET_BASE
