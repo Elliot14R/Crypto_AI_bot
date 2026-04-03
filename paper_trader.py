@@ -198,6 +198,27 @@ class PaperTrader:
             "paper_fill": fill_price,
         }
 
+    def place_limit_order(self, symbol: str, side: str, quantity: float,
+                      price: float, stop_price: float = None) -> dict:
+        """Simulate limit / stop orders for TP & SL"""
+
+        order_id = f"paper_{symbol}_{side}_{int(datetime.now(timezone.utc).timestamp())}"
+
+        order_type = "STOP_LOSS" if stop_price else "LIMIT"
+
+        log.info(f"  📝 PAPER {order_type} {side} {quantity:.6f} {symbol} @ {price:.4f}")
+
+        return {
+            "orderId": order_id,
+            "symbol": symbol,
+            "side": side.upper(),
+            "type": order_type,
+            "origQty": str(quantity),
+            "price": str(price),
+            "stopPrice": str(stop_price or price),
+            "status": "NEW",
+        }
+
     def update_balance_after_close(self, pnl: float):
         bal = load_json(BALANCE_FILE, {})
         usdt = float(bal.get("usdt", self.STARTING_BALANCE))
