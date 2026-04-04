@@ -32,5 +32,40 @@
     "tier": "\u26a1 High-Liquidity L1s",
     "mode": "paper_trading",
     "generated_at": "2026-04-03T22:23:43.692246+00:00"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "signal": "BUY",
+    "entry": 589.53462,
+    "stop": 587.97,
+    "tp1": 590.94,
+    "tp2": 591.79,
+    "qty": 2.715023,
+    "qty_tp1": 1.357511,
+    "qty_tp2": 1.357511,
+    "risk_usd": 59.99,
+    "balance_at_open": 7999.0000146073,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "paper_BNBUSDT_1775293080",
+      "stop_loss": "paper_BNBUSDT_SELL_1775293080",
+      "tp1": "paper_BNBUSDT_SELL_1775293080",
+      "tp2": "paper_BNBUSDT_SELL_1775293080"
+    },
+    "opened_at": "2026-04-04T08:58:00.623479+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 64.7,
+    "score": 4,
+    "reasons": [
+      "Good AI conf (65%)",
+      "Strong trend ADX 22",
+      "RSI bullish (46)",
+      "EMA20>EMA50 uptrend"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "mode": "paper_trading",
+    "generated_at": "2026-04-04T08:58:00.624062+00:00"
   }
 ]
