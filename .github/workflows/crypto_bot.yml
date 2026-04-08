@@ -1,4 +1,4 @@
-name: CryptoBot AI — Smart Scanner
+name: CryptoBot AI — Delta Exchange Scanner
 
 on:
   schedule:
@@ -10,15 +10,19 @@ on:
         required: false
         default: 'scan'
         type: choice
-        options:
-          - scan
-          - diagnostic
-          - clear_stuck
+        options: [scan, diagnostic]
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 12
+
+    env:
+      GH_PAT_TOKEN:        ${{ secrets.GH_PAT_TOKEN }}
+      GITHUB_REPO:         Elliot14R/Crypto_AI_bot
+      GITHUB_BRANCH:       main
+      DELTA_API_KEY:       ${{ secrets.DELTA_API_KEY }}
+      DELTA_API_SECRET:    ${{ secrets.DELTA_API_SECRET }}
 
     steps:
       - name: Checkout
@@ -33,23 +37,27 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Write .env
+      - name: Write .env from secrets
         run: |
-          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"     >> .env
-          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
           echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"   >> .env
           echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"     >> .env
-          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"         >> .env
-          echo "GITHUB_REPO=${{ github.repository }}"             >> .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"     >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
+          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"        >> .env
+          echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"              >> .env
+          echo "GITHUB_BRANCH=main"                                >> .env
+          echo "DELTA_API_KEY=${{ secrets.DELTA_API_KEY }}"       >> .env
+          echo "DELTA_API_SECRET=${{ secrets.DELTA_API_SECRET }}" >> .env
 
-      - name: Restore model
+      - name: Restore model cache
         uses: actions/cache@v4
         with:
           path: pro_crypto_ai_model.pkl
           key: model-${{ hashFiles('model_performance.json') }}
 
-      - name: Restore state cache
+      - name: Restore state files
         uses: actions/cache@v4
+        id: state-cache
         with:
           path: |
             trades.json
@@ -61,39 +69,23 @@ jobs:
           restore-keys: |
             bot-state-
 
-      - name: Sync state from data/ folder
+      - name: Init state files if missing
         run: |
-          mkdir -p data
-          for f in trades.json trade_history.json signals.json scan_mode.json balance.json; do
-            if [ ! -f "$f" ]; then
-              if [ -f "data/$f" ]; then
-                cp "data/$f" "$f"
-                echo "  Restored $f from data/"
-              else
-                if [[ "$f" == "trades.json" || "$f" == "scan_mode.json" ]]; then
-                  echo '{}' > "$f"
-                else
-                  echo '[]' > "$f"
-                fi
-                echo "  Created empty $f"
-              fi
-            fi
-          done
-          echo "=== trades.json ===" && cat trades.json
-          echo "=== balance.json ===" && cat balance.json
+          [ -f trades.json ]        || echo '{}'  > trades.json
+          [ -f trade_history.json ] || echo '[]'  > trade_history.json
+          [ -f signals.json ]       || echo '[]'  > signals.json
+          [ -f scan_mode.json ]     || echo '{}'  > scan_mode.json
+          [ -f balance.json ]       || echo '{}'  > balance.json
 
       - name: Run bot
         run: |
-          MODE="${{ github.event.inputs.mode }}"
-          if [ "$MODE" = "diagnostic" ]; then
+          if [ "${{ github.event.inputs.mode }}" = "diagnostic" ]; then
             python trade_executor.py diagnostic
-          elif [ "$MODE" = "clear_stuck" ]; then
-            python trade_executor.py clear_stuck
           else
             python trade_executor.py
           fi
 
-      - name: Save state cache
+      - name: Save state files
         if: always()
         uses: actions/cache/save@v4
         with:
@@ -104,26 +96,6 @@ jobs:
             scan_mode.json
             balance.json
           key: bot-state-${{ github.run_id }}
-
-      - name: Commit state files to data/ folder
-        if: always()
-        run: |
-          mkdir -p data
-          for f in trades.json trade_history.json signals.json scan_mode.json balance.json; do
-            [ -f "$f" ] && cp "$f" "data/$f"
-          done
-          git config user.name  "CryptoBot AI"
-          git config user.email "bot@cryptoai.local"
-          git add data/
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "bot: update state [skip ci]"
-            git push
-            echo "State files committed to data/"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload log
         if: always()
