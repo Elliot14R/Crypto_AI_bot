@@ -1,11 +1,18 @@
-# trade_executor.py — Delta Exchange India Testnet
+# trade_executor.py — Delta Exchange + Paper Trading Fallback
 # ══════════════════════════════════════════════════════════════════════
-# Exchange: Delta Exchange India (https://testnet.delta.exchange)
-# Why Delta: Legal in India, no geo-block from GitHub Actions or Render
-# API keys: https://testnet.delta.exchange → Settings → API Keys
+# STRATEGY: Try Delta Exchange first. If IP not whitelisted (401), 
+# automatically fall back to Paper Trading so bot never stops working.
 #
-# Market data:  Binance public API (klines — never geo-blocked)
-# Orders/Balance: Delta Exchange India Testnet (HMAC-signed REST)
+# HOW TO GET DELTA WORKING:
+#   Delta Exchange requires IP whitelisting for Trading API keys.
+#   GitHub Actions uses rotating IPs — you CANNOT whitelist them all.
+#   Solutions:
+#     1. Paper Trading (current fallback) — works perfectly, zero setup
+#     2. Render.com paid tier (static IP) — whitelist once, works forever
+#     3. VPS with static IP — best for production
+#
+# Market data:  Binance public API (never geo-blocked anywhere)
+# Orders:       Delta Exchange testnet OR Paper Trading (auto-detected)
 # ══════════════════════════════════════════════════════════════════════
 
 import os, json, time, logging, requests, joblib
@@ -25,7 +32,6 @@ from feature_engineering import add_indicators
 from smart_scheduler import (
     should_scan, get_mode_thresholds, check_correlation, get_effective_risk
 )
-from delta_client import DeltaClient
 
 TRADES_FILE     = "trades.json"
 HISTORY_FILE    = "trade_history.json"
@@ -33,6 +39,12 @@ SIGNALS_FILE    = "signals.json"
 MODE_FILE       = "scan_mode.json"
 BALANCE_FILE    = "balance.json"
 MAX_OPEN_TRADES = 3
+
+# ── Trading mode detection ───────────────────────────────────────────
+# AUTO: tries Delta first, falls back to Paper if IP not whitelisted
+# PAPER: forces paper trading (set TRADING_MODE=paper in .env)
+# DELTA: forces Delta (will error if IP not whitelisted)
+TRADING_MODE = os.getenv("TRADING_MODE", "auto").lower()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,7 +58,6 @@ log = logging.getLogger(__name__)
 
 def load_json(p, d):
     try:
-        # Check root, then data/ subfolder
         for path in [Path(p), Path("data") / p]:
             if path.exists():
                 with open(path) as f: return json.load(f)
@@ -72,63 +83,111 @@ def save_signal(sig):
     save_json(SIGNALS_FILE, s[-500:])
 
 
-# ════════════ DELTA CLIENT INIT ══════════════════════════════════════
+# ════════════ EXCHANGE SETUP ═════════════════════════════════════════
 
-def init_delta() -> DeltaClient:
-    key    = os.getenv("DELTA_API_KEY",    "") or os.getenv("BINANCE_API_KEY", "")
-    secret = os.getenv("DELTA_API_SECRET", "") or os.getenv("BINANCE_SECRET",  "")
-    if not key or not secret:
-        raise ValueError(
-            "DELTA_API_KEY and DELTA_API_SECRET not set!\n"
-            "Add them to GitHub Secrets AND Render environment variables."
-        )
-    client = DeltaClient(key, secret)
-    log.info("✓ Delta Exchange India TESTNET initialised")
-    return client
+def setup_exchange():
+    """
+    Returns (client, mode_str) where mode_str is 'delta' or 'paper'.
+    Auto-detects which mode works based on IP whitelist status.
+    """
+    global TRADING_MODE
+
+    if TRADING_MODE == "paper":
+        log.info("📝 PAPER TRADING MODE (forced by TRADING_MODE=paper)")
+        from paper_trader import PaperTrader
+        return PaperTrader(), "paper"
+
+    # Try Delta first (or if forced)
+    try:
+        from delta_client import DeltaClient
+        key    = (os.getenv("DELTA_API_KEY", "")    or os.getenv("BINANCE_API_KEY", ""))
+        secret = (os.getenv("DELTA_API_SECRET", "") or os.getenv("BINANCE_SECRET",  ""))
+
+        if not key or not secret:
+            raise ValueError("No API keys found — check DELTA_API_KEY and DELTA_API_SECRET")
+
+        client = DeltaClient(key, secret)
+
+        # Test connection — this will raise if IP not whitelisted
+        bal = client.get_usdt_balance()
+        log.info(f"✅ DELTA EXCHANGE TESTNET — Balance: {bal:.2f} USDT")
+        return client, "delta"
+
+    except Exception as e:
+        err_str = str(e).lower()
+        if "ip_not_whitelisted" in err_str or "401" in err_str:
+            log.warning(
+                f"⚠️ Delta Exchange IP not whitelisted ({e})\n"
+                f"   Falling back to PAPER TRADING automatically.\n"
+                f"   To use Delta: whitelist your server's static IP in Delta API settings."
+            )
+            _send(
+                f"⚠️ *Delta IP not whitelisted*\n"
+                f"Falling back to Paper Trading automatically.\n"
+                f"Bot continues running with real market data."
+            )
+        elif TRADING_MODE == "delta":
+            raise   # If forced delta mode, re-raise the error
+        else:
+            log.warning(f"Delta connection failed: {e} — using Paper Trading")
+
+    # Fallback to paper trading
+    log.info("📝 PAPER TRADING MODE (Delta unavailable — IP not whitelisted)")
+    from paper_trader import PaperTrader
+    return PaperTrader(), "paper"
 
 
 # ════════════ BALANCE ════════════════════════════════════════════════
 
-def fetch_and_save_balance(client: DeltaClient) -> float:
-    """Fetch real Delta testnet balance and save to balance.json."""
+def fetch_and_save_balance(client, mode: str) -> float:
+    """Fetch balance from Delta or Paper Trader and save to balance.json."""
     try:
-        balances = client.get_wallet_balance()
-        usdt     = float(balances.get("USDT", 0))
+        if mode == "delta":
+            from delta_client import DeltaClient
+            balances = client.get_wallet_balance()
+            usdt     = float(balances.get("USDT", 0))
+            assets   = [
+                {"asset": a, "free": round(float(v), 4), "total": round(float(v), 4)}
+                for a, v in balances.items() if float(v) > 0
+            ]
+            save_json(BALANCE_FILE, {
+                "usdt":       round(usdt, 2),
+                "equity":     round(usdt, 2),
+                "unrealised": 0.0,
+                "assets":     assets,
+                "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+                "mode":       "delta_testnet",
+                "source":     "delta_exchange_india",
+            })
+            log.info(f"✓ Balance: {usdt:.2f} USDT (Delta Testnet)")
 
-        assets = [
-            {"asset": asset, "free": round(float(amt), 4), "total": round(float(amt), 4)}
-            for asset, amt in balances.items()
-            if float(amt) > 0
-        ]
+        else:  # paper
+            usdt = client.save_balance_snapshot()
 
-        save_json(BALANCE_FILE, {
-            "usdt":       round(usdt, 2),
-            "equity":     round(usdt, 2),
-            "unrealised": 0.0,
-            "assets":     assets,
-            "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-            "mode":       "delta_testnet",
-            "source":     "delta_exchange_india",
-        })
-        log.info(f"✓ Balance: {usdt:.2f} USDT (Delta Testnet) | {len(assets)} assets")
         return round(usdt, 2)
 
     except Exception as e:
         log.error(f"Balance fetch failed: {e}")
-        save_json(BALANCE_FILE, {
-            "usdt":       None,
-            "assets":     [],
-            "error":      str(e),
-            "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-            "mode":       "delta_testnet",
-        })
-        return 0.0
+        # Write error state so dashboard shows something useful
+        bal_now = load_json(BALANCE_FILE, {})
+        if not bal_now or bal_now.get("usdt") is None:
+            save_json(BALANCE_FILE, {
+                "usdt":       10000.0,
+                "equity":     10000.0,
+                "unrealised": 0.0,
+                "assets":     [{"asset":"USDT","free":"10000.0","total":"10000.0"}],
+                "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+                "mode":       "paper_trading",
+                "note":       "Starting balance — Delta exchange unavailable",
+            })
+            return 10000.0
+        return float(bal_now.get("usdt") or 0)
 
 
 # ════════════ MARKET DATA ════════════════════════════════════════════
 
 def get_data(symbol, interval):
-    """Binance public klines — never geo-blocked anywhere."""
+    """Binance public klines — never geo-blocked."""
     endpoints = [
         "https://data-api.binance.vision/api/v3/klines",
         "https://api.binance.com/api/v3/klines",
@@ -159,12 +218,11 @@ def load_model():
 
 
 def calc_pos_size(balance, entry, stop, risk_mult=1.0):
-    """Returns (qty_float, risk_usd). qty is in base asset units."""
     effective_risk = RISK_PER_TRADE * risk_mult
     dist           = abs(entry - stop)
     if dist <= 0: return 0.0, 0.0
     qty     = (balance * effective_risk) / dist
-    max_usd = balance * 0.20  # hard cap: 20% of balance per trade
+    max_usd = balance * 0.20
     if qty * entry > max_usd:
         qty = max_usd / entry
     return round(qty, 6), round(balance * effective_risk, 2)
@@ -172,7 +230,7 @@ def calc_pos_size(balance, entry, stop, risk_mult=1.0):
 
 # ════════════ EXECUTE TRADE ══════════════════════════════════════════
 
-def execute_trade(client: DeltaClient, symbol, signal, entry, atr,
+def execute_trade(client, mode: str, symbol, signal, entry, atr,
                   confidence, score, reasons, risk_mult=1.0):
 
     trades = load_trades()
@@ -181,13 +239,6 @@ def execute_trade(client: DeltaClient, symbol, signal, entry, atr,
     if len(trades) >= MAX_OPEN_TRADES:
         log.info("  Max open trades reached — skip"); return False
     if not check_correlation(trades, signal):
-        return False
-
-    # Check if symbol is available on Delta
-    try:
-        client.get_product(symbol)
-    except ValueError as e:
-        log.warning(f"  {symbol} not on Delta testnet — skip ({e})")
         return False
 
     dec = 4 if entry < 10 else 2
@@ -202,72 +253,88 @@ def execute_trade(client: DeltaClient, symbol, signal, entry, atr,
         tp2     = round(entry - atr * ATR_TARGET2_MULT, dec)
         side    = "sell"; sl_side = "buy";  tp_side = "buy"
 
-    balance = fetch_and_save_balance(client)
+    balance = fetch_and_save_balance(client, mode)
     if balance < 10:
         _warn(f"⚠️ Balance {balance:.2f} USDT too low — skip {symbol}")
         return False
 
-    # Delta uses contract sizes, not raw qty
-    contracts     = client.calc_contracts(balance, entry, stop, risk_mult)
-    qty_float, risk_usd = calc_pos_size(balance, entry, stop, risk_mult)
-    contracts_tp1 = max(1, contracts // 2)
-    contracts_tp2 = max(1, contracts - contracts_tp1)
+    qty, risk_usd = calc_pos_size(balance, entry, stop, risk_mult)
+    if qty <= 0:
+        log.warning(f"  Position size zero for {symbol}"); return False
 
-    log.info(f"  Placing {signal} {symbol} | {contracts} contracts | "
-             f"entry≈{entry:.{dec}f} SL={stop:.{dec}f} TP1={tp1:.{dec}f} TP2={tp2:.{dec}f}")
+    qty_tp1 = round(qty * 0.5, 6)
+    qty_tp2 = round(qty - qty_tp1, 6)
 
-    order_ids = {}
+    log.info(f"  [{mode.upper()}] {signal} {symbol} qty={qty} "
+             f"SL={stop:.{dec}f} TP1={tp1:.{dec}f} TP2={tp2:.{dec}f}")
+
+    order_ids   = {}
+    actual_entry = entry
 
     try:
-        # ── 1. Market entry ───────────────────────────────────────────
-        entry_o = client.place_market_order(symbol, side, contracts)
-        if not entry_o:
-            log.error(f"  Entry order failed for {symbol}"); return False
-        order_ids["entry"] = str(entry_o.get("id", ""))
-        actual_entry = float(entry_o.get("average_fill_price", entry) or
-                             entry_o.get("limit_price", entry) or entry)
-        if actual_entry == 0: actual_entry = entry
-        log.info(f"  ✅ Entry filled @ ~{actual_entry:.{dec}f}")
-        time.sleep(1.5)
+        if mode == "delta":
+            contracts     = client.calc_contracts(balance, entry, stop, risk_mult)
+            contracts_tp1 = max(1, contracts // 2)
+            contracts_tp2 = max(1, contracts - contracts_tp1)
 
-        # ── 2. Stop-loss ──────────────────────────────────────────────
-        try:
-            sl_o = client.place_limit_order(symbol, sl_side, contracts,
-                                            price=stop, stop_price=stop)
-            if sl_o:
-                order_ids["stop_loss"] = str(sl_o.get("id", ""))
-                log.info(f"  ✅ SL placed @ {stop:.{dec}f}")
-        except Exception as e:
-            log.warning(f"  SL placement failed: {e}")
+            # Entry
+            eo = client.place_market_order(symbol, side, contracts)
+            if not eo: log.error(f"  Entry failed {symbol}"); return False
+            order_ids["entry"] = str(eo.get("id", ""))
+            actual_entry = float(eo.get("average_fill_price", entry) or entry) or entry
+            log.info(f"  ✅ Entry @ ~{actual_entry:.{dec}f}")
+            time.sleep(1.5)
 
-        # ── 3. Take profit 1 ─────────────────────────────────────────
-        try:
-            tp1_o = client.place_limit_order(symbol, tp_side, contracts_tp1, price=tp1)
-            if tp1_o:
-                order_ids["tp1"] = str(tp1_o.get("id", ""))
-                log.info(f"  ✅ TP1 placed @ {tp1:.{dec}f} ({contracts_tp1} contracts)")
-        except Exception as e:
-            log.warning(f"  TP1 placement failed: {e}")
+            # SL
+            try:
+                sl_o = client.place_limit_order(symbol, sl_side, contracts,
+                                                price=stop, stop_price=stop)
+                if sl_o: order_ids["stop_loss"] = str(sl_o.get("id",""))
+                log.info(f"  ✅ SL @ {stop:.{dec}f}")
+            except Exception as e:
+                log.warning(f"  SL failed: {e}")
 
-        # ── 4. Take profit 2 ─────────────────────────────────────────
-        try:
-            tp2_o = client.place_limit_order(symbol, tp_side, contracts_tp2, price=tp2)
-            if tp2_o:
-                order_ids["tp2"] = str(tp2_o.get("id", ""))
-                log.info(f"  ✅ TP2 placed @ {tp2:.{dec}f} ({contracts_tp2} contracts)")
-        except Exception as e:
-            log.warning(f"  TP2 placement failed: {e}")
+            # TP1
+            try:
+                tp1_o = client.place_limit_order(symbol, tp_side, contracts_tp1, price=tp1)
+                if tp1_o: order_ids["tp1"] = str(tp1_o.get("id",""))
+                log.info(f"  ✅ TP1 @ {tp1:.{dec}f}")
+            except Exception as e:
+                log.warning(f"  TP1 failed: {e}")
+
+            # TP2
+            try:
+                tp2_o = client.place_limit_order(symbol, tp_side, contracts_tp2, price=tp2)
+                if tp2_o: order_ids["tp2"] = str(tp2_o.get("id",""))
+                log.info(f"  ✅ TP2 @ {tp2:.{dec}f}")
+            except Exception as e:
+                log.warning(f"  TP2 failed: {e}")
+
+        else:  # paper
+            # Market entry
+            eo = client.place_market_order(symbol, side.upper(), qty)
+            order_ids["entry"] = str(eo.get("orderId", ""))
+            actual_entry = float(eo.get("paper_fill", entry) or entry)
+            log.info(f"  📝 PAPER entry @ {actual_entry:.{dec}f}")
+
+            # SL and TP as limit orders (checked against live price each scan)
+            sl_o  = client.place_limit_order(symbol, sl_side.upper(), qty_tp1+qty_tp2,
+                                              price=stop, stop_price=stop)
+            tp1_o = client.place_limit_order(symbol, tp_side.upper(), qty_tp1, price=tp1)
+            tp2_o = client.place_limit_order(symbol, tp_side.upper(), qty_tp2, price=tp2)
+            order_ids["stop_loss"] = str(sl_o.get("orderId",  ""))
+            order_ids["tp1"]       = str(tp1_o.get("orderId", ""))
+            order_ids["tp2"]       = str(tp2_o.get("orderId", ""))
 
     except Exception as e:
-        log.error(f"  Trade execution error {symbol}: {e}")
+        log.error(f"  Trade error {symbol}: {e}")
         _warn(f"⚠️ Trade error {symbol}: {e}")
         return False
 
     record = {
         "symbol": symbol, "signal": signal,
         "entry": actual_entry, "stop": stop, "tp1": tp1, "tp2": tp2,
-        "qty": qty_float, "contracts": contracts,
-        "qty_tp1": qty_float * 0.5, "qty_tp2": qty_float * 0.5,
+        "qty": qty, "qty_tp1": qty_tp1, "qty_tp2": qty_tp2,
         "risk_usd": risk_usd, "risk_mult": risk_mult,
         "balance_at_open": balance,
         "order_ids": order_ids,
@@ -275,26 +342,26 @@ def execute_trade(client: DeltaClient, symbol, signal, entry, atr,
         "tp1_hit": False, "tp2_hit": False, "closed": False,
         "confidence": confidence, "score": score,
         "reasons": reasons, "tier": get_tier(symbol),
-        "exchange": "delta_testnet",
+        "exchange": mode,
     }
     trades[symbol] = record
     save_trades(trades)
     save_signal(record)
     _send_open_alert(symbol, signal, confidence, score, actual_entry,
-                     stop, tp1, tp2, qty_float, risk_usd, balance, reasons)
-    log.info(f"  ✅✅ TRADE OPENED: {symbol} {signal} ({contracts} contracts)")
+                     stop, tp1, tp2, qty, risk_usd, balance, reasons, mode)
+    log.info(f"  ✅✅ TRADE OPENED: {symbol} {signal} [{mode.upper()}]")
     return True
 
 
 # ════════════ MONITOR OPEN TRADES ════════════════════════════════════
 
-def check_open_trades(client: DeltaClient):
+def check_open_trades(client, mode: str):
     trades    = load_trades()
     if not trades:
         log.info("  No open trades"); return
 
     to_remove = []
-    log.info(f"  Monitoring {len(trades)} open trade(s)")
+    log.info(f"  Monitoring {len(trades)} open trade(s) [{mode.upper()}]")
 
     for symbol, trade in list(trades.items()):
         if trade.get("closed"):
@@ -305,61 +372,84 @@ def check_open_trades(client: DeltaClient):
         dec   = 4 if entry < 10 else 2
 
         try:
+            if mode == "paper":
+                # Paper: use PaperTrader.get_order which checks live price
+                def get_o(key):
+                    if key not in oids: return {}
+                    return client.get_order(symbol, oids[key])
+            else:
+                # Delta: fetch real order status
+                def get_o(key):
+                    if key not in oids: return {}
+                    o = client.get_order(oids[key])
+                    return o
+
             # ── Check TP1 ─────────────────────────────────────────────
             if not trade["tp1_hit"] and "tp1" in oids:
-                o = client.get_order(oids["tp1"])
+                o      = get_o("tp1")
                 status = o.get("state", o.get("status", ""))
                 if status in ("filled", "closed", "FILLED"):
                     trade["tp1_hit"] = True
-                    avg  = float(o.get("average_fill_price", o.get("limit_price", trade["tp1"])) or trade["tp1"])
-                    pnl  = _pnl(trade, avg, "tp1")
+                    avg = float(o.get("average_fill_price",
+                                     o.get("price", trade["tp1"])) or trade["tp1"])
+                    pnl = _pnl(trade, avg, "tp1")
                     log.info(f"  🎯 TP1 HIT {symbol} @ {avg:.{dec}f} | pnl={pnl:+.4f}")
-                    _send_close_alert(symbol, "TP1 HIT 🎯", pnl, entry, avg, trade["opened_at"])
+                    _send_close_alert(symbol, "TP1 HIT 🎯", pnl, entry, avg,
+                                      trade["opened_at"], mode)
+                    if mode == "paper":
+                        client.update_balance_after_close(pnl)
 
                     # Move SL to breakeven
-                    if "stop_loss" in oids:
-                        cancelled = client.cancel_order(symbol, oids["stop_loss"])
-                        if cancelled:
+                    if "stop_loss" in oids and mode != "paper":
+                        try:
+                            client.cancel_order(symbol, oids["stop_loss"])
                             sl_side = "sell" if trade["signal"] == "BUY" else "buy"
-                            contracts = max(1, trade.get("contracts", 1) // 2)
-                            new_sl = client.place_limit_order(symbol, sl_side,
-                                                              contracts,
-                                                              price=entry,
-                                                              stop_price=entry)
+                            qty_rem = max(1, trade.get("contracts", 1) // 2)
+                            new_sl  = client.place_limit_order(symbol, sl_side, qty_rem,
+                                                               price=entry, stop_price=entry)
                             if new_sl:
-                                trade["order_ids"]["stop_loss"] = str(new_sl.get("id", ""))
+                                trade["order_ids"]["stop_loss"] = str(new_sl.get("id",""))
                                 trade["stop"] = entry
-                                log.info(f"  🛡️ SL moved to breakeven @ {entry:.{dec}f}")
+                                log.info(f"  🛡️ SL → breakeven @ {entry:.{dec}f}")
                                 _send(f"🛡️ *{symbol} RISK-FREE!*\nSL moved to entry `{entry:.{dec}f}`")
+                        except Exception as e:
+                            log.warning(f"  SL move failed: {e}")
 
             # ── Check TP2 ─────────────────────────────────────────────
             if trade["tp1_hit"] and not trade["tp2_hit"] and "tp2" in oids:
-                o      = client.get_order(oids["tp2"])
+                o      = get_o("tp2")
                 status = o.get("state", o.get("status", ""))
                 if status in ("filled", "closed", "FILLED"):
                     trade["tp2_hit"] = True
                     trade["closed"]  = True
-                    avg  = float(o.get("average_fill_price", o.get("limit_price", trade["tp2"])) or trade["tp2"])
-                    pnl  = _pnl(trade, avg, "tp2")
+                    avg = float(o.get("average_fill_price",
+                                     o.get("price", trade["tp2"])) or trade["tp2"])
+                    pnl = _pnl(trade, avg, "tp2")
                     log.info(f"  ✅ TP2 HIT {symbol} @ {avg:.{dec}f} | pnl={pnl:+.4f}")
-                    _send_close_alert(symbol, "✅ FULL WIN (TP2)", pnl, entry, avg, trade["opened_at"])
+                    _send_close_alert(symbol, "✅ FULL WIN (TP2)", pnl, entry, avg,
+                                      trade["opened_at"], mode)
                     _record_close(trade, avg, pnl, "TP2 hit")
+                    if mode == "paper": client.update_balance_after_close(pnl)
                     to_remove.append(symbol)
 
             # ── Check SL ──────────────────────────────────────────────
             if not trade.get("closed") and "stop_loss" in oids:
-                o      = client.get_order(oids["stop_loss"])
+                o      = get_o("stop_loss")
                 status = o.get("state", o.get("status", ""))
                 if status in ("filled", "closed", "FILLED"):
                     trade["closed"] = True
-                    avg  = float(o.get("average_fill_price", o.get("limit_price", trade["stop"])) or trade["stop"])
-                    pnl  = _pnl(trade, avg, "sl")
+                    avg = float(o.get("average_fill_price",
+                                     o.get("price", trade["stop"])) or trade["stop"])
+                    pnl = _pnl(trade, avg, "sl")
                     log.info(f"  ❌ SL HIT {symbol} @ {avg:.{dec}f} | pnl={pnl:+.4f}")
-                    _send_close_alert(symbol, "❌ STOPPED OUT", pnl, entry, avg, trade["opened_at"])
+                    _send_close_alert(symbol, "❌ STOPPED OUT", pnl, entry, avg,
+                                      trade["opened_at"], mode)
                     _record_close(trade, avg, pnl, "SL hit")
-                    for k in ("tp1", "tp2"):
+                    if mode == "paper": client.update_balance_after_close(pnl)
+                    for k in ("tp1","tp2"):
                         if k in oids and not trade.get(f"{k}_hit"):
-                            client.cancel_order(symbol, oids[k])
+                            try: client.cancel_order(symbol, oids[k])
+                            except: pass
                     to_remove.append(symbol)
 
         except Exception as e:
@@ -371,67 +461,47 @@ def check_open_trades(client: DeltaClient):
     save_trades(trades)
 
 
-def clean_ghost_orders(client: DeltaClient):
-    """Cancel open orders not tracked in trades.json."""
-    try:
-        trades    = load_trades()
-        valid_ids = set()
-        for t in trades.values():
-            valid_ids.update(str(v) for v in t.get("order_ids", {}).values())
-
-        open_orders = client.get_open_orders()
-        cancelled   = 0
-        for o in open_orders:
-            oid = str(o.get("id", ""))
-            if oid and oid not in valid_ids:
-                sym = next(
-                    (s for s, info in client._products.items()
-                     if info["id"] == o.get("product_id")), None
-                )
-                if sym:
-                    client.cancel_order(sym, oid)
-                    cancelled += 1
-        if cancelled:
-            log.info(f"  🧹 Ghost sweep: cancelled {cancelled} orphaned orders")
-    except Exception as e:
-        log.warning(f"  Ghost sweep skipped: {e}")
-
-
-def clear_stuck_trades(client: DeltaClient):
-    """Clear trades.json entries that have no matching open orders on Delta."""
+def clear_stuck_trades(client, mode: str):
+    """Clear trades.json entries with no live orders."""
     trades = load_trades()
-    if not trades:
-        return
+    if not trades: return
 
     log.info(f"  🔄 Checking {len(trades)} trade(s) for stuck orders...")
     cleared = 0
 
     for symbol in list(trades.keys()):
-        trade = trades[symbol]
-        oids  = trade.get("order_ids", {})
-        found_any = False
+        trade    = trades[symbol]
+        oids     = trade.get("order_ids", {})
+        found    = False
 
         for key, oid in oids.items():
             if key == "entry": continue
-            o      = client.get_order(oid)
-            status = o.get("state", o.get("status", ""))
-            if status in ("open", "pending", "NEW", "new"):
-                found_any = True
-                break
+            try:
+                if mode == "delta":
+                    o      = client.get_order(oid)
+                    status = o.get("state", o.get("status", ""))
+                    if status in ("open", "pending"):
+                        found = True; break
+                else:
+                    o      = client.get_order(symbol, oid)
+                    status = o.get("status", "")
+                    if status == "NEW":
+                        found = True; break
+            except Exception:
+                pass
 
-        if not found_any and oids:
-            log.warning(f"  ⚠️ {symbol}: no live orders — clearing stuck trade")
-            _record_close(trade, float(trade.get("entry", 0)), 0.0,
-                         "Auto-cleared (no live orders)")
+        if not found and oids:
+            log.warning(f"  ⚠️ {symbol}: no live orders — clearing")
+            _record_close(trade, float(trade.get("entry",0)), 0.0, "Auto-cleared")
             trades.pop(symbol)
             cleared += 1
 
     if cleared:
         save_trades(trades)
         log.info(f"  ✅ Cleared {cleared} stuck trade(s)")
-        _send(f"🧹 *{cleared} stuck trade(s) cleared* (Delta testnet)")
+        _send(f"🧹 *{cleared} stuck trade(s) cleared*")
     else:
-        log.info("  ✓ No stuck trades found")
+        log.info("  ✓ No stuck trades")
 
 
 def _pnl(trade, close_price, close_type):
@@ -445,11 +515,8 @@ def _pnl(trade, close_price, close_type):
 
 def _record_close(trade, close_price, pnl, reason):
     append_history({
-        **trade,
-        "close_price":  close_price,
-        "pnl":          pnl,
-        "closed_at":    datetime.now(timezone.utc).isoformat(),
-        "close_reason": reason,
+        **trade, "close_price": close_price, "pnl": pnl,
+        "closed_at": datetime.now(timezone.utc).isoformat(), "close_reason": reason,
     })
 
 
@@ -459,22 +526,17 @@ def generate_signal(symbol, pipeline, thresholds):
     try:
         df_e = add_indicators(get_data(symbol, TIMEFRAME_ENTRY))
         df_c = add_indicators(get_data(symbol, TIMEFRAME_CONFIRM))
-
-        if df_e.empty or len(df_e) < 50:
-            return None
+        if df_e.empty or len(df_e) < 50: return None
 
         row_e = df_e.iloc[-1].copy()
         row_c = df_c.iloc[-1] if not df_c.empty else pd.Series(dtype=float)
-
-        row_e["rsi_1h"]   = float(row_c.get("rsi",   50))
-        row_e["adx_1h"]   = float(row_c.get("adx",    0))
-        row_e["trend_1h"] = float(row_c.get("trend",  0))
+        row_e["rsi_1h"]   = float(row_c.get("rsi",  50))
+        row_e["adx_1h"]   = float(row_c.get("adx",   0))
+        row_e["trend_1h"] = float(row_c.get("trend", 0))
 
         af   = pipeline["all_features"]
         miss = [f for f in af if f not in row_e.index]
-        if miss:
-            log.warning(f"    Missing features: {miss[:3]}")
-            return None
+        if miss: log.warning(f"    Missing features: {miss[:3]}"); return None
 
         X    = pd.DataFrame([row_e[af].values], columns=af)
         Xs   = pipeline["selector"].transform(X)
@@ -484,7 +546,6 @@ def generate_signal(symbol, pipeline, thresholds):
         conf = round(float(max(prob)) * 100, 1)
 
         log.info(f"    ML: {sig} {conf:.1f}% (need ≥{thresholds['min_confidence']}%)")
-
         if sig == "NO_TRADE": return None
         if conf < thresholds["min_confidence"]: return None
 
@@ -509,26 +570,20 @@ def generate_signal(symbol, pipeline, thresholds):
             tp2  = round(entry - atr * ATR_TARGET2_MULT, dec)
 
         if score < thresholds["min_score"]:
-            save_signal({
-                "symbol": symbol, "signal": sig, "confidence": conf,
+            save_signal({"symbol": symbol, "signal": sig, "confidence": conf,
                 "score": score, "entry": entry, "atr": atr,
                 "stop": stop, "tp1": tp1, "tp2": tp2, "reasons": reasons,
-                "rejected": True, "reject_reason": f"score {score} < {thresholds['min_score']}",
-            })
+                "rejected": True, "reject_reason": f"score {score} < {thresholds['min_score']}"})
             return None
 
-        return {
-            "symbol": symbol, "signal": sig, "confidence": conf,
-            "score": score, "entry": entry, "atr": atr,
-            "stop": stop, "tp1": tp1, "tp2": tp2, "reasons": reasons,
-        }
+        return {"symbol": symbol, "signal": sig, "confidence": conf,
+                "score": score, "entry": entry, "atr": atr,
+                "stop": stop, "tp1": tp1, "tp2": tp2, "reasons": reasons}
 
     except requests.exceptions.HTTPError as e:
-        log.warning(f"    HTTP error {symbol}: {e}")
-        return None
+        log.warning(f"    HTTP error {symbol}: {e}"); return None
     except Exception as e:
-        log.error(f"    Signal error {symbol}: {e}")
-        return None
+        log.error(f"    Signal error {symbol}: {e}"); return None
 
 
 def _quality_score(row_e, row_c, signal, confidence):
@@ -559,31 +614,27 @@ def _quality_score(row_e, row_c, signal, confidence):
 # ════════════ TELEGRAM ═══════════════════════════════════════════════
 
 def _send(text):
-    tok = os.getenv("TELEGRAM_TOKEN",   "")
-    cid = os.getenv("TELEGRAM_CHAT_ID", "")
+    tok = os.getenv("TELEGRAM_TOKEN", ""); cid = os.getenv("TELEGRAM_CHAT_ID", "")
     if not tok or not cid: return
     try:
         requests.post(f"https://api.telegram.org/bot{tok}/sendMessage",
-            data={"chat_id": cid, "text": text, "parse_mode": "Markdown"},
-            timeout=10)
+            data={"chat_id": cid, "text": text, "parse_mode": "Markdown"}, timeout=10)
     except: pass
 
 def _warn(text): log.warning(text); _send(text)
 
-def check_mode_switch(mode):
+def check_mode_switch(mode_dict):
     last = load_json(MODE_FILE, {})
-    if last.get("mode") != mode["mode"]:
-        msgs = {
-            "active":  "📈 *Active hours* — conf≥55% every 15 min (Delta Exchange)",
-            "quiet":   "🌙 *Quiet hours* — conf≥62% every 30 min",
-            "weekend": "📅 *Weekend* — conf≥58%",
-        }
-        _send(msgs.get(mode["mode"], "Mode changed"))
-        save_json(MODE_FILE, {"mode": mode["mode"],
+    if last.get("mode") != mode_dict["mode"]:
+        msgs = {"active":"📈 *Active hours* — conf≥55%",
+                "quiet":"🌙 *Quiet hours* — conf≥62%",
+                "weekend":"📅 *Weekend* — conf≥58%"}
+        _send(msgs.get(mode_dict["mode"], "Mode changed"))
+        save_json(MODE_FILE, {"mode": mode_dict["mode"],
                               "since": datetime.now(timezone.utc).isoformat()})
 
 def _send_open_alert(symbol, signal, confidence, score, entry,
-                     stop, tp1, tp2, qty, risk_usd, balance, reasons):
+                     stop, tp1, tp2, qty, risk_usd, balance, reasons, mode):
     emoji  = "🟢" if signal == "BUY" else "🔴"
     stars  = "⭐" * min(score, 5)
     dec    = 4 if entry < 10 else 2
@@ -592,35 +643,33 @@ def _send_open_alert(symbol, signal, confidence, score, entry,
     t1_pct = abs((tp1-entry)/entry*100)
     t2_pct = abs((tp2-entry)/entry*100)
     rlines = "\n".join([f"  • {r}" for r in reasons])
+    exch   = "Delta Testnet" if mode == "delta" else "Paper Trading"
     _send(
-        f"🤖 *DELTA TESTNET TRADE*\n━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🤖 *TRADE OPENED — {exch}*\n━━━━━━━━━━━━━━━━━━━━\n\n"
         f"{emoji} *{signal} — {symbol}* {stars}\n"
         f"🏷️ _{get_tier(symbol)}_\n"
         f"🎯 Conf: *{confidence:.1f}%* · Score: *{score}/5*\n\n"
-        f"⚡ *ENTRY:*     `{fp(entry)}`\n"
-        f"🛑 *STOP LOSS:* `{fp(stop)}`  (-{sl_pct:.1f}%)\n"
-        f"🎯 *TARGET 1:*  `{fp(tp1)}`  (+{t1_pct:.1f}%)\n"
-        f"🎯 *TARGET 2:*  `{fp(tp2)}`  (+{t2_pct:.1f}%)\n\n"
-        f"💰 *Position:* `{round(qty*entry,2):.2f} USDT`\n"
-        f"⚠️  *Risk:*     `{risk_usd:.2f} USDT`\n"
-        f"💼 *Balance:*  `{balance:.2f} USDT`\n\n"
-        f"📊 *Reasons:*\n{rlines}\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n_Delta Exchange India Testnet_"
+        f"⚡ *ENTRY:* `{fp(entry)}`\n"
+        f"🛑 *STOP:*  `{fp(stop)}`  (-{sl_pct:.1f}%)\n"
+        f"🎯 *TP1:*   `{fp(tp1)}`  (+{t1_pct:.1f}%)\n"
+        f"🎯 *TP2:*   `{fp(tp2)}`  (+{t2_pct:.1f}%)\n\n"
+        f"💰 `{round(qty*entry,2):.2f} USDT` pos | "
+        f"⚠️ `{risk_usd:.2f} USDT` risk\n💼 Balance: `{balance:.2f} USDT`\n\n"
+        f"📊 *Reasons:*\n{rlines}\n\n━━━━━━━━━━━━━━━━━━━━\n_{exch}_"
     )
 
-def _send_close_alert(symbol, result, pnl, entry, close_price, opened_at):
+def _send_close_alert(symbol, result, pnl, entry, close_price, opened_at, mode):
     emoji = "✅" if pnl > 0 else "❌"
     dec   = 4 if entry < 10 else 2
     try: dur = str(datetime.now(timezone.utc)-datetime.fromisoformat(opened_at)).split(".")[0]
     except: dur = "—"
+    exch = "Delta Testnet" if mode == "delta" else "Paper Trading"
     _send(
-        f"🤖 *TRADE CLOSED*\n━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🤖 *TRADE CLOSED — {exch}*\n━━━━━━━━━━━━━━━━━━━━\n\n"
         f"{emoji} *{result} — {symbol}*\n\n"
-        f"📥 Entry:  `{entry:.{dec}f}`\n"
-        f"📤 Close:  `{close_price:.{dec}f}`\n"
-        f"💵 *PnL:   `{pnl:+.4f} USDT`*\n"
-        f"⏱️ Duration: {dur}\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n_Delta Exchange India Testnet_"
+        f"📥 Entry: `{entry:.{dec}f}`\n📤 Close: `{close_price:.{dec}f}`\n"
+        f"💵 *PnL: `{pnl:+.4f} USDT`*\n⏱️ {dur}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n_{exch}_"
     )
 
 
@@ -628,29 +677,24 @@ def _send_close_alert(symbol, result, pnl, entry, close_price, opened_at):
 
 def run_diagnostic():
     from smart_scheduler import get_scan_mode, check_btc_volatility
-    mode = get_scan_mode()
-    vol  = check_btc_volatility()
+    mode = get_scan_mode(); vol = check_btc_volatility()
+    client, exch_mode = setup_exchange()
+    bal = fetch_and_save_balance(client, exch_mode)
+    trades = load_trades()
+
     lines = [
-        "🔍 *Bot Diagnostic — Delta Exchange*",
+        f"🔍 *Bot Diagnostic*",
         f"Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
-        f"Exchange: Delta Exchange India Testnet ✅ (no geo-block)",
+        f"Exchange: {'✅ Delta Testnet (real)' if exch_mode == 'delta' else '📝 Paper Trading (IP not whitelisted)'}",
         "━━━━━━━━━━━━━━━━━━━━",
         f"Mode: *{mode['label']}*  conf≥{mode['min_confidence']}%",
         f"BTC ATR: *{vol['atr_pct']:.3f}%* ({vol['status']})",
+        f"💰 Balance: *{bal:.2f} USDT*",
+        f"📂 Open trades: *{len(trades)}*",
     ]
     try:
-        client = init_delta()
-        bal    = fetch_and_save_balance(client)
-        lines.append(f"💰 Balance: *{bal:.2f} USDT* ✅ (real Delta testnet)")
-        lines.append(f"📂 Open trades: *{len(load_trades())}*")
-        lines.append(f"📦 Products loaded: {len(client._products)}")
-    except Exception as e:
-        lines.append(f"❌ Delta connection: {e}")
-    try:
-        p = load_model()
-        lines.append(f"🤖 Model: ✅ {len(p['all_features'])} features")
-    except Exception as e:
-        lines.append(f"❌ Model: {e}")
+        p = load_model(); lines.append(f"🤖 Model: ✅ {len(p['all_features'])} features")
+    except Exception as e: lines.append(f"❌ Model: {e}")
     lines.append(f"\nScanning {len(SYMBOLS)} coins next run")
     _send("\n".join(lines))
 
@@ -660,7 +704,6 @@ def run_diagnostic():
 def run_execution_scan():
     log.info(f"\n{'═'*56}")
     log.info(f"SCAN — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
-    log.info(f"Exchange: Delta Exchange India Testnet (no geo-block)")
     log.info(f"{'═'*56}")
 
     run, mode, vol, reason = should_scan()
@@ -671,29 +714,26 @@ def run_execution_scan():
     effective_risk = get_effective_risk(mode, vol)
     vol_warn       = vol["message"] if vol.get("warn") else None
 
-    client     = init_delta()
+    # Auto-detect exchange mode
+    client, exch_mode = setup_exchange()
+
     pipeline   = load_model()
     thresholds = get_mode_thresholds(mode)
 
-    log.info(f"\n[0] Fetching Delta balance...")
-    balance = fetch_and_save_balance(client)
+    log.info(f"\n[0] Fetching balance ({exch_mode.upper()})...")
+    balance = fetch_and_save_balance(client, exch_mode)
     log.info(f"    Balance: {balance:.2f} USDT")
-    if balance < 10:
-        _warn(f"⚠️ Balance {balance:.2f} USDT — check Delta testnet account")
 
     log.info(f"\n[1] Clearing stuck trades...")
-    clear_stuck_trades(client)
+    clear_stuck_trades(client, exch_mode)
 
-    log.info(f"\n[2] Cleaning ghost orders...")
-    clean_ghost_orders(client)
-
-    log.info(f"\n[3] Checking open trades...")
-    check_open_trades(client)
+    log.info(f"\n[2] Checking open trades...")
+    check_open_trades(client, exch_mode)
 
     trades = load_trades()
-    log.info(f"\n[4] Scanning {len(SYMBOLS)} coins | Open:{len(trades)}/{MAX_OPEN_TRADES}")
+    log.info(f"\n[3] Scanning {len(SYMBOLS)} coins | Open:{len(trades)}/{MAX_OPEN_TRADES}")
     log.info(f"    conf≥{thresholds['min_confidence']}% | score≥{thresholds['min_score']} | "
-             f"ADX≥{thresholds['min_adx']} | risk_mult:{effective_risk:.2f}")
+             f"ADX≥{thresholds['min_adx']} | risk:{effective_risk:.2f} | {exch_mode.upper()}")
 
     found = 0
     for symbol in SYMBOLS:
@@ -706,25 +746,17 @@ def run_execution_scan():
             time.sleep(0.3); continue
 
         found += 1
-        log.info(f"  ✅ SIGNAL: {sig['signal']} {sig['confidence']:.1f}% score={sig['score']}")
+        if vol_warn: sig["reasons"] = list(sig.get("reasons",[])) + [f"⚠️ {vol_warn}"]
 
-        if vol_warn:
-            sig["reasons"] = list(sig.get("reasons", [])) + [f"⚠️ {vol_warn}"]
-
-        execute_trade(
-            client,
-            symbol=sig["symbol"], signal=sig["signal"],
-            entry=sig["entry"],   atr=sig["atr"],
-            confidence=sig["confidence"], score=sig["score"],
-            reasons=sig["reasons"], risk_mult=effective_risk,
-        )
+        execute_trade(client, exch_mode, **{k: sig[k] for k in
+            ["symbol","signal","entry","atr","confidence","score","reasons"]},
+            risk_mult=effective_risk)
         time.sleep(1)
 
-    # Save final balance
-    fetch_and_save_balance(client)
+    fetch_and_save_balance(client, exch_mode)
 
     log.info(f"\n{'═'*56}")
-    log.info(f"DONE — {found} signal(s) | Balance: {balance:.2f} USDT")
+    log.info(f"DONE — {found} signal(s) | {exch_mode.upper()} | Balance: {balance:.2f} USDT")
     log.info(f"{'═'*56}\n")
 
 
@@ -733,7 +765,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "diagnostic":
         run_diagnostic()
     elif len(sys.argv) > 1 and sys.argv[1] == "clear_stuck":
-        client = init_delta()
-        clear_stuck_trades(client)
+        client, exch_mode = setup_exchange()
+        clear_stuck_trades(client, exch_mode)
     else:
         run_execution_scan()
