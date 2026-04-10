@@ -154,6 +154,16 @@ def execute_trade(deribit: DeribitClient, symbol, signal, entry, atr, confidence
         log.info(f"  ✅ Entry @ ~{actual_entry:.{dec}f}")
         time.sleep(1.5)
 
+        # RECALCULATE SL/TP based on the ACTUAL fill price to prevent Slippage/Overlap errors
+        if signal == "BUY":
+            stop = round(actual_entry - atr * ATR_STOP_MULT, dec)
+            tp1  = round(actual_entry + atr * ATR_TARGET1_MULT, dec)
+            tp2  = round(actual_entry + atr * ATR_TARGET2_MULT, dec)
+        else:
+            stop = round(actual_entry + atr * ATR_STOP_MULT, dec)
+            tp1  = round(actual_entry - atr * ATR_TARGET1_MULT, dec)
+            tp2  = round(actual_entry - atr * ATR_TARGET2_MULT, dec)
+
         try:
             sl = deribit.place_limit_order(symbol, sl_side, amount, stop, stop_price=stop)
             order_ids["stop_loss"] = str(sl.get("order_id",""))
