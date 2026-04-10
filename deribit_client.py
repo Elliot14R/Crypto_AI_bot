@@ -202,7 +202,7 @@ class DeribitClient:
         }
         if stop_price is not None:
             body["type"] = "stop_limit"
-            body["stop_price"] = round(stop_price, 4)
+            body["stop_price"] = round(trigger_price, 4)
             body["trigger"] = "last_price"
         else: body["type"] = "limit"
 
