@@ -224,9 +224,7 @@ def api_balance():
             client = DeribitClient(client_id, client_secret)
             
             all_bals = client.get_all_balances()
-            
-            usdt_info = all_bals.get("USDT", {})
-            main_usdt = float(usdt_info.get("equity_usd", 0))
+            main_usdt = client.get_total_equity_usd()
             
             assets_list = []
             for cur, info in all_bals.items():
@@ -267,8 +265,10 @@ def api_balance():
 
 @app.route("/api/trades/open")
 def api_open():
-    """Fetches open positions LIVE from Deribit to prevent Split-Brain sync issues"""
+    """Fetches open positions LIVE from Deribit and stitches local SL/TP targets"""
     try:
+        local_trades = load_json(TRADES_FILE, {})
+        
         client_id = os.getenv("DERIBIT_CLIENT_ID", "")
         client_secret = os.getenv("DERIBIT_CLIENT_SECRET", "")
         if client_id and client_secret:
@@ -279,7 +279,6 @@ def api_open():
             formatted_trades = []
             for p in positions:
                 inst = p.get("instrument_name", "")
-                # Convert Deribit name (BNB_USDC-PERPETUAL) back to UI name (BNBUSDT)
                 base_coin = inst.split("_")[0] if "_" in inst else inst.split("-")[0]
                 symbol = f"{base_coin}USDT"
 
@@ -291,11 +290,12 @@ def api_open():
                 upnl = float(p.get("floating_profit_loss_usd", p.get("floating_profit_loss", 0)))
                 signal = "BUY" if qty > 0 else "SELL"
 
-                # Calculate live PnL percentage
                 if entry > 0:
                     pct = (live - entry) / entry * 100 if signal == "BUY" else (entry - live) / entry * 100
                 else:
                     pct = 0
+
+                trade_info = local_trades.get(symbol, {})
 
                 formatted_trades.append({
                     "symbol": symbol,
@@ -305,19 +305,19 @@ def api_open():
                     "live_price": live,
                     "unrealised_pnl": round(upnl, 4),
                     "pnl_pct": round(pct, 2),
+                    "stop": trade_info.get("stop", 0),
+                    "tp1":  trade_info.get("tp1", 0),
+                    "tp2":  trade_info.get("tp2", 0),
                     "status": "Live on Deribit",
-                    "progress": 50, # Standard UI bar
-                    "tp2": entry * 1.05 # Fallback UI target
+                    "progress": 50
                 })
             
-            # If Deribit successfully returns positions, send them to the dashboard
             if formatted_trades or len(positions) == 0:
                 return jsonify(formatted_trades)
 
     except Exception as e:
         log.warning(f"Live Deribit trades fetch failed: {e}. Falling back to local cache.")
 
-    # Fallback to local files if the API fails
     trades  = load_json(TRADES_FILE, {})
     symbols = list(trades.keys())
     prices  = get_live_prices(symbols) if symbols else {}
