@@ -1,50 +1,43 @@
-# deribit_client.py — Deribit Testnet Client
-# ══════════════════════════════════════════════════════════════════════
-# WHY DERIBIT:
-#   ✅ IP whitelisting is OPTIONAL — works from any IP (GitHub Actions OK)
-#   ✅ No geo-block (unlike Binance/Bybit for India)
-#   ✅ Free testnet at test.deribit.com — no KYC needed
-#   ✅ BTC/ETH perpetuals with USDC margin
-#   ✅ REST API with simple client_id + client_secret auth
+# deribit_client.py — Fixed Deribit Testnet Client
+# 
+# ROOT CAUSE OF NO TRADES:
+#   Old SYMBOL_MAP only had 2 coins. 18/20 signals silently failed.
+#   Fixed: now maps all supported Deribit perpetuals.
 #
-# SETUP (one time):
-#   1. Register at https://test.deribit.com (free, no KYC)
-#   2. Click "Deposit" → get 10 BTC or 10 ETH of test funds
-#   3. Go to Settings → API → Create API key
-#      Scopes: trade:read_write  account:read  wallet:read
-#      Leave IP Whitelist EMPTY (works from any IP)
-#   4. Add DERIBIT_CLIENT_ID and DERIBIT_CLIENT_SECRET to GitHub Secrets
-#
-# INSTRUMENTS: BTC-PERPETUAL, ETH-PERPETUAL (USD-settled)
-# ACCOUNT TYPE: standard BTC/ETH margin account
-# ══════════════════════════════════════════════════════════════════════
+# Deribit has TWO types of perpetuals:
+#   Inverse (BTC/ETH margined): BTC-PERPETUAL, ETH-PERPETUAL
+#   Linear (USDC margined):     SOL_USDC-PERPETUAL, XRP_USDC-PERPETUAL etc
+# We use LINEAR (USDC) for all — simpler, one balance, same math.
 
-import json
-import time
-import logging
-import requests
-
+import json, time, logging, requests
 log = logging.getLogger(__name__)
 
 TESTNET_BASE = "https://test.deribit.com/api/v2"
 
-# Map our USDT symbols → Deribit instruments + currency
+# ── Complete Deribit instrument map ──────────────────────────────────
+# All USDC linear perpetuals (margin in USDC — simple and consistent)
 SYMBOL_MAP = {
-    "BTCUSDT":  {"instrument": "BTC-PERPETUAL",  "currency": "BTC"},
-    "ETHUSDT":  {"instrument": "ETH-PERPETUAL",  "currency": "ETH"},
-    # Add more as Deribit adds linear USDC perpetuals
+    # Inverse perpetuals (BTC/ETH margined — use if you hold BTC/ETH)
+    "BTCUSDT":    {"instrument": "BTC-PERPETUAL",      "currency": "BTC",  "kind": "inverse", "min_amount": 10},
+    "ETHUSDT":    {"instrument": "ETH-PERPETUAL",      "currency": "ETH",  "kind": "inverse", "min_amount": 1},
+
+    # USDC linear perpetuals (easiest — all margin in USDC)
+    "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "XRPUSDT":    {"instrument": "XRP_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "BNBUSDT":    {"instrument": "BNB_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "AVAXUSDT":   {"instrument": "AVAX_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "LINKUSDT":   {"instrument": "LINK_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "NEARUSDT":   {"instrument": "NEAR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "UNIUSDT":    {"instrument": "UNI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "ADAUSDT":    {"instrument": "ADA_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
 }
 
-# Symbols we can actually trade on Deribit testnet
-TRADEABLE = list(SYMBOL_MAP.keys())
+# Which symbols we can actually trade
+TRADEABLE_SYMBOLS = list(SYMBOL_MAP.keys())
 
 
 class DeribitClient:
-    """
-    Minimal Deribit testnet client.
-    Uses client_credentials grant (no IP whitelist needed).
-    Trades BTC-PERPETUAL and ETH-PERPETUAL.
-    """
 
     def __init__(self, client_id: str, client_secret: str):
         self.client_id     = client_id
@@ -54,33 +47,30 @@ class DeribitClient:
         self.session.headers.update({"Content-Type": "application/json"})
         self._access_token = None
         self._token_expiry = 0
+        self._instrument_cache = {}   # cache actual instrument details from API
         self._authenticate()
 
     # ── Auth ──────────────────────────────────────────────────────────
 
     def _authenticate(self):
-        """Get OAuth2 access token using client_credentials."""
-        try:
-            r = self.session.get(
-                f"{self.base}/public/auth",
-                params={
-                    "grant_type":    "client_credentials",
-                    "client_id":     self.client_id,
-                    "client_secret": self.client_secret,
-                },
-                timeout=15
-            )
-            r.raise_for_status()
-            data = r.json()
-            if data.get("result"):
-                self._access_token = data["result"]["access_token"]
-                self._token_expiry = time.time() + data["result"].get("expires_in", 900) - 60
-                self.session.headers["Authorization"] = f"Bearer {self._access_token}"
-                log.info("✓ Deribit testnet authenticated")
-            else:
-                raise Exception(f"Auth failed: {data}")
-        except Exception as e:
-            raise Exception(f"Deribit auth failed: {e}")
+        r = self.session.get(
+            f"{self.base}/public/auth",
+            params={
+                "grant_type":    "client_credentials",
+                "client_id":     self.client_id,
+                "client_secret": self.client_secret,
+            },
+            timeout=15
+        )
+        r.raise_for_status()
+        data = r.json()
+        res  = data.get("result", {})
+        if not res or "access_token" not in res:
+            raise Exception(f"Auth failed: {data}")
+        self._access_token = res["access_token"]
+        self._token_expiry = time.time() + res.get("expires_in", 900) - 60
+        self.session.headers["Authorization"] = f"Bearer {self._access_token}"
+        log.info("✓ Deribit testnet authenticated")
 
     def _ensure_auth(self):
         if time.time() >= self._token_expiry:
@@ -88,125 +78,202 @@ class DeribitClient:
 
     def _get(self, path: str, params: dict = None) -> dict:
         self._ensure_auth()
-        r = self.session.get(f"{self.base}{path}", params=params or {}, timeout=15)
+        r    = self.session.get(f"{self.base}{path}", params=params or {}, timeout=15)
         r.raise_for_status()
         data = r.json()
         if "error" in data:
-            raise Exception(f"GET {path}: {data['error']}")
+            raise Exception(f"API error {path}: {data['error']}")
         return data.get("result", data)
 
     def _post(self, path: str, body: dict) -> dict:
         self._ensure_auth()
-        r = self.session.post(f"{self.base}{path}", json=body, timeout=15)
+        r    = self.session.post(f"{self.base}{path}", json=body, timeout=15)
         r.raise_for_status()
         data = r.json()
         if "error" in data:
-            raise Exception(f"POST {path}: {data['error']}")
+            raise Exception(f"API error {path}: {data['error']}")
         return data.get("result", data)
 
-    # ── Symbol helpers ────────────────────────────────────────────────
-
-    def get_instrument(self, symbol: str) -> str:
-        """Get Deribit instrument name for a symbol."""
-        if symbol not in SYMBOL_MAP:
-            raise ValueError(f"{symbol} not supported on Deribit. Supported: {TRADEABLE}")
-        return SYMBOL_MAP[symbol]["instrument"]
-
-    def get_currency(self, symbol: str) -> str:
-        return SYMBOL_MAP[symbol]["currency"]
+    # ── Instrument helpers ────────────────────────────────────────────
 
     def is_supported(self, symbol: str) -> bool:
-        return symbol in SYMBOL_MAP
+        """Check if symbol can be traded on Deribit."""
+        if symbol not in SYMBOL_MAP:
+            return False
+        # Verify instrument actually exists on testnet
+        instrument = SYMBOL_MAP[symbol]["instrument"]
+        try:
+            if instrument not in self._instrument_cache:
+                info = self._get("/public/get_instrument",
+                                 {"instrument_name": instrument})
+                self._instrument_cache[instrument] = info
+            return True
+        except Exception:
+            return False
+
+    def get_instrument_name(self, symbol: str) -> str:
+        if symbol not in SYMBOL_MAP:
+            raise ValueError(
+                f"{symbol} not supported on Deribit.\n"
+                f"Supported: {', '.join(TRADEABLE_SYMBOLS)}"
+            )
+        return SYMBOL_MAP[symbol]["instrument"]
+
+    def get_instrument_info(self, symbol: str) -> dict:
+        name = self.get_instrument_name(symbol)
+        if name not in self._instrument_cache:
+            info = self._get("/public/get_instrument", {"instrument_name": name})
+            self._instrument_cache[name] = info
+        return self._instrument_cache.get(name, {})
+
+    def get_min_trade_amount(self, symbol: str) -> float:
+        """Get minimum order size from API (or fallback to SYMBOL_MAP)."""
+        info = self.get_instrument_info(symbol)
+        return float(info.get("min_trade_amount",
+                     SYMBOL_MAP.get(symbol, {}).get("min_amount", 1)))
+
+    def get_contract_size(self, symbol: str) -> float:
+        """Get contract size (how much underlying per 1 contract)."""
+        info = self.get_instrument_info(symbol)
+        return float(info.get("contract_size", 1.0))
+
+    def get_live_price(self, symbol: str) -> float:
+        """Get mark price for a symbol."""
+        try:
+            instrument = self.get_instrument_name(symbol)
+            ticker     = self._get("/public/ticker", {"instrument_name": instrument})
+            return float(ticker.get("mark_price") or ticker.get("last_price") or 0)
+        except Exception as e:
+            log.warning(f"  Deribit price {symbol}: {e}")
+            return 0.0
+
+    def calc_contracts(self, symbol: str, balance_usd: float,
+                       entry: float, stop: float, risk_mult: float = 1.0) -> float:
+        """
+        Calculate order amount.
+        For LINEAR USDC perps: amount = number of coins (e.g. 1.5 SOL)
+        For INVERSE BTC perp: amount = USD value (e.g. 100 = $100 worth)
+        """
+        risk_usd  = balance_usd * 0.02 * risk_mult   # 2% risk
+        stop_dist = abs(entry - stop)
+        if stop_dist <= 0:
+            return self.get_min_trade_amount(symbol)
+
+        info      = SYMBOL_MAP.get(symbol, {})
+        kind      = info.get("kind", "linear")
+        min_amt   = self.get_min_trade_amount(symbol)
+
+        if kind == "inverse":
+            # BTC-PERPETUAL: amount in USD contracts ($10 each)
+            # PnL per contract per $1 move = 1/entry
+            pnl_per_usd_move = 10.0 / entry
+            amount = risk_usd / (stop_dist * pnl_per_usd_move)
+            # Round to nearest $10
+            amount = max(min_amt, round(amount / 10) * 10)
+        else:
+            # Linear USDC: amount in base currency units
+            # PnL per unit per $1 move = 1 USDC
+            amount    = risk_usd / stop_dist
+            # Cap at 20% of balance
+            max_amount = balance_usd * 0.20 / entry
+            amount     = min(amount, max_amount)
+            amount     = max(min_amt, round(amount, 1))
+
+        log.info(f"  Contracts: {amount} {symbol} "
+                 f"(risk=${risk_usd:.2f}, kind={kind})")
+        return amount
 
     # ── Balance ───────────────────────────────────────────────────────
 
-    def get_balance(self, currency: str = "BTC") -> dict:
-        """Get account summary for a currency (BTC or ETH)."""
-        return self._get("/private/get_account_summary", {"currency": currency, "extended": "true"})
+    def get_account_summary(self, currency: str) -> dict:
+        try:
+            return self._get("/private/get_account_summary",
+                             {"currency": currency, "extended": "true"})
+        except Exception:
+            return {}
 
     def get_all_balances(self) -> dict:
-        """Returns equity in USD for BTC and ETH accounts combined."""
+        """Returns {currency: {equity_usd, available}} for all currencies."""
         balances = {}
-        for currency in ["BTC", "ETH", "USDT", "USDC", "SOL", "XRP"]:
+        for currency in ["BTC", "ETH", "USDC", "USDT"]:
             try:
-                summary = self.get_balance(currency)
-                equity_usd = float(summary.get("equity_usd", 0) or
-                                   summary.get("equity", 0) or 0)
-                balances[currency] = {
-                    "equity_usd": round(equity_usd, 2),
-                    "currency":   currency,
-                    "available":  float(summary.get("available_funds", 0) or 0),
-                }
+                summary = self.get_account_summary(currency)
+                eq_usd  = float(summary.get("equity_usd", 0) or
+                                summary.get("equity", 0) or 0)
+                avail   = float(summary.get("available_funds", 0) or 0)
+                if eq_usd > 0:
+                    balances[currency] = {
+                        "equity_usd": round(eq_usd, 2),
+                        "available":  round(avail, 6),
+                    }
             except Exception as e:
-                log.warning(f"Balance {currency}: {e}")
+                log.debug(f"  Balance {currency}: {e}")
         return balances
 
-    def get_usdt_equivalent(self) -> float:
-        """Return total portfolio value in USD across BTC + ETH accounts."""
+    def get_total_equity_usd(self) -> float:
+        """Total portfolio value in USD across all currencies."""
         balances = self.get_all_balances()
         total    = sum(v.get("equity_usd", 0) for v in balances.values())
         return round(total, 2)
 
+    def get_usdc_balance(self) -> float:
+        """Available USDC (for linear perpetuals)."""
+        summary = self.get_account_summary("USDC")
+        return float(summary.get("available_funds", 0) or 0)
+
+    def get_positions(self) -> list:
+        """Get all open positions."""
+        try:
+            positions = []
+            for currency in ["BTC", "ETH", "USDC"]:
+                r = self._get("/private/get_positions",
+                              {"currency": currency, "kind": "future"})
+                if isinstance(r, list):
+                    positions.extend([p for p in r if float(p.get("size",0) or 0) != 0])
+            return positions
+        except Exception as e:
+            log.warning(f"  Positions: {e}")
+            return []
+
     # ── Orders ────────────────────────────────────────────────────────
 
-    def place_market_order(self, symbol: str, side: str, amount_usd: float) -> dict:
-        """
-        Place a market order.
-        amount_usd: notional USD value of position (e.g. 100 = $100 of BTC)
-        Deribit BTC-PERPETUAL: amount is in USD contracts ($10 per contract)
-        """
-        instrument = self.get_instrument(symbol)
-        # BTC-PERPETUAL min = $10. Round to nearest 10.
-        contracts  = max(10, round(amount_usd / 10) * 10)
-
-        method = "private/buy" if side.upper() == "BUY" else "private/sell"
-        result = self._post(f"/{method}", {
+    def place_market_order(self, symbol: str, side: str, amount: float) -> dict:
+        instrument = self.get_instrument_name(symbol)
+        method     = "/private/buy" if side.upper() == "BUY" else "/private/sell"
+        result     = self._post(method, {
             "instrument_name": instrument,
-            "amount":          contracts,
+            "amount":          amount,
             "type":            "market",
             "label":           f"bot_{symbol}_{int(time.time())}",
         })
         order = result.get("order", result)
-        log.info(f"  ✅ DERIBIT MARKET {side.upper()} ${contracts} {instrument} "
-                 f"— id:{order.get('order_id','')}")
+        log.info(f"  Market {side.upper()} {amount} {instrument} → id={order.get('order_id','?')}")
         return order
 
-    def place_limit_order(self, symbol: str, side: str, amount_usd: float,
+    def place_limit_order(self, symbol: str, side: str, amount: float,
                           price: float, stop_price: float = None) -> dict:
-        """Place limit or stop-limit order."""
-        instrument = self.get_instrument(symbol)
-        contracts  = max(10, round(amount_usd / 10) * 10)
-
-        if stop_price:
-            # Stop-limit order
-            method = "private/buy" if side.upper() == "BUY" else "private/sell"
-            result = self._post(f"/{method}", {
-                "instrument_name": instrument,
-                "amount":          contracts,
-                "type":            "stop_limit",
-                "price":           round(price, 2),
-                "stop_price":      round(stop_price, 2),
-                "trigger":         "last_price",
-                "label":           f"sl_{symbol}_{int(time.time())}",
-            })
+        instrument = self.get_instrument_name(symbol)
+        method     = "/private/buy" if side.upper() == "BUY" else "/private/sell"
+        body = {
+            "instrument_name": instrument,
+            "amount":          amount,
+            "price":           round(price, 4),
+            "label":           f"bot_{symbol}_{int(time.time())}",
+        }
+        if stop_price is not None:
+            body["type"]        = "stop_limit"
+            body["stop_price"]  = round(stop_price, 4)
+            body["trigger"]     = "last_price"
         else:
-            method = "private/buy" if side.upper() == "BUY" else "private/sell"
-            result = self._post(f"/{method}", {
-                "instrument_name": instrument,
-                "amount":          contracts,
-                "type":            "limit",
-                "price":           round(price, 2),
-                "label":           f"tp_{symbol}_{int(time.time())}",
-            })
+            body["type"] = "limit"
 
-        order = result.get("order", result)
-        kind  = "STOP_LIMIT" if stop_price else "LIMIT"
-        log.info(f"  ✅ DERIBIT {kind} {side.upper()} ${contracts} {instrument} @ {price} "
-                 f"— id:{order.get('order_id','')}")
+        result = self._post(method, body)
+        order  = result.get("order", result)
+        kind   = "STOP_LIMIT" if stop_price else "LIMIT"
+        log.info(f"  {kind} {side.upper()} {amount} {instrument} @ {price} → id={order.get('order_id','?')}")
         return order
 
     def get_order(self, order_id: str) -> dict:
-        """Get order status."""
         try:
             return self._get("/private/get_order_state", {"order_id": order_id})
         except Exception as e:
@@ -214,71 +281,39 @@ class DeribitClient:
             return {}
 
     def cancel_order(self, order_id: str) -> dict:
-        """Cancel an order."""
         try:
             return self._post("/private/cancel", {"order_id": order_id})
         except Exception as e:
-            log.warning(f"  cancel_order {order_id}: {e}")
+            log.warning(f"  cancel {order_id}: {e}")
             return {}
 
-    def get_open_orders(self, symbol: str = None) -> list:
-        """Get open orders."""
+    def get_open_orders(self) -> list:
         try:
-            if symbol and symbol in SYMBOL_MAP:
-                instrument = self.get_instrument(symbol)
-                result     = self._get("/private/get_open_orders_by_instrument",
-                                       {"instrument_name": instrument})
-            else:
-                result = []
-                for currency in ["BTC", "ETH"]:
-                    r = self._get("/private/get_open_orders_by_currency",
-                                  {"currency": currency})
-                    result.extend(r if isinstance(r, list) else [])
-            return result if isinstance(result, list) else []
+            orders = []
+            for currency in ["BTC", "ETH", "USDC"]:
+                r = self._get("/private/get_open_orders_by_currency",
+                              {"currency": currency, "kind": "future"})
+                if isinstance(r, list):
+                    orders.extend(r)
+            return orders
         except Exception as e:
             log.warning(f"  get_open_orders: {e}")
             return []
 
-    def get_position(self, symbol: str) -> dict:
-        """Get current position for a symbol."""
-        try:
-            instrument = self.get_instrument(symbol)
-            return self._get("/private/get_position", {"instrument_name": instrument})
-        except Exception:
-            return {}
-
-    def get_live_price(self, symbol: str) -> float:
-        """Get current mark price for a symbol."""
-        try:
-            instrument = self.get_instrument(symbol)
-            ticker     = self._get("/public/ticker", {"instrument_name": instrument})
-            return float(ticker.get("mark_price", ticker.get("last_price", 0)) or 0)
-        except Exception as e:
-            log.warning(f"  Deribit price {symbol}: {e}")
-            return 0.0
-
-    def calc_usd_amount(self, balance_usd: float, entry: float, stop: float,
-                        risk_mult: float = 1.0) -> float:
-        """
-        Calculate USD position size based on 1% risk rule.
-        Returns the USD notional amount to trade (rounded to $10).
-        """
-        risk_usd   = balance_usd * 0.01 * risk_mult
-        stop_dist  = abs(entry - stop) / entry   # as fraction
-        if stop_dist <= 0: return 10.0
-        # USD amount = risk / stop_distance_fraction
-        amount_usd = risk_usd / stop_dist
-        # Cap at 20% of balance
-        amount_usd = min(amount_usd, balance_usd * 0.20)
-        # Round to $10 (Deribit minimum contract size)
-        return max(10.0, round(amount_usd / 10) * 10)
-
     def test_connection(self) -> bool:
-        """Test connection and return True if working."""
         try:
-            total = self.get_usdt_equivalent()
-            log.info(f"✅ Deribit Testnet connected — Portfolio: ~${total:.2f} USD")
+            total = self.get_total_equity_usd()
+            log.info(f"✅ Deribit Testnet — portfolio ${total:.2f} USD")
+            # Verify which symbols actually work on testnet
+            working = []
+            for sym in list(SYMBOL_MAP.keys())[:5]:  # check first 5
+                try:
+                    self.get_instrument_info(sym)
+                    working.append(sym)
+                except Exception:
+                    pass
+            log.info(f"  Working symbols: {working}")
             return True
         except Exception as e:
-            log.error(f"✗ Deribit connection FAILED: {e}")
-            return False
+            log.error(f"✗ Deribit connection failed: {e}")
+            raise
