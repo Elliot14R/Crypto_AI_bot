@@ -71,13 +71,11 @@ class DeribitClient:
         return data.get("result", data)
 
     def _post(self, path: str, body: dict) -> dict:
-        self._ensure_auth()
-        r = self.session.post(f"{self.base}{path}", json=body, timeout=15)
-        try: data = r.json()
-        except Exception: data = {}
-        if "error" in data: raise Exception(f"Deribit API Error: {data['error']}")
-        r.raise_for_status()
-        return data.get("result", data)
+        """
+        Deribit's REST API safely accepts ALL actions (including Buy/Sell) via GET parameters.
+        This routes orders through GET to completely bypass the strict JSON-RPC 11050 parsing error!
+        """
+        return self._get(path, body)
 
     def is_supported(self, symbol: str) -> bool:
         if symbol not in SYMBOL_MAP: return False
