@@ -215,7 +215,7 @@ def api_status():
         "today_buy":       len([s for s in today_sigs if s.get("signal") == "BUY"]),
         "today_sell":      len([s for s in today_sigs if s.get("signal") == "SELL"]),
         "scan_mode":       mode_data.get("mode", "active"),
-        "balance_usdt":    bal.get("usdt"),
+        "balance_usdt":    bal.get("usdt", "BTC", "ETH", "USDC", "SOL", "xrp"),
         "balance_updated": bal.get("updated_at"),
         "trading_mode":    bal.get("mode", "deribit_testnet"),
     })
@@ -230,18 +230,53 @@ def api_balance():
         if client_id and client_secret:
             from deribit_client import DeribitClient
             client = DeribitClient(client_id, client_secret)
-            live_usdt = client.get_usdt_equivalent()
+            
+            # Fetch all individual balances from the wallet
+            all_bals = client.get_all_balances()
+            
+            # 1. Extract ONLY the USDT balance for the top headline
+            usdt_info = all_bals.get("USDT", {})
+            main_usdt = float(usdt_info.get("equity_usd", 0))
+            
+            # 2. Build the dynamic list of ALL coins for the bottom table
+            assets_list = []
+            for cur, info in all_bals.items():
+                qty = float(info.get("available", 0))
+                eq  = float(info.get("equity_usd", 0))
+                if qty > 0 or eq > 0:
+                    assets_list.append({
+                        "asset": cur, 
+                        "free": str(qty), 
+                        "total": str(eq)
+                    })
             
             return jsonify({
                 "ok":          True,
-                "usdt":        round(live_usdt, 2),
-                "equity":      round(live_usdt, 2),
+                "usdt":        round(main_usdt, 2),  # This goes to the top
+                "equity":      round(main_usdt, 2),
                 "unrealised":  0,
-                "assets":      [{"asset": "USDT", "free": str(live_usdt), "total": str(live_usdt)}],
+                "assets":      assets_list,          # This builds the table
                 "updated_at":  datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
                 "mode":        "deribit_testnet",
-                "note":        "Deribit Testnet (Live Fetch)",
+                "note":        "Live Deribit Wallet",
             })
+            
+    except Exception as e:
+        log.warning(f"Live Deribit balance fetch failed: {e}. Falling back to local file.")
+
+    # Fallback to local file if API keys are missing
+    bal = load_json(BALANCE_FILE, {})
+    usdt = float(bal.get("usdt") or 0)
+    return jsonify({
+        "ok":         True,
+        "usdt":       round(usdt, 2),
+        "equity":     round(float(bal.get("equity") or usdt), 2),
+        "unrealised": round(float(bal.get("unrealised") or 0), 4),
+        "assets":     bal.get("assets", []),
+        "updated_at": bal.get("updated_at"),
+        "mode":       bal.get("mode", "testnet"),
+        "note":       "Fetched from GitHub local cache",
+    })
     except Exception as e:
         log.warning(f"Live Deribit balance fetch failed: {e}. Falling back to local file.")
 
