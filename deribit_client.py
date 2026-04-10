@@ -31,6 +31,15 @@ SYMBOL_MAP = {
     "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
     "UNIUSDT":    {"instrument": "UNI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
     "ADAUSDT":    {"instrument": "ADA_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "AAVEUSDT":   {"instrument": "AAVE_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "SUIUSDT":    {"instrument": "SUI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "APTUSDT":    {"instrument": "APT_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "INJUSDT":    {"instrument": "INJ_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "ARBUSDT":    {"instrument": "ARB_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "OPUSDT":     {"instrument": "OP_USDC-PERPETUAL",   "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "SEIUSDT":    {"instrument": "SEI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "FETUSDT":    {"instrument": "FET_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
 }
 
 # Which symbols we can actually trade
