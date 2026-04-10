@@ -696,10 +696,13 @@ function renderTradeCard(t) {
       <span class="tc-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${pnl.toFixed(4)} USDT (${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%)</span>
     </div>
     <div class="tc-prices">
-      <div class="price-box"><div class="price-lbl">Live</div><div class="price-val live">${live?fp(live,dec):'—'}</div></div>
+      <div class="tc-prices">
+      <div class="price-box"><div class="price-lbl">Live</div><div class="price-val live">${live?fp(live,dec):'-'}</div></div>
       <div class="price-box"><div class="price-lbl">Entry</div><div class="price-val entry">${fp(t.entry,dec)}</div></div>
       <div class="price-box"><div class="price-lbl">Stop Loss</div><div class="price-val sl">${fp(t.stop,dec)}</div></div>
-      <div class="price-box"><div class="price-lbl">Target 1</div><div class="price-val tp">${fp(t.tp1,dec)}</div></div>
+      <div class="price-box"><div class="price-lbl">Target 1</div><div class="price-val tp1">${fp(t.tp1,dec)}</div></div>
+      <div class="price-box"><div class="price-lbl">Target 2</div><div class="price-val tp2">${fp(t.tp2,dec)}</div></div>
+</div>
     </div>
     <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
