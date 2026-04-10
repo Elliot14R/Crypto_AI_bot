@@ -122,7 +122,7 @@ class DeribitClient:
 
     def get_balance(self, currency: str = "BTC") -> dict:
         """Get account summary for a currency (BTC or ETH)."""
-        return self._get("/private/get_account_summary", {"currency": currency, "extended": True})
+        return self._get("/private/get_account_summary", {"currency": currency, "extended": true})
 
     def get_all_balances(self) -> dict:
         """Returns equity in USD for BTC and ETH accounts combined."""
