@@ -1,4 +1,4 @@
-name: CryptoBot AI — Delta Exchange Scanner
+name: CryptoBot AI — Trading Scanner
 
 on:
   schedule:
@@ -18,12 +18,12 @@ jobs:
     timeout-minutes: 12
 
     env:
-      GH_PAT_TOKEN:        ${{ secrets.GH_PAT_TOKEN }}
-      GITHUB_REPO:         Elliot14R/Crypto_AI_bot
-      GITHUB_BRANCH:       main
-      DELTA_API_KEY:       ${{ secrets.DELTA_API_KEY }}
-      DELTA_API_SECRET:    ${{ secrets.DELTA_API_SECRET }}
-
+      GH_PAT_TOKEN:          ${{ secrets.GH_PAT_TOKEN }}
+      GITHUB_REPO:           Elliot14R/Crypto_AI_bot
+      GITHUB_BRANCH:         main
+      DERIBIT_CLIENT_ID:     ${{ secrets.DERIBIT_CLIENT_ID }}
+      DERIBIT_CLIENT_SECRET: ${{ secrets.DERIBIT_CLIENT_SECRET }}
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,11 +43,11 @@ jobs:
           echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"     >> .env
           echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"     >> .env
           echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
-          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"        >> .env
+          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"         >> .env
           echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"              >> .env
-          echo "GITHUB_BRANCH=main"                                >> .env
-          echo "DELTA_API_KEY=${{ secrets.DELTA_API_KEY }}"       >> .env
-          echo "DELTA_API_SECRET=${{ secrets.DELTA_API_SECRET }}" >> .env
+          echo "GITHUB_BRANCH=main"                               >> .env
+          echo "DERIBIT_CLIENT_ID=${{ secrets.DERIBIT_CLIENT_ID }}"         >> .env
+          echo "DERIBIT_CLIENT_SECRET=${{ secrets.DERIBIT_CLIENT_SECRET }}" >> .env
 
       - name: Restore model cache
         uses: actions/cache@v4
