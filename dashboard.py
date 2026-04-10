@@ -374,8 +374,10 @@ def _startup_check():
 
 _startup_check()
 
-try: threading.Thread(target=telegram_listener, daemon=True).start()
-except Exception as e: log.error(f"Telegram listener failed: {e}")
+try: 
+    threading.Thread(target=telegram_listener, daemon=True).start()
+except Exception as e: 
+    log.error(f"Telegram listener failed: {e}")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
