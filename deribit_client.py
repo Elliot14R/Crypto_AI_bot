@@ -1,23 +1,40 @@
-# deribit_client.py — ALL BUGS FIXED
+# deribit_client.py — RESTORED & CORRECTED
 import time, logging, requests, math
 log = logging.getLogger(__name__)
 
 TESTNET_BASE = "https://test.deribit.com/api/v2"
 
+# RESTORED: Full instrument map for all 20 coins
 SYMBOL_MAP = {
-    "BTCUSDT": {"instrument": "BTC-PERPETUAL", "currency": "BTC"},
-    "ETHUSDT": {"instrument": "ETH-PERPETUAL", "currency": "ETH"},
-    "BNBUSDT": {"instrument": "BNB_USDC-PERPETUAL", "currency": "USDC"},
-    "SOLUSDT": {"instrument": "SOL_USDC-PERPETUAL", "currency": "USDC"},
+    "BTCUSDT":    {"instrument": "BTC-PERPETUAL",      "currency": "BTC",  "kind": "inverse", "min_amount": 10},
+    "ETHUSDT":    {"instrument": "ETH-PERPETUAL",      "currency": "ETH",  "kind": "inverse", "min_amount": 1},
+    "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "XRPUSDT":    {"instrument": "XRP_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "BNBUSDT":    {"instrument": "BNB_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "AVAXUSDT":   {"instrument": "AVAX_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "LINKUSDT":   {"instrument": "LINK_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "NEARUSDT":   {"instrument": "NEAR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "UNIUSDT":    {"instrument": "UNI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "ADAUSDT":    {"instrument": "ADA_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "AAVEUSDT":   {"instrument": "AAVE_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "SUIUSDT":    {"instrument": "SUI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "APTUSDT":    {"instrument": "APT_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "INJUSDT":    {"instrument": "INJ_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "ARBUSDT":    {"instrument": "ARB_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "OPUSDT":     {"instrument": "OP_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "SEIUSDT":    {"instrument": "SEI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "FETUSDT":    {"instrument": "FET_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
 }
 TRADEABLE = list(SYMBOL_MAP.keys())
 
 class DeribitClient:
     def __init__(self, client_id: str, client_secret: str):
-        self.client_id = client_id
+        self.client_id     = client_id
         self.client_secret = client_secret
-        self.base = TESTNET_BASE
-        self.session = requests.Session()
+        self.base          = TESTNET_BASE
+        self.session       = requests.Session()
         self.session.headers.update({"Content-Type": "application/json"})
         self._access_token = None
         self._token_expiry = 0
@@ -43,7 +60,6 @@ class DeribitClient:
         return r.json().get("result", r.json())
 
     def _post(self, path, body):
-        # FIX 1: Real HTTP POST with JSON body (was silently calling _get)
         self._ensure_auth()
         r = self.session.post(f"{self.base}{path}", json=body, timeout=15)
         data = r.json()
@@ -51,10 +67,37 @@ class DeribitClient:
         return data.get("result", data)
 
     def get_instrument(self, symbol):
-        return SYMBOL_MAP.get(symbol, {}).get("instrument", f"{symbol.replace('USDT','')}-PERPETUAL")
+        return SYMBOL_MAP.get(symbol, {}).get("instrument")
 
     def is_supported(self, symbol):
         return symbol in SYMBOL_MAP
+
+    # RESTORED: This is the missing function that caused the crash
+    def get_all_balances(self) -> dict:
+        balances = {}
+        for currency in ["BTC", "ETH", "USDC", "USDT"]:
+            try:
+                res = self._get("/private/get_account_summary", {"currency": currency, "extended": "true"})
+                eq_usd = float(res.get("equity_usd", 0) or res.get("equity", 0) or 0)
+                avail = float(res.get("available_funds", 0) or 0)
+                if eq_usd > 0:
+                    balances[currency] = {"equity_usd": round(eq_usd, 2), "available": round(avail, 6)}
+            except: continue
+        return balances
+
+    def get_usdt_equivalent(self) -> float:
+        balances = self.get_all_balances()
+        return round(sum(v.get("equity_usd", 0) for v in balances.values()), 2)
+
+    # RESTORED: Needed for trade_executor monitoring
+    def get_positions(self) -> list:
+        positions = []
+        for currency in ["BTC", "ETH", "USDC"]:
+            try:
+                r = self._get("/private/get_positions", {"currency": currency, "kind": "future"})
+                if isinstance(r, list): positions.extend([p for p in r if float(p.get("size",0)) != 0])
+            except: continue
+        return positions
 
     def place_market_order(self, symbol, side, amount_usd):
         inst = self.get_instrument(symbol)
@@ -66,8 +109,6 @@ class DeribitClient:
         inst = self.get_instrument(symbol)
         contracts = max(1, round(amount_usd / 10) * 10)
         method = "/private/buy" if side.upper() == "BUY" else "/private/sell"
-        
-        # FIX 2: Correct field name is "stop_price" and "trigger"
         body = {"instrument_name": inst, "amount": contracts, "price": round(price, 2), "reduce_only": True}
         if stop_price:
             body.update({"type": "stop_limit", "stop_price": round(stop_price, 2), "trigger": "last_price"})
@@ -78,15 +119,14 @@ class DeribitClient:
     def get_order(self, order_id):
         return self._get("/private/get_order_state", {"order_id": str(order_id)})
 
-    def is_order_filled(self, order):
-        # FIX 4: Deribit uses "order_state"
+    def is_order_filled(self, order: dict) -> bool:
         return order.get("order_state") == "filled"
 
-    def get_usdt_equivalent(self):
-        total = 0
-        for cur in ["BTC", "ETH", "USDC"]:
-            try:
-                res = self._get("/private/get_account_summary", {"currency": cur, "extended": "true"})
-                total += float(res.get("equity_usd", 0))
-            except: continue
-        return round(total, 2)
+    def get_fill_price(self, order_result: dict, fallback: float) -> float:
+        trades = order_result.get("trades", [])
+        if trades:
+            prices = [float(t.get("price", 0)) for t in trades if t.get("price")]
+            if prices: return round(sum(prices) / len(prices), 2)
+        order = order_result.get("order", order_result)
+        avg = order.get("average_price") or order.get("price")
+        return float(avg) if avg and float(avg) > 0 else fallback
