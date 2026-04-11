@@ -1,4 +1,4 @@
-# deribit_client.py — FINAL INTEGRATED VERSION
+# deribit_client.py — FULL INTEGRATED VERSION
 import time, logging, requests, math
 log = logging.getLogger(__name__)
 
@@ -10,8 +10,21 @@ SYMBOL_MAP = {
     "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
     "BNBUSDT":    {"instrument": "BNB_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
     "XRPUSDT":    {"instrument": "XRP_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
-    "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
-    # Add other symbols as needed following the pattern above
+    "AVAXUSDT":   {"instrument": "AVAX_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "LINKUSDT":   {"instrument": "LINK_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "NEARUSDT":   {"instrument": "NEAR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "UNIUSDT":    {"instrument": "UNI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "ADAUSDT":    {"instrument": "ADA_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "AAVEUSDT":   {"instrument": "AAVE_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "SUIUSDT":    {"instrument": "SUI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "APTUSDT":    {"instrument": "APT_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "INJUSDT":    {"instrument": "INJ_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "ARBUSDT":    {"instrument": "ARB_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "OPUSDT":     {"instrument": "OP_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "SEIUSDT":    {"instrument": "SEI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "FETUSDT":    {"instrument": "FET_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
+    "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
 }
 TRADEABLE = list(SYMBOL_MAP.keys())
 
@@ -53,21 +66,24 @@ class DeribitClient:
         if "error" in data: raise Exception(f"Deribit POST Error: {data['error']}")
         return data.get("result", data)
 
-    # FIX for: 'DeribitClient' object has no attribute 'get_live_price'
+    def get_instrument_info(self, symbol: str) -> dict:
+        inst = SYMBOL_MAP.get(symbol, {}).get("instrument")
+        if inst not in self._instrument_cache:
+            info = self._get("/public/get_instrument", {"instrument_name": inst})
+            self._instrument_cache[inst] = info
+        return self._instrument_cache.get(inst, {})
+
+    def round_price(self, symbol: str, price: float) -> float:
+        info = self.get_instrument_info(symbol)
+        tick = float(info.get("tick_size", 0.01))
+        return round(round(price / tick) * tick, 8)
+
     def get_live_price(self, symbol: str) -> float:
         try:
             inst = SYMBOL_MAP.get(symbol, {}).get("instrument")
-            if not inst: return 0.0
             ticker = self._get("/public/ticker", {"instrument_name": inst})
             return float(ticker.get("mark_price") or ticker.get("last_price") or 0)
-        except Exception as e:
-            log.warning(f"Price fetch failed for {symbol}: {e}")
-            return 0.0
-
-    # FIX for: 'DeribitClient' object has no attribute 'get_total_equity_usd'
-    def get_total_equity_usd(self) -> float:
-        balances = self.get_all_balances()
-        return round(sum(v.get("equity_usd", 0) for v in balances.values()), 2)
+        except Exception: return 0.0
 
     def get_all_balances(self) -> dict:
         balances = {}
@@ -81,13 +97,19 @@ class DeribitClient:
             except: continue
         return balances
 
+    def get_usdt_equivalent(self) -> float:
+        balances = self.get_all_balances()
+        return round(sum(v.get("equity_usd", 0) for v in balances.values()), 2)
+
+    def get_total_equity_usd(self) -> float:
+        return self.get_usdt_equivalent()
+
     def get_positions(self) -> list:
         positions = []
         for currency in ["BTC", "ETH", "USDC"]:
             try:
                 r = self._get("/private/get_positions", {"currency": currency, "kind": "future"})
-                if isinstance(r, list):
-                    positions.extend([p for p in r if float(p.get("size", 0)) != 0])
+                if isinstance(r, list): positions.extend([p for p in r if float(p.get("size",0)) != 0])
             except: continue
         return positions
 
@@ -99,9 +121,10 @@ class DeribitClient:
     def place_limit_order(self, symbol, side, amount, price, stop_price=None):
         inst = SYMBOL_MAP.get(symbol, {}).get("instrument")
         method = "/private/buy" if side.upper() == "BUY" else "/private/sell"
-        body = {"instrument_name": inst, "amount": amount, "price": price, "reduce_only": True}
+        safe_price = self.round_price(symbol, price)
+        body = {"instrument_name": inst, "amount": amount, "price": safe_price, "reduce_only": True}
         if stop_price:
-            body.update({"type": "stop_limit", "stop_price": stop_price, "trigger": "last_price"})
+            body.update({"type": "stop_limit", "stop_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
         else:
             body["type"] = "limit"
         return self._post(method, body)
@@ -114,6 +137,3 @@ class DeribitClient:
 
     def is_supported(self, symbol):
         return symbol in SYMBOL_MAP
-
-    def test_connection(self):
-        return self.get_total_equity_usd() > 0
