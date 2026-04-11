@@ -13,7 +13,7 @@ SYMBOL_MAP = {
     "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},
     # Add other symbols as needed following the pattern above
 }
-TRADEABLE_SYMBOLS = list(SYMBOL_MAP.keys())
+TRADEABLE = list(SYMBOL_MAP.keys())
 
 class DeribitClient:
     def __init__(self, client_id: str, client_secret: str):
