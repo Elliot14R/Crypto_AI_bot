@@ -1,4 +1,4 @@
-# deribit_client.py — FULL INTEGRATED VERSION (test_connection restored)
+# deribit_client.py — FULL INTEGRATED VERSION (Math + Connection Restored)
 import time, logging, requests, math
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ SYMBOL_MAP = {
     "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
 }
 TRADEABLE = list(SYMBOL_MAP.keys())
-TRADEABLE_SYMBOLS = TRADEABLE  # This alias prevents the ImportError forever!
+TRADEABLE_SYMBOLS = TRADEABLE  # Alias to prevent import errors
 
 class DeribitClient:
     def __init__(self, client_id: str, client_secret: str):
@@ -82,10 +82,45 @@ class DeribitClient:
             self._instrument_cache[inst] = info
         return self._instrument_cache.get(inst, {})
 
+    # ── PRECISION & MATH RESTORED ─────────────────────────────────────
+    
+    def get_min_trade_amount(self, symbol: str) -> float:
+        info = self.get_instrument_info(symbol)
+        return float(info.get("min_trade_amount", SYMBOL_MAP.get(symbol, {}).get("min_amount", 1)))
+
+    def round_amount(self, symbol: str, amount: float) -> float:
+        if amount <= 0: return 0.0
+        step = self.get_min_trade_amount(symbol)
+        rounded = max(step, math.floor(amount / step) * step)
+        return int(rounded) if float(step).is_integer() else round(rounded, 6)
+
     def round_price(self, symbol: str, price: float) -> float:
         info = self.get_instrument_info(symbol)
         tick = float(info.get("tick_size", 0.01))
         return round(round(price / tick) * tick, 8)
+
+    def calc_contracts(self, symbol: str, balance_usd: float, entry: float, stop: float, risk_mult: float = 1.0) -> float:
+        try:
+            from config import RISK_PER_TRADE as rpt
+        except ImportError:
+            rpt = 0.01
+        risk_usd = balance_usd * rpt * risk_mult
+        stop_dist = abs(entry - stop)
+        min_amt = self.get_min_trade_amount(symbol)
+
+        if stop_dist <= 0: return self.round_amount(symbol, min_amt)
+
+        kind = SYMBOL_MAP.get(symbol, {}).get("kind", "linear")
+        if kind == "inverse":
+            amount = risk_usd / (stop_dist / entry)
+        else:
+            amount = min(risk_usd / stop_dist, balance_usd * 0.20 / entry)
+
+        final_amount = self.round_amount(symbol, amount)
+        log.info(f"  Contracts: {final_amount} {symbol} (risk=${risk_usd:.2f}, {kind})")
+        return final_amount
+
+    # ──────────────────────────────────────────────────────────────────
 
     def get_live_price(self, symbol: str) -> float:
         try:
@@ -159,7 +194,6 @@ class DeribitClient:
     def cancel_order(self, order_id: str) -> dict:
         return self._post("/private/cancel", {"order_id": order_id})
 
-    # RESTORED: Validates the connection and prints the balance on startup
     def test_connection(self) -> bool:
         try:
             total = self.get_total_equity_usd()
