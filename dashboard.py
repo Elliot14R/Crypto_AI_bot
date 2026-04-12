@@ -186,8 +186,20 @@ def api_open():
 
                 entry = float(p.get("average_price", 0))
                 live = float(p.get("mark_price", 0))
-                upnl = float(p.get("floating_profit_loss_usd", 0))
                 signal = "BUY" if qty > 0 else "SELL"
+
+                # FIX 1: Correct percentage math (reverses for SELL positions)
+                if entry > 0:
+                    pct = (live - entry) / entry * 100 if signal == "BUY" else (entry - live) / entry * 100
+                else:
+                    pct = 0.0
+
+                # FIX 2: Correct USD PNL math (Handles missing floating_profit_loss_usd on Testnet)
+                upnl = float(p.get("floating_profit_loss_usd") or 0)
+                if upnl == 0:
+                    base_pnl = float(p.get("floating_profit_loss") or 0)
+                    # If Inverse contract (BTC/ETH), convert crypto PNL to USD by multiplying by live price
+                    upnl = base_pnl * live if "USDC" not in inst else base_pnl
 
                 # Pull the AI stats and targets from the GitHub data we just fetched
                 t_info = local_trades.get(symbol, {})
@@ -199,7 +211,7 @@ def api_open():
                     "qty": abs(qty),
                     "live_price": live,
                     "unrealised_pnl": round(upnl, 4),
-                    "pnl_pct": round((live-entry)/entry*100 if entry>0 else 0, 2),
+                    "pnl_pct": round(pct, 2),
                     "stop": t_info.get("stop", 0),
                     "tp1":  t_info.get("tp1", 0),
                     "tp2":  t_info.get("tp2", 0),
