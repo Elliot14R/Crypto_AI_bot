@@ -192,7 +192,13 @@ class DeribitClient:
         return self._post(method, body)
 
     def get_order(self, order_id):
-        return self._get("/private/get_order_state", {"order_id": str(order_id)})
+        try:
+            return self._get("/private/get_order_state", {"order_id": str(order_id)})
+        except Exception as e:
+            # If the order is a ghost/deleted, gracefully return 'not_found' instead of throwing a red error
+            if "order_not_found" in str(e):
+                return {"order_state": "not_found"}
+            return {}
 
     def is_order_filled(self, order: dict) -> bool:
         return order.get("order_state") == "filled"
