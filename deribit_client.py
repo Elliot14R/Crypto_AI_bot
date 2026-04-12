@@ -1,4 +1,4 @@
-# deribit_client.py — FULL INTEGRATED VERSION (Math + Connection Restored)
+# deribit_client.py — THE FINAL BULLETPROOF FIX
 import time, logging, requests, math
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ SYMBOL_MAP = {
     "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL","currency": "USDC", "kind": "linear",  "min_amount": 1},
 }
 TRADEABLE = list(SYMBOL_MAP.keys())
-TRADEABLE_SYMBOLS = TRADEABLE  # Alias to prevent import errors
+TRADEABLE_SYMBOLS = TRADEABLE  # Alias prevents import errors in the executor!
 
 class DeribitClient:
     def __init__(self, client_id: str, client_secret: str):
@@ -55,25 +55,36 @@ class DeribitClient:
     def _ensure_auth(self):
         if time.time() >= self._token_expiry: self._authenticate()
 
-    def _get(self, path, params=None):
+    # ── BULLETPROOF API ROUTER ────────────────────────────────────────
+
+    def _request(self, path: str, payload: dict = None) -> dict:
         self._ensure_auth()
-        r = self.session.get(f"{self.base}{path}", params=params or {}, timeout=15)
+        params = {}
+        if payload:
+            # Safely formats booleans so Deribit doesn't throw bad_request!
+            for k, v in payload.items():
+                if isinstance(v, bool): params[k] = "true" if v else "false"
+                else: params[k] = v
+        
+        # Using GET correctly bypasses the strict JSON-RPC wrapper requirement
+        r = self.session.get(f"{self.base}{path}", params=params, timeout=15)
+        
         try: data = r.json()
         except: raise Exception(f"HTTP {r.status_code}: {r.text}")
+        
         if "error" in data:
             err = data["error"].get("message", data["error"])
             raise Exception(f"API Error ({path}): {err}")
+            
         return data.get("result", data)
 
-    def _post(self, path, body):
-        self._ensure_auth()
-        r = self.session.post(f"{self.base}{path}", json=body, timeout=15)
-        try: data = r.json()
-        except: raise Exception(f"HTTP {r.status_code}: {r.text}")
-        if "error" in data:
-            err = data["error"].get("message", data["error"])
-            raise Exception(f"API Error ({path}): {err}")
-        return data.get("result", data)
+    def _get(self, path: str, params: dict = None) -> dict:
+        return self._request(path, params)
+
+    def _post(self, path: str, body: dict) -> dict:
+        return self._request(path, body)
+
+    # ── PRECISION MATH ────────────────────────────────────────────────
 
     def get_instrument_info(self, symbol: str) -> dict:
         inst = SYMBOL_MAP.get(symbol, {}).get("instrument")
@@ -82,8 +93,6 @@ class DeribitClient:
             self._instrument_cache[inst] = info
         return self._instrument_cache.get(inst, {})
 
-    # ── PRECISION & MATH RESTORED ─────────────────────────────────────
-    
     def get_min_trade_amount(self, symbol: str) -> float:
         info = self.get_instrument_info(symbol)
         return float(info.get("min_trade_amount", SYMBOL_MAP.get(symbol, {}).get("min_amount", 1)))
@@ -120,7 +129,7 @@ class DeribitClient:
         log.info(f"  Contracts: {final_amount} {symbol} (risk=${risk_usd:.2f}, {kind})")
         return final_amount
 
-    # ──────────────────────────────────────────────────────────────────
+    # ── BALANCE & ACCOUNT ─────────────────────────────────────────────
 
     def get_live_price(self, symbol: str) -> float:
         try:
@@ -156,6 +165,8 @@ class DeribitClient:
                 if isinstance(r, list): positions.extend([p for p in r if float(p.get("size",0)) != 0])
             except: continue
         return positions
+
+    # ── ORDER EXECUTION ───────────────────────────────────────────────
 
     def place_market_order(self, symbol, side, amount):
         inst = SYMBOL_MAP.get(symbol, {}).get("instrument")
