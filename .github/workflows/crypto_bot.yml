@@ -17,20 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
 
-    env:
-      GH_PAT_TOKEN:          ${{ secrets.GH_PAT_TOKEN }}
-      GITHUB_REPO:           Elliot14R/Crypto_AI_bot
-      GITHUB_BRANCH:         main
-      DERIBIT_CLIENT_ID:     ${{ secrets.DERIBIT_CLIENT_ID }}
-      DERIBIT_CLIENT_SECRET: ${{ secrets.DERIBIT_CLIENT_SECRET }}
-      
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true
+          lfs: false  # 🔴 CRITICAL: This bypasses the frozen LFS budget!
 
-      - name: Python 3.11
+      - name: Download AI Model
+        # 🟢 Pulls directly from your v2.0 release to bypass LFS bandwidth limits
+        run: |
+          wget -q -O pro_crypto_ai_model.pkl "https://github.com/Elliot14R/Crypto_AI_bot/releases/download/v2.0/pro_crypto_ai_model.pkl"
+
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -41,21 +39,15 @@ jobs:
 
       - name: Write .env from secrets
         run: |
-          echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"   >> .env
-          echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"     >> .env
-          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"     >> .env
-          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
-          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"         >> .env
-          echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"              >> .env
-          echo "GITHUB_BRANCH=main"                               >> .env
+          echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"         >> .env
+          echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"           >> .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"           >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}"       >> .env
+          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"               >> .env
+          echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"                    >> .env
+          echo "GITHUB_BRANCH=main"                                     >> .env
           echo "DERIBIT_CLIENT_ID=${{ secrets.DERIBIT_CLIENT_ID }}"         >> .env
           echo "DERIBIT_CLIENT_SECRET=${{ secrets.DERIBIT_CLIENT_SECRET }}" >> .env
-
-      - name: Restore model cache
-        uses: actions/cache@v4
-        with:
-          path: pro_crypto_ai_model.pkl
-          key: model-${{ hashFiles('model_performance.json') }}
 
       - name: Restore state files
         uses: actions/cache@v4
@@ -73,11 +65,11 @@ jobs:
 
       - name: Init state files if missing
         run: |
-          [ -f trades.json ]        || echo '{}'  > trades.json
-          [ -f trade_history.json ] || echo '[]'  > trade_history.json
-          [ -f signals.json ]       || echo '[]'  > signals.json
-          [ -f scan_mode.json ]     || echo '{}'  > scan_mode.json
-          [ -f balance.json ]       || echo '{}'  > balance.json
+          [ -f trades.json ]        || echo '{}' > trades.json
+          [ -f trade_history.json ] || echo '[]' > trade_history.json
+          [ -f signals.json ]       || echo '[]' > signals.json
+          [ -f scan_mode.json ]     || echo '{}' > scan_mode.json
+          [ -f balance.json ]       || echo '{}' > balance.json
 
       - name: Run bot
         run: |
