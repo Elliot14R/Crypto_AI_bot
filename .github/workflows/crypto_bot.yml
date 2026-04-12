@@ -59,9 +59,10 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          key: bot-state-${{ github.run_id }}
+          # 🟢 FIX: Added '-v2' to force a fresh cache and wipe the ghost trades
+          key: bot-state-v2-${{ github.run_id }}
           restore-keys: |
-            bot-state-
+            bot-state-v2-
 
       - name: Init state files if missing
         run: |
@@ -89,7 +90,8 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          key: bot-state-${{ github.run_id }}
+          # 🟢 FIX: Added '-v2' here as well
+          key: bot-state-v2-${{ github.run_id }}
 
       - name: Upload log
         if: always()
