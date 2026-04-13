@@ -160,7 +160,16 @@ class DeribitClient:
         Deribit ALWAYS requires integer amounts — floats cause bad_request 11050.
         Uses math.floor (not round) to never exceed risk budget.
         """
+        if raw_amount <= 0:
+            return 0
+            
         min_amt = self.get_min_trade_amount(symbol)
+        
+        # 🟢 CRITICAL SAFETY NET: Prevent Division by Zero!
+        # If the API glitches or returns 0, force a safe fallback of 1
+        if not min_amt or min_amt <= 0:
+            min_amt = 1.0
+
         # floor to nearest valid step
         steps  = math.floor(raw_amount / min_amt)
         result = max(1, steps) * min_amt
