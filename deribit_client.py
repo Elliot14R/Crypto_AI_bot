@@ -1,51 +1,30 @@
-# deribit_client.py — bad_request fix + all previous fixes
-#
-# FIX FOR bad_request CODE 11050:
-#   Deribit requires INTEGER contract amounts for ALL perpetuals.
-#   calc_contracts() was returning floats (0.5149 BTC, 16.691 ETH).
-#   Now uses int(math.floor(...)) — guaranteed integers every time.
-#
-# CONTRACT SIZE REFERENCE (Deribit testnet):
-#   BTC-PERPETUAL  : inverse, $10/contract, min=10, step=10 → integers (10, 20, 30...)
-#   ETH-PERPETUAL  : inverse, $1/contract,  min=1,  step=1  → integers (1, 2, 3...)
-#   *_USDC-PERPETUAL: linear, base currency, min=1,  step=1  → integers
-#
-# ALL OTHER FIXES RETAINED:
-#   _post() sends real HTTP POST (not _get)
-#   stop_price field correct (trigger_price per Deribit docs for stop-limit)
-#   get_fill_price() reads trades[] array
-#   is_order_filled() checks order_state == "filled"
-#   reduce_only=True on all SL/TP orders
-#   _verify_instruments() on startup
-
+# deribit_client.py — Master Production Version
 import math, time, logging, requests
 log = logging.getLogger(__name__)
 
 TESTNET_BASE = "https://test.deribit.com/api/v2"
 
-# Contract specs — verified against Deribit documentation
-# inverse: amount = USD notional contracts (integer required)
-#   BTC: $10 per contract, min 10 contracts
-#   ETH: $1 per contract,  min 1 contract
-# linear: amount = base currency units (integer required)
 SYMBOL_MAP = {
-    "BTCUSDT":    {"instrument": "BTC-PERPETUAL",       "currency": "BTC",  "kind": "inverse", "contract_usd": 10, "min_amount": 10},
-    "ETHUSDT":    {"instrument": "ETH-PERPETUAL",       "currency": "ETH",  "kind": "inverse", "contract_usd": 1,  "min_amount": 1},
-    "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "XRPUSDT":    {"instrument": "XRP_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "AVAXUSDT":   {"instrument": "AVAX_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "LINKUSDT":   {"instrument": "LINK_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "NEARUSDT":   {"instrument": "NEAR_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "UNIUSDT":    {"instrument": "UNI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "ADAUSDT":    {"instrument": "ADA_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "AAVEUSDT":   {"instrument": "AAVE_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "INJUSDT":    {"instrument": "INJ_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "ARBUSDT":    {"instrument": "ARB_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "OPUSDT":     {"instrument": "OP_USDC-PERPETUAL",   "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "SEIUSDT":    {"instrument": "SEI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "FETUSDT":    {"instrument": "FET_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
-    "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "contract_usd": 0,  "min_amount": 1},
+    "BTCUSDT":    {"instrument": "BTC_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 0.001, "tick_size": 0.1},
+    "ETHUSDT":    {"instrument": "ETH_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 0.01,  "tick_size": 0.01},
+    "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "XRPUSDT":    {"instrument": "XRP_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.0001},
+    "BNBUSDT":    {"instrument": "BNB_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 0.1,   "tick_size": 0.01},
+    "AVAXUSDT":   {"instrument": "AVAX_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "LINKUSDT":   {"instrument": "LINK_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "NEARUSDT":   {"instrument": "NEAR_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.0001},
+    "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "UNIUSDT":    {"instrument": "UNI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "ADAUSDT":    {"instrument": "ADA_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.0001},
+    "AAVEUSDT":   {"instrument": "AAVE_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 0.1,   "tick_size": 0.01},
+    "INJUSDT":    {"instrument": "INJ_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "ARBUSDT":    {"instrument": "ARB_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.0001},
+    "SUIUSDT":    {"instrument": "SUI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.0001},
+    "OPUSDT":     {"instrument": "OP_USDC-PERPETUAL",   "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.0001},
+    "SEIUSDT":    {"instrument": "SEI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "FETUSDT":    {"instrument": "FET_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
+    "APTUSDT":    {"instrument": "APT_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,     "tick_size": 0.001},
 }
 
 TRADEABLE_SYMBOLS: list = []
@@ -86,34 +65,27 @@ class DeribitClient:
     def _get(self, path: str, params: dict = None) -> dict:
         self._ensure_auth()
         r = self.session.get(f"{self.base}{path}", params=params or {}, timeout=15)
-        
-        # 🟢 FIX: Read JSON first so we don't hide the real API error messages!
         try:
             data = r.json()
         except Exception:
             r.raise_for_status()
             return {}
-            
         if "error" in data:
-            err = data["error"]
-            raise Exception(f"GET {path}: {err.get('message', err)} (Code: {err.get('code', 'Unknown')})")
+            raise Exception(f"Deribit error GET {path}: {data['error']}")
+        r.raise_for_status()
         return data.get("result", data)
 
     def _post(self, path: str, body: dict) -> dict:
-        """JSON-RPC 2.0 Wrapper with safe error extraction"""
+        """JSON-RPC 2.0 Wrapper with safe error extraction to catch 11050 and 10003 details"""
         self._ensure_auth()
-        
-        # 1. ALWAYS wrap Deribit POST requests in JSON-RPC
         payload = {
             "jsonrpc": "2.0",
             "id": int(time.time() * 1000),
             "method": path.strip("/"),
             "params": body
         }
-        
         r = self.session.post(f"{self.base}{path}", json=payload, timeout=15)
         
-        # 2. Extract the detailed JSON error BEFORE raising HTTP status errors
         try:
             data = r.json()
         except Exception:
@@ -130,17 +102,30 @@ class DeribitClient:
     # ── Instrument verification ───────────────────────────────────────
 
     def _verify_instruments(self):
-        """Check each symbol live on startup. Only confirmed symbols are tradeable."""
+        """Check active symbols using bulk requests to prevent rate-limiting"""
         global TRADEABLE_SYMBOLS
         confirmed = []
-        for sym, info in SYMBOL_MAP.items():
+        active_instruments = {}
+
+        for cur in ["USDC", "BTC", "ETH"]:
             try:
-                result = self._get("/public/get_instrument", {"instrument_name": info["instrument"]})
-                self._instrument_cache[info["instrument"]] = result
+                res = self._get("/public/get_instruments", {"currency": cur, "kind": "future", "expired": "false"})
+                if isinstance(res, list):
+                    for inst in res:
+                        name = inst.get("instrument_name")
+                        if name: active_instruments[name] = inst
+            except Exception as e:
+                log.warning(f"Failed to fetch {cur} master list: {e}")
+
+        for sym, info in SYMBOL_MAP.items():
+            target_inst = info["instrument"]
+            if target_inst in active_instruments:
+                self._instrument_cache[target_inst] = active_instruments[target_inst]
                 self._supported_symbols.add(sym)
                 confirmed.append(sym)
-            except Exception:
-                log.debug(f"  {sym} ({info['instrument']}) not on testnet — skipped")
+            else:
+                log.warning(f"  ⚠️ {sym} ({target_inst}) is currently offline on Deribit Testnet.")
+
         TRADEABLE_SYMBOLS = confirmed
         log.info(f"✓ Tradeable: {len(confirmed)} symbols — {confirmed}")
 
@@ -162,46 +147,39 @@ class DeribitClient:
 
     def get_tick_size(self, symbol: str) -> float:
         info = self.get_instrument_info(symbol)
-        return float(info.get("tick_size") or SYMBOL_MAP[symbol].get("tick_size", 0.5))
+        return float(info.get("tick_size") or SYMBOL_MAP[symbol].get("tick_size", 0.001))
 
-    def get_min_trade_amount(self, symbol: str) -> int:
-        """Always returns an integer — Deribit min_trade_amount is always integer."""
+    def get_min_trade_amount(self, symbol: str) -> float:
         info = self.get_instrument_info(symbol)
         api_min = info.get("min_trade_amount")
-        fallback = SYMBOL_MAP[symbol]["min_amount"]
-        return int(float(api_min)) if api_min else int(fallback)
+        fallback = SYMBOL_MAP[symbol].get("min_amount", 1.0)
+        return float(api_min) if api_min else float(fallback)
 
     def round_price(self, symbol: str, price: float) -> float:
-        """Round price to tick_size. Prevents invalid_params on price."""
         if price <= 0: return 0.0
         tick = self.get_tick_size(symbol)
         rounded = round(round(price / tick) * tick, 10)
         decimals = len(str(tick).rstrip("0").split(".")[-1]) if "." in str(tick) else 0
         return round(rounded, decimals)
 
-    def to_int_amount(self, symbol: str, raw_amount: float) -> int:
-        """
-        THE KEY FIX: Convert any float amount to a valid integer contract count.
-        Deribit ALWAYS requires integer amounts — floats cause bad_request 11050.
-        Uses math.floor (not round) to never exceed risk budget.
-        """
+    def to_int_amount(self, symbol: str, raw_amount: float):
+        """Converts to step size correctly, with ZeroDivisionError protection"""
+        if raw_amount <= 0:
+            return 0.0
+            
         min_amt = self.get_min_trade_amount(symbol)
-        # floor to nearest valid step
+        if not min_amt or min_amt <= 0:
+            min_amt = 1.0
+
         steps  = math.floor(raw_amount / min_amt)
         result = max(1, steps) * min_amt
-        return int(result)
+        
+        decimals = len(str(min_amt).rstrip("0").split(".")[-1]) if "." in str(min_amt) else 0
+        return round(result, decimals) if decimals > 0 else int(result)
 
     # ── Position sizing ───────────────────────────────────────────────
 
-    def calc_contracts(self, symbol: str, balance_usd: float, entry: float,
-                       stop: float, risk_mult: float = 1.0) -> int:
-        """
-        Returns INTEGER contract count. No floats. Ever.
-        Inverse (BTC, ETH): amount = USD notional contracts
-            BTC: each contract = $10 USD, min 10 contracts
-            ETH: each contract = $1  USD, min 1 contract
-        Linear (USDC perps): amount = base currency units, min 1
-        """
+    def calc_contracts(self, symbol: str, balance_usd: float, entry: float, stop: float, risk_mult: float = 1.0):
         try:
             from config import RISK_PER_TRADE as risk_pct
         except ImportError:
@@ -209,46 +187,40 @@ class DeribitClient:
 
         risk_usd  = balance_usd * risk_pct * risk_mult
         stop_dist = abs(entry - stop)
-        spec      = SYMBOL_MAP[symbol]
         min_amt   = self.get_min_trade_amount(symbol)
 
         if stop_dist <= 0:
-            return min_amt
+            return self.to_int_amount(symbol, min_amt)
 
-        if spec["kind"] == "inverse":
-            cs = spec["contract_usd"]   # $10 for BTC, $1 for ETH
-            # risk_usd = contracts × cs × stop_dist / entry
-            # → contracts = risk_usd × entry / (cs × stop_dist)
-            raw = risk_usd * entry / (cs * stop_dist)
-            # hard cap: 20% portfolio notional
-            max_contracts = int((balance_usd * 0.20) / cs)
-            raw = min(raw, max_contracts)
-        else:
-            # linear: risk_usd = contracts × stop_dist
-            raw = risk_usd / stop_dist
-            # hard cap: 20% portfolio value in base currency
-            max_contracts = int((balance_usd * 0.20) / entry)
-            raw = min(raw, max_contracts)
+        # Linear: risk_usd = contracts × stop_dist
+        raw = risk_usd / stop_dist
+        max_contracts = (balance_usd * 0.20) / entry
+        raw = min(raw, max_contracts)
 
         result = self.to_int_amount(symbol, raw)
-        log.info(f"  Contracts: {result} {symbol} "
-                 f"(risk=${risk_usd:.2f}, kind={spec['kind']}, "
-                 f"stop_dist={stop_dist:.4f}, raw={raw:.2f})")
+        log.info(f"  Contracts: {result} {symbol} (risk=${risk_usd:.2f}, kind=linear, stop_dist={stop_dist:.4f}, raw={raw:.2f})")
         return result
 
-    def split_amount(self, symbol: str, total: int) -> tuple:
-        """
-        Split total contracts into (tp1_amount, tp2_amount).
-        Both must be valid integers. If total < 2, put all in tp1.
-        """
+    def split_amount(self, symbol: str, total) -> tuple:
+        """ZeroDivisionError protected split"""
+        if total <= 0:
+            return 0, 0
+            
         min_amt = self.get_min_trade_amount(symbol)
-        if total < 2 * min_amt:
-            return int(total), 0
-        half    = total // 2
-        tp1_amt = max(min_amt, int(math.floor(half / min_amt) * min_amt))
+        if not min_amt or min_amt <= 0:
+            min_amt = 1.0
+
+        half = total / 2.0
+        tp1_amt = max(min_amt, math.floor(half / min_amt) * min_amt)
         tp2_amt = total - tp1_amt
+
         if tp2_amt < min_amt:
-            return int(total), 0
+            tp1_amt = total
+            tp2_amt = 0
+
+        decimals = len(str(min_amt).rstrip("0").split(".")[-1]) if "." in str(min_amt) else 0
+        if decimals > 0:
+            return round(tp1_amt, decimals), round(tp2_amt, decimals)
         return int(tp1_amt), int(tp2_amt)
 
     # ── Balance ───────────────────────────────────────────────────────
@@ -286,46 +258,31 @@ class DeribitClient:
 
     # ── Orders ────────────────────────────────────────────────────────
 
-    def place_market_order(self, symbol: str, side: str, amount: int) -> dict:
-        """
-        amount MUST be integer. Returns full result dict {"order": {...}, "trades": [...]}.
-        """
-        assert isinstance(amount, int) and amount > 0, f"amount must be positive int, got {amount!r}"
+    def place_market_order(self, symbol: str, side: str, amount) -> dict:
         instrument = self.get_instrument_name(symbol)
         method     = "/private/buy" if side.upper() == "BUY" else "/private/sell"
         result = self._post(method, {
             "instrument_name": instrument,
             "amount":          amount,
             "type":            "market",
+            "time_in_force":   "immediate_or_cancel", # 🟢 IOC FIX: Prevents wash-trading overlaps on testnet
             "label":           f"bot_entry_{int(time.time())}",
         })
         order = result.get("order", result)
-        log.info(f"  ✅ MARKET {side.upper()} {amount} {instrument} "
-                 f"id:{order.get('order_id','')} state:{order.get('order_state','')}")
-        return result  # full result — caller uses get_fill_price()
+        log.info(f"  ✅ MARKET {side.upper()} {amount} {instrument} id:{order.get('order_id','')} state:{order.get('order_state','')}")
+        return result 
 
     def get_fill_price(self, market_result: dict, fallback: float) -> float:
-        """Extract actual fill price from market order result trades[] array."""
         trades = market_result.get("trades", [])
         if trades:
             prices = [float(t["price"]) for t in trades if t.get("price")]
-            if prices:
-                return round(sum(prices) / len(prices), 8)
+            if prices: return round(sum(prices) / len(prices), 8)
         order = market_result.get("order", market_result)
         avg   = order.get("average_price") or order.get("price")
-        if avg and float(avg) > 0:
-            return float(avg)
+        if avg and float(avg) > 0: return float(avg)
         return fallback
 
-    def place_limit_order(self, symbol: str, side: str, amount: int,
-                          price: float, stop_price: float = None) -> dict:
-        """
-        amount MUST be integer.
-        Returns full result dict {"order": {...}} so caller can read order_id.
-        reduce_only=True prevents accidental new positions.
-        trigger_price field per Deribit docs for stop-limit orders.
-        """
-        assert isinstance(amount, int) and amount > 0, f"amount must be positive int, got {amount!r}"
+    def place_limit_order(self, symbol: str, side: str, amount, price: float, stop_price: float = None) -> dict:
         instrument = self.get_instrument_name(symbol)
         method     = "/private/buy" if side.upper() == "BUY" else "/private/sell"
         safe_price = self.round_price(symbol, price)
@@ -354,9 +311,8 @@ class DeribitClient:
         result = self._post(method, body)
         order  = result.get("order", result)
         kind   = "STOP_LIMIT" if stop_price else "LIMIT"
-        log.info(f"  ✅ {kind} {side.upper()} {amount} {instrument} @ {safe_price} "
-                 f"id:{order.get('order_id','')} state:{order.get('order_state','')}")
-        return result  # full result, caller extracts result["order"]["order_id"]
+        log.info(f"  ✅ {kind} {side.upper()} {amount} {instrument} @ {safe_price} id:{order.get('order_id','')} state:{order.get('order_state','')}")
+        return result
 
     def get_order(self, order_id: str) -> dict:
         try:
@@ -366,7 +322,6 @@ class DeribitClient:
             return {}
 
     def is_order_filled(self, order: dict) -> bool:
-        """Valid Deribit states: open, filled, cancelled, untriggered, rejected."""
         return order.get("order_state", "").lower() == "filled"
 
     def cancel_order(self, order_id: str) -> dict:
@@ -379,8 +334,7 @@ class DeribitClient:
     def get_open_orders(self, symbol: str = None) -> list:
         try:
             if symbol and symbol in SYMBOL_MAP:
-                r = self._get("/private/get_open_orders_by_instrument",
-                              {"instrument_name": self.get_instrument_name(symbol)})
+                r = self._get("/private/get_open_orders_by_instrument", {"instrument_name": self.get_instrument_name(symbol)})
                 return r if isinstance(r, list) else []
             orders = []
             for cur in ["BTC", "ETH", "USDC"]:
