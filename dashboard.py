@@ -44,11 +44,26 @@ def load_log(lines=200):
     return []
 
 def fetch_live_github_data(filename):
-    """Bypasses Render's stale disk and fetches the latest file directly from GitHub Actions storage"""
+    """Bypasses Render's stale disk and safely decodes the base64 file from GitHub"""
     repo = os.getenv("GITHUB_REPO")
     token = os.getenv("GH_PAT_TOKEN") or os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
     if not repo or not token: 
         return {}
+    
+    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+    import base64
+    
+    for path in [f"data/{filename}", filename]:
+        try:
+            r = requests.get(f"https://api.github.com/repos/{repo}/contents/{path}", headers=headers, timeout=5)
+            if r.status_code == 200:
+                data = r.json()
+                # 🟢 THE FIX: Decode the base64 gibberish into readable JSON!
+                content = base64.b64decode(data["content"]).decode('utf-8')
+                return json.loads(content)
+        except Exception as e:
+            pass
+    return {}
     
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3.raw"}
     try:
