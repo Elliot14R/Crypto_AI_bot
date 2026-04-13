@@ -100,11 +100,20 @@ class DeribitClient:
         return data.get("result", data)
 
     def _post(self, path: str, body: dict) -> dict:
+        """JSON-RPC 2.0 Wrapper with safe error extraction"""
         self._ensure_auth()
-        # 🟢 FIX: Revert to standard REST body. Linear contracts don't need JSON-RPC wrappers.
-        r = self.session.post(f"{self.base}{path}", json=body, timeout=15)
         
-        # 🟢 FIX: Read JSON first so we don't hide the 400 Bad Request details!
+        # 1. ALWAYS wrap Deribit POST requests in JSON-RPC
+        payload = {
+            "jsonrpc": "2.0",
+            "id": int(time.time() * 1000),
+            "method": path.strip("/"),
+            "params": body
+        }
+        
+        r = self.session.post(f"{self.base}{path}", json=payload, timeout=15)
+        
+        # 2. Extract the detailed JSON error BEFORE raising HTTP status errors
         try:
             data = r.json()
         except Exception:
@@ -114,6 +123,8 @@ class DeribitClient:
         if "error" in data:
             err = data["error"]
             raise Exception(f"{err.get('message', err)} (Code: {err.get('code', 'Unknown')})")
+            
+        r.raise_for_status()
         return data.get("result", data)
 
     # ── Instrument verification ───────────────────────────────────────
