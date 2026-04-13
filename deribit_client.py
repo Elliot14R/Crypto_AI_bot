@@ -33,7 +33,7 @@ SYMBOL_MAP = {
     "AAVEUSDT":   {"instrument": "AAVE_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 0.1, "tick_size": 0.01},
     "INJUSDT":    {"instrument": "INJ_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,   "tick_size": 0.001},
     "ARBUSDT":    {"instrument": "ARB_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,   "tick_size": 0.0001},
-    "SUIUSDT":    {"instrument": "SUI_USDC-PERPETUAL", "currency": "USDC", "kind": "linear",  "min_amount": 1},   "tick_size": 0.0001},
+    "SUIUSDT":    {"instrument": "SUI_USDC-PERPETUAL",  "currency": "USDC", "kind": "linear",  "min_amount": 1,   "tick_size": 0.0001},
     "OPUSDT":     {"instrument": "OP_USDC-PERPETUAL",   "currency": "USDC", "kind": "linear",  "min_amount": 1,   "tick_size": 0.0001},
 }
 
