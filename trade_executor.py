@@ -124,29 +124,29 @@ def get_data(symbol: str, interval: str) -> pd.DataFrame:
 # ════════════ STUCK TRADE CLEANER ════════════════════════════════════
 
 def clean_invalid_trades(deribit: DeribitClient):
-    """Remove trades with $0 SL/TP or no live orders — from old bugs."""
+    """Remove broken trades or ghost trades with no actual Deribit position."""
     trades = load_trades()
     if not trades: return
 
+    # Get physical live positions straight from the exchange
+    live_positions = {}
+    for p in deribit.get_positions():
+        if float(p.get("size", 0)) != 0:
+            inst = p.get("instrument_name", "")
+            base = inst.split("_")[0] if "_" in inst else inst.split("-")[0]
+            live_positions[f"{base}USDT"] = float(p.get("size"))
+
     to_remove = []
     for symbol, trade in trades.items():
+        # 1. Clear old broken state trades
         if float(trade.get("stop", 0)) == 0 or float(trade.get("tp1", 0)) == 0:
             log.warning(f"  🗑️ {symbol}: stop=0 or tp1=0 — removing broken state")
             to_remove.append(symbol); continue
 
-        oids  = trade.get("order_ids", {})
-        live  = False
-        for key, oid in oids.items():
-            if key == "entry" or not oid or str(oid) in ("", "None"): continue
-            try:
-                o = deribit.get_order(str(oid))
-                if o.get("order_state") in ("open", "partially_filled", "untriggered"):
-                    live = True; break
-            except Exception: pass
-
-        if not live and len(oids) > 1:
-            log.warning(f"  🗑️ {symbol}: no live orders on Deribit — clearing stuck trade")
-            _record_close(trade, float(trade.get("entry", 0)), 0.0, "Stuck — auto-removed")
+        # 2. 🟢 THE GHOST KILLER: If bot memory has it, but Deribit doesn't... kill it.
+        if symbol not in live_positions:
+            log.warning(f"  🗑️ {symbol}: 0 position on Deribit — clearing ghost trade!")
+            _record_close(trade, float(trade.get("entry", 0)), 0.0, "Ghost Trade — auto-removed")
             to_remove.append(symbol)
 
     if to_remove:
