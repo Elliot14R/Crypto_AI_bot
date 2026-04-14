@@ -45,36 +45,32 @@ class DeribitClient:
                 self._supported_symbols.add(sym)
         log.info(f"✓ Verified {len(self._supported_symbols)} USDC symbols")
 
+    def test_connection(self):
+        """🟢 FIX: Added missing attribute for trade_executor"""
+        total = self.get_total_equity_usd()
+        log.info(f"✅ Deribit Live: ${total:.2f}")
+        return True
+
+    def get_total_equity_usd(self):
+        return float(self._get("/private/get_account_summary", {"currency": "USDC"}).get("equity", 0))
+
+    def get_tradeable(self): return list(self._supported_symbols)
+    def is_supported(self, symbol): return symbol in self._supported_symbols
+    def get_instrument_name(self, symbol): return f"{symbol.replace('USDT', '')}_USDC-PERPETUAL"
+
     def round_amount(self, symbol, raw):
-        inst = f"{symbol.replace('USDT', '')}_USDC-PERPETUAL"
+        inst = self.get_instrument_name(symbol)
         step = float(self._instrument_cache[inst].get("min_trade_amount", 1.0))
         precision = len(str(step).split('.')[1].rstrip('0')) if '.' in str(step) else 0
         res = max(step, math.floor(raw / step) * step)
-        clean_val = "{: .{}f}".format(res, precision).strip()
-        return float(clean_val) if precision > 0 else int(float(clean_val))
+        return float("{: .{}f}".format(res, precision).strip()) if precision > 0 else int(res)
 
     def round_price(self, symbol, price):
-        inst = f"{symbol.replace('USDT', '')}_USDC-PERPETUAL"
+        inst = self.get_instrument_name(symbol)
         tick = float(self._instrument_cache[inst].get("tick_size", 0.01))
         precision = len(str(tick).split('.')[1].rstrip('0')) if '.' in str(tick) else 0
         res = round(round(price / tick) * tick, precision)
-        clean_val = "{: .{}f}".format(res, precision).strip()
-        return float(clean_val) if precision > 0 else int(float(clean_val))
-
-    def get_total_equity_usd(self):
-        s = self._get("/private/get_account_summary", {"currency": "USDC"})
-        return float(s.get("equity", 0))
-
-    def place_market_order(self, symbol, side, amount):
-        inst = f"{symbol.replace('USDT', '')}_USDC-PERPETUAL"
-        return self._post(f"/private/{side.lower()}", {"instrument_name": inst, "amount": self.round_amount(symbol, amount), "type": "market", "time_in_force": "immediate_or_cancel"})
-
-    def place_limit_order(self, symbol, side, amount, price, stop_price=None):
-        inst = f"{symbol.replace('USDT', '')}_USDC-PERPETUAL"
-        p = {"instrument_name": inst, "amount": self.round_amount(symbol, amount), "price": self.round_price(symbol, price), "reduce_only": True}
-        if stop_price: p.update({"type": "stop_limit", "trigger_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
-        else: p["type"] = "limit"
-        return self._post(f"/private/{side.lower()}", p)
+        return float("{: .{}f}".format(res, precision).strip()) if precision > 0 else int(res)
 
     def calc_contracts(self, symbol, balance_usd, entry, stop, risk_mult=1.0):
         raw = (balance_usd * 0.01 * risk_mult) / abs(entry - stop)
@@ -84,4 +80,19 @@ class DeribitClient:
         q1 = self.round_amount(symbol, total / 2)
         return q1, self.round_amount(symbol, total - q1)
 
-    def get_positions(self): return [p for p in self._get("/private/get_positions", {"currency": "USDC"}) if float(p.get("size", 0)) != 0]
+    def get_positions(self): 
+        return [p for p in self._get("/private/get_positions", {"currency": "USDC"}) if float(p.get("size", 0)) != 0]
+
+    def place_market_order(self, symbol, side, amount):
+        inst = self.get_instrument_name(symbol)
+        return self._post(f"/private/{side.lower()}", {"instrument_name": inst, "amount": self.round_amount(symbol, amount), "type": "market", "time_in_force": "immediate_or_cancel"})
+
+    def place_limit_order(self, symbol, side, amount, price, stop_price=None):
+        inst = self.get_instrument_name(symbol)
+        p = {"instrument_name": inst, "amount": self.round_amount(symbol, amount), "price": self.round_price(symbol, price), "reduce_only": True}
+        if stop_price: p.update({"type": "stop_limit", "trigger_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
+        else: p["type"] = "limit"
+        return self._post(f"/private/{side.lower()}", p)
+
+    def get_order(self, oid): return self._post("/private/get_order_state", {"order_id": str(oid)})
+    def is_order_filled(self, o): return o.get("order_state") == "filled"
