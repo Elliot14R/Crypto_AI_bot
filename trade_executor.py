@@ -19,6 +19,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s",
                     handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler()])
 log = logging.getLogger(__name__)
 
+# ════════════ DATA FETCHING ═══════════════════════════════════════════
+
 def get_data(symbol: str, interval: str) -> pd.DataFrame:
     urls = ["https://data-api.binance.vision/api/v3/klines", "https://api.binance.com/api/v3/klines"]
     for url in urls:
@@ -32,6 +34,8 @@ def get_data(symbol: str, interval: str) -> pd.DataFrame:
                 return df
         except: continue
     return pd.DataFrame()
+
+# ════════════ SIGNAL LOGIC (AI ANALYSIS) ══════════════════════════════
 
 def generate_signal(symbol, pipeline, thresholds):
     try:
@@ -58,13 +62,16 @@ def generate_signal(symbol, pipeline, thresholds):
         sig = {0: "BUY", 1: "SELL", 2: "NO_TRADE"}[pipeline["ensemble"].predict(Xs)[0]]
         conf = round(float(max(prob)) * 100, 1)
 
+        # 🟢 DETAIL 1: Always print AI confidence
         log.info(f"      ML: {sig} {conf}% (need ≥{thresholds['min_confidence']}%)")
         if sig == "NO_TRADE" or conf < thresholds["min_confidence"]: return None
 
+        # 🟢 DETAIL 2: Always print ADX
         adx = float(row.get("adx", 0))
         log.info(f"      ADX: {adx:.1f} (need ≥{thresholds['min_adx']})")
         if adx < thresholds["min_adx"]: return None
 
+        # 🟢 DETAIL 3: Always print Score
         score = 0
         if conf >= 65: score += 1
         if adx > 20: score += 1
@@ -80,13 +87,11 @@ def generate_signal(symbol, pipeline, thresholds):
         log.error(f"      Error: {e}")
         return None
 
+# ════════════ EXECUTION LOGIC ═════════════════════════════════════════
+
 def execute_trade(deribit, symbol, signal, entry, atr, risk_mult, balance):
-    # 🟢 FIX: Force math into pure Python floats to prevent numpy datatypes leaking into JSON
     target_q = deribit.calc_contracts(symbol, float(balance), float(entry), float(entry - (atr*ATR_STOP_MULT if signal=="BUY" else -atr*ATR_STOP_MULT)), float(risk_mult))
-    
-    if target_q <= 0:
-        log.warning(f"      ⚠️ Calculated quantity is 0 for {symbol}. Skipping.")
-        return False
+    if target_q <= 0: return False
 
     side = "BUY" if signal == "BUY" else "SELL"
     sl_side = "SELL" if signal == "BUY" else "BUY"
@@ -107,11 +112,13 @@ def execute_trade(deribit, symbol, signal, entry, atr, risk_mult, balance):
             
             trades = json.load(open("trades.json")) if Path("trades.json").exists() else {}
             trades[symbol] = {"symbol": symbol, "qty": filled, "entry": actual}
-            json.dump(trades, open("trades.json", "w"))
+            json.dump(trades, open("trades.json", "w"), indent=2)
             log.info(f"      ✅ LIVE: {symbol} @ {actual}")
             return True
     except Exception as e: log.error(f"      ❌ FAILED: {e}")
     return False
+
+# ════════════ MAIN SCAN LOOP ══════════════════════════════════════════
 
 def run_execution_scan():
     log.info(f"\n{'═'*56}\nSCAN START — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\n{'═'*56}")
@@ -125,17 +132,26 @@ def run_execution_scan():
 
     log.info(f"Scanning {len(SYMBOLS)} coins | Mode: {mode['label']}")
 
+    # 🟢 THE FIX: Loop through ALL coins first, check slots second.
     for symbol in SYMBOLS:
-        current_trades = json.load(open("trades.json")) if Path("trades.json").exists() else {}
-        if len(current_trades) >= MAX_OPEN_TRADES: break
-        
         log.info(f"\n  ── {symbol} ({get_tier(symbol)}) ──")
+        
+        # 1. AI analyzes the coin (prints details to log)
         sig = generate_signal(symbol, pipeline, thresholds)
+        
         if sig:
-            execute_trade(deribit, sig["symbol"], sig["signal"], sig["entry"], sig["atr"], risk_mult, balance)
-            time.sleep(1.5)
+            # 2. If AI says BUY/SELL, check if we have room for it
+            current_trades = json.load(open("trades.json")) if Path("trades.json").exists() else {}
+            if len(current_trades) < MAX_OPEN_TRADES:
+                execute_trade(deribit, sig["symbol"], sig["signal"], sig["entry"], sig["atr"], risk_mult, balance)
+                time.sleep(1.5)
+            else:
+                log.info(f"      🛑 MARGIN PROTECTED: Slots full ({MAX_OPEN_TRADES}/{MAX_OPEN_TRADES}). Trade skipped.")
+                time.sleep(0.1)
         else:
             time.sleep(0.1)
+
+    log.info(f"\n{'═'*56}\nSCAN COMPLETE\n{'═'*56}")
 
 if __name__ == "__main__":
     run_execution_scan()
