@@ -50,10 +50,8 @@ class DeribitClient:
         r = self.session.post(f"{self.base}{path}", json=payload, timeout=15)
         data = r.json()
         if "error" in data:
-            # 🟢 NEW: Detailed error extraction for better debugging
             err = data["error"]
-            msg = err.get("message", "Unknown error")
-            raise Exception(f"Deribit Error: {msg} (Code: {err.get('code')})")
+            raise Exception(f"Deribit Error: {err.get('message')} (Code: {err.get('code')})")
         return data.get("result", data)
 
     def _get(self, path, params=None):
@@ -68,20 +66,22 @@ class DeribitClient:
             if info["instrument"] in active:
                 self._instrument_cache[info["instrument"]] = active[info["instrument"]]
                 self._supported_symbols.add(sym)
-        log.info(f"✓ Tradeable symbols verified: {list(self._supported_symbols)}")
+        log.info(f"✓ Verified {len(self._supported_symbols)} USDC symbols")
 
     def round_amount(self, symbol, raw):
-        """🟢 CLEAN-ROOM PRECISION: Strips float noise using string formatting"""
+        """Forces precision by using string formatting to strip float noise"""
         step = float(self._instrument_cache[self.get_instrument_name(symbol)].get("min_trade_amount", 1.0))
         precision = len(str(step).split('.')[1].rstrip('0')) if '.' in str(step) else 0
         res = max(step, math.floor(raw / step) * step)
-        return float("{: .{}f}".format(res, precision).strip()) if precision > 0 else int(res)
+        clean_val = "{: .{}f}".format(res, precision).strip()
+        return float(clean_val) if precision > 0 else int(float(clean_val))
 
     def round_price(self, symbol, price):
         tick = float(self._instrument_cache[self.get_instrument_name(symbol)].get("tick_size", 0.01))
         precision = len(str(tick).split('.')[1].rstrip('0')) if '.' in str(tick) else 0
         res = round(round(price / tick) * tick, precision)
-        return float("{: .{}f}".format(res, precision).strip()) if precision > 0 else int(res)
+        clean_val = "{: .{}f}".format(res, precision).strip()
+        return float(clean_val) if precision > 0 else int(float(clean_val))
 
     def test_connection(self):
         total = self.get_total_equity_usd()
@@ -92,7 +92,6 @@ class DeribitClient:
     def get_instrument_name(self, symbol): return SYMBOL_MAP[symbol]["instrument"]
     
     def calc_contracts(self, symbol, balance_usd, entry, stop, risk_mult=1.0):
-        # Default risk is 1% of balance
         raw = (balance_usd * 0.01 * risk_mult) / abs(entry - stop)
         return self.round_amount(symbol, min(raw, (balance_usd * 0.2) / entry))
 
@@ -116,16 +115,9 @@ class DeribitClient:
         })
 
     def place_limit_order(self, symbol, side, amount, price, stop_price=None):
-        params = {
-            "instrument_name": self.get_instrument_name(symbol), 
-            "amount": self.round_amount(symbol, amount), 
-            "price": self.round_price(symbol, price), 
-            "reduce_only": True
-        }
-        if stop_price: 
-            params.update({"type": "stop_limit", "trigger_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
-        else: 
-            params["type"] = "limit"
+        params = {"instrument_name": self.get_instrument_name(symbol), "amount": self.round_amount(symbol, amount), "price": self.round_price(symbol, price), "reduce_only": True}
+        if stop_price: params.update({"type": "stop_limit", "trigger_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
+        else: params["type"] = "limit"
         return self._post(f"/private/{side.lower()}", params)
 
     def get_order(self, oid):
