@@ -654,24 +654,22 @@ async function fetchOpenTrades() {
   const count   = data.length;
   const tradeEl = document.getElementById('tradeCount');
   if (tradeEl) tradeEl.textContent = count;
-  tradeEl.style.display = count > 0 ? '' : 'none';
+  if (tradeEl) tradeEl.style.display = count > 0 ? '' : 'none';
 
   const badge = document.getElementById('openBadge');
   if (badge) badge.textContent = count + ' active';
 
-  const riskTotal = data.reduce((s, t) => s + (t.risk_usd || 0), 0);
+  // Make sure to use "unrealised" to match the Python API
+  const upnlTotal = data.reduce((s,t) => s + (t.unrealised || 0), 0);
   const confAvg   = data.length ? data.reduce((s,t) => s + (t.confidence||0), 0) / data.length : 0;
-  const upnlTotal = data.reduce((s,t) => s + (t.unrealised_pnl||0), 0);
 
   const otCount = document.getElementById('ot-count');
   if (otCount) otCount.textContent = count;
-  const otRisk  = document.getElementById('ot-risk');
-  if (otRisk) otRisk.textContent = riskTotal.toFixed(2);
   const otConf  = document.getElementById('ot-conf');
   if (otConf) otConf.textContent = confAvg ? confAvg.toFixed(1) + '%' : '—';
 
   const html = data.length ? data.map(t => renderTradeCard(t)).join('') :
-    '<div class="empty"><div class="eicon">📡</div><div class="emsg">No open trades.<br>Bot scans every 15 min.</div></div>';
+    '<div class="empty" style="text-align:center; padding:40px; color:gray;"><div style="font-size:32px; margin-bottom:8px;">📭</div><div>No open trades.<br><small>Bot scans every 15 min.</small></div></div>';
 
   ['openTradesBody','openTradesFullBody'].forEach(id => {
     const el = document.getElementById(id);
@@ -681,53 +679,67 @@ async function fetchOpenTrades() {
 
 function renderTradeCard(t) {
   const isBuy  = t.signal === 'BUY';
-  const dec    = (t.entry||1) < 10 ? 4 : 2;
-  const live   = t.live_price;
-  const pnl    = t.unrealised_pnl || 0;
-  const pnlPct = t.pnl_pct || 0;
-  const prog   = Math.min(t.progress || 0, 100);
-  return `<div class="trade-card ${isBuy?'buy':'sell'}">
-    <div class="tc-top">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="tc-sym">${t.symbol.replace('USDT','')}<span style="font-size:11px;color:var(--text3)">/USDT</span></span>
-        <span class="dir-tag ${isBuy?'buy':'sell'}">${t.signal}</span>
-        <span style="font-size:10px;color:var(--text3)">${t.tier||''}</span>
+  const dec    = parseFloat(t.entry || 0) > 100 ? 2 : 4;
+  const pnl    = parseFloat(t.unrealised || 0); // Matches Python API
+  const pnlPct = parseFloat(t.pnl_pct || 0);
+  const prog   = Math.min(parseFloat(t.progress || 0), 100);
+  
+  // Dynamic Red/Green Logic
+  const pnlColor = pnl >= 0 ? '#22c55e' : '#ef4444'; // Green if profit, Red if loss
+  const pnlSign  = pnl >= 0 ? '+' : '';
+  const fmt      = (v, d) => v ? parseFloat(v).toFixed(d) : '—';
+  const sigBg    = isBuy ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)';
+  const sigCol   = isBuy ? '#22c55e' : '#ef4444';
+
+  // Inline CSS injected directly into the card to guarantee it works without editing CSS files
+  return `
+  <div class="trade-card" style="background:var(--bg2, #1a1a2e); border:1px solid var(--border, #2a2a3e); border-radius:10px; padding:14px; margin-bottom:12px;">
+    
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:16px; font-weight:bold;">${t.symbol.replace('USDT','')}<span style="font-size:12px;color:gray;">/USDT</span></span>
+        <span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; background:${sigBg}; color:${sigCol};">${t.signal}</span>
       </div>
-      <span class="tc-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${pnl.toFixed(4)} USDT (${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%)</span>
+      <div style="text-align:right; font-weight:bold; color:${pnlColor}">
+        <div style="font-size:15px;">${pnlSign}$${Math.abs(pnl).toFixed(4)}</div>
+        <div style="font-size:11px; opacity:0.8;">(${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</div>
+      </div>
     </div>
-    <div class="tc-prices">
-      <div class="tc-prices">
-      <div class="price-box"><div class="price-lbl">Live</div><div class="price-val live">${live?fp(live,dec):'-'}</div></div>
-      <div class="price-box"><div class="price-lbl">Entry</div><div class="price-val entry">${fp(t.entry,dec)}</div></div>
-      <div class="price-box"><div class="price-lbl">Stop Loss</div><div class="price-val sl">${fp(t.stop,dec)}</div></div>
-      <div class="price-box"><div class="price-lbl">Target 1</div><div class="price-val tp1">${fp(t.tp1,dec)}</div></div>
-      <div class="price-box"><div class="price-lbl">Target 2</div><div class="price-val tp2">${fp(t.tp2,dec)}</div></div>
-</div>
+
+    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:12px 0;">
+      <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Entry</div><div style="font-size:12px;font-weight:bold;">$${fmt(t.entry, dec)}</div></div>
+      <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Live</div><div style="font-size:12px;font-weight:bold;color:${pnlColor};">$${fmt(t.live_price, dec)}</div></div>
+      <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Stop Loss</div><div style="font-size:12px;font-weight:bold;color:#ef4444;">$${fmt(t.stop, dec)}</div></div>
+      <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Target 1</div><div style="font-size:12px;font-weight:bold;color:#22c55e;">$${fmt(t.tp1, dec)}</div></div>
+      <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Target 2</div><div style="font-size:12px;font-weight:bold;color:#22c55e;">$${fmt(t.tp2, dec)}</div></div>
     </div>
-    <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-      <span style="font-size:11px;color:var(--text2)">AI ${t.confidence||0}% · Score ${t.score||0}/6 · ${stars(t.score)}</span>
-      <button class="btn-close-trade" onclick="closeTrade('${t.symbol}')">✕ Close</button>
+
+    <div style="height:3px; background:rgba(255,255,255,0.1); border-radius:2px; margin:8px 0; overflow:hidden;">
+      <div style="height:100%; width:${prog}%; background:${sigCol}; transition:width 0.5s;"></div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+      <span style="font-size:11px; color:gray;">AI ${t.confidence||0}% · Score ${t.score||0}/6</span>
+      <button onclick="closeTrade('${t.symbol}')" style="font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid #ef4444; color:#ef4444; background:transparent; cursor:pointer;">✕ Close</button>
     </div>
   </div>`;
 }
 
 async function closeTrade(symbol) {
-  if (!confirm(`Close trade for ${symbol}?`)) return;
+  if (!confirm(`Remove ${symbol} from dashboard?\n(You must also close the position on the Deribit UI manually!)`)) return;
   const r = await apiFetch('/api/close_trade', {ok:false}, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({symbol})
   });
-  if (r && r.ok) {
-    alert(`Trade closed. PnL: ${r.pnl >= 0 ? '+' : ''}${(r.pnl||0).toFixed(4)} USDT`);
+  if (r && r.status === 'removed') {
     fetchOpenTrades();
-    fetchStatus();
+    if (typeof fetchStatus === 'function') fetchStatus();
   } else {
     alert('Error: ' + (r?.error || 'Unknown error'));
   }
 }
-
+  
 async function fetchSignals() {
   const data = await apiFetch('/api/signals', []);
   allSignals  = data.filter(s => !s.rejected);
