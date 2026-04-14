@@ -22,7 +22,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: false
-          # 🟢 FIX: Ensure the bot checks out with your PAT so it has permission to push later
           token: ${{ secrets.GH_PAT_TOKEN }}
 
       - name: Download AI Model
@@ -60,17 +59,19 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          key: bot-state-v3-${{ github.run_id }}
+          key: bot-state-v4-${{ github.run_id }}
           restore-keys: |
-            bot-state-v3-
+            bot-state-v4-
 
-      - name: Init state files if missing
+      # 🔴 NUCLEAR FIX: Overwrites ghost trades with a blank file to force 0/3 slots
+      - name: Force Reset Ghost Trades
         run: |
-          [ -f trades.json ]        || echo '{}' > trades.json
-          [ -f trade_history.json ] || echo '[]' > trade_history.json
-          [ -f signals.json ]       || echo '[]' > signals.json
-          [ -f scan_mode.json ]     || echo '{}' > scan_mode.json
-          [ -f balance.json ]       || echo '{}' > balance.json
+          echo "Cleaning ghost trades to fix 3/3 error..."
+          echo '{}' > trades.json
+          echo '[]' > trade_history.json
+          echo '[]' > signals.json
+          echo '{}' > scan_mode.json
+          echo '{}' > balance.json
 
       - name: Run bot
         run: |
@@ -90,9 +91,8 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          key: bot-state-v3-${{ github.run_id }}
+          key: bot-state-v4-${{ github.run_id }}
 
-      # 🟢 FIX: Pull latest changes first, then push state and logs to the repo
       - name: Commit and Push State to Repo
         if: always()
         run: |
@@ -103,7 +103,6 @@ jobs:
           git pull --rebase origin main
           git push
 
-      # 🟢 FIX: Removed the duplicate artifact upload step to stop the 409 crash
       - name: Upload log
         if: always()
         uses: actions/upload-artifact@v4
