@@ -1,4 +1,4 @@
-# trade_executor.py — Unified USDC Margin + Ghost Killer + IOC Fix
+# trade_executor.py — Final Stabilized Production Version (Precision Fixed)
 import os, json, time, logging, requests, joblib
 import pandas as pd
 from datetime import datetime, timezone
@@ -161,18 +161,22 @@ def execute_trade(deribit: DeribitClient, symbol, signal, entry, atr,
                   confidence, score, reasons, risk_mult=1.0, balance=10000.0):
 
     trades = load_trades()
-    if symbol in trades: log.info(f"  {symbol}: already open — skip"); return False
-    if len(trades) >= MAX_OPEN_TRADES: log.info("  Max trades — skip"); return False
+    if symbol in trades: return False
+    if len(trades) >= MAX_OPEN_TRADES: return False
     if not check_correlation(trades, signal): return False
-    if not deribit.is_supported(symbol): log.info(f"  {symbol}: not on Deribit — skip"); return False
-    if balance < 5: _warn(f"⚠️ Balance ${balance:.2f} too low"); return False
+    if not deribit.is_supported(symbol): return False
 
     dec = 4 if entry < 10 else 2
-    side = "BUY" if signal == "BUY" else "SELL"
-    sl_side = "SELL" if signal == "BUY" else "BUY"
-    tp_side = "SELL" if signal == "BUY" else "BUY"
+    
+    # 🟢 SIDES FIX: Correctly mapping sides for TP vs SL
+    if signal == "BUY":
+        side, sl_side, tp_side = "BUY", "SELL", "SELL"
+        stop_calc = entry - (atr * ATR_STOP_MULT)
+    else:
+        side, sl_side, tp_side = "SELL", "BUY", "BUY"
+        stop_calc = entry + (atr * ATR_STOP_MULT)
 
-    total_contracts = deribit.calc_contracts(symbol, balance, entry, entry - (atr*ATR_STOP_MULT if signal=="BUY" else -atr*ATR_STOP_MULT), risk_mult)
+    total_contracts = deribit.calc_contracts(symbol, balance, entry, stop_calc, risk_mult)
     
     order_ids = {}
     
@@ -189,9 +193,9 @@ def execute_trade(deribit: DeribitClient, symbol, signal, entry, atr,
         order_ids["entry"] = str(order.get("order_id"))
         actual_entry = float(order.get("average_price", entry))
         log.info(f"  ✅ Filled @ ~{actual_entry:.{dec}f}")
-        time.sleep(1.5)
+        time.sleep(1.0)
 
-        # Recalculate levels from actual fill price
+        # 2. Recalculate levels from ACTUAL fill price
         if signal == "BUY":
             stop = deribit.round_price(symbol, actual_entry - atr*ATR_STOP_MULT)
             tp1  = deribit.round_price(symbol, actual_entry + atr*ATR_TARGET1_MULT)
@@ -201,22 +205,22 @@ def execute_trade(deribit: DeribitClient, symbol, signal, entry, atr,
             tp1  = deribit.round_price(symbol, actual_entry - atr*ATR_TARGET1_MULT)
             tp2  = deribit.round_price(symbol, actual_entry - atr*ATR_TARGET2_MULT)
 
-        # 2. Stop Loss
+        # 3. Stop Loss
         try:
             sl_res = deribit.place_limit_order(symbol, sl_side, filled_qty, stop, stop_price=stop)
             oid = str(sl_res.get("order", sl_res).get("order_id", ""))
             if oid: order_ids["stop_loss"] = oid
-            log.info(f"  ✅ SL @ {stop:.{dec}f}")
+            log.info(f"  ✅ SL @ {stop}")
         except Exception as e: log.warning(f"  SL failed: {e}")
 
-        # 3. Take Profits
+        # 4. Take Profits
         q1, q2 = deribit.split_amount(symbol, filled_qty)
         try:
             if q1 > 0:
                 tp1_res = deribit.place_limit_order(symbol, tp_side, q1, tp1)
                 oid = str(tp1_res.get("order", tp1_res).get("order_id", ""))
                 if oid: order_ids["tp1"] = oid
-                log.info(f"  ✅ TP1 @ {tp1:.{dec}f}")
+                log.info(f"  ✅ TP1 @ {tp1}")
         except Exception as e: log.warning(f"  TP1 failed: {e}")
 
         try:
@@ -224,7 +228,7 @@ def execute_trade(deribit: DeribitClient, symbol, signal, entry, atr,
                 tp2_res = deribit.place_limit_order(symbol, tp_side, q2, tp2)
                 oid = str(tp2_res.get("order", tp2_res).get("order_id", ""))
                 if oid: order_ids["tp2"] = oid
-                log.info(f"  ✅ TP2 @ {tp2:.{dec}f}")
+                log.info(f"  ✅ TP2 @ {tp2}")
         except Exception as e: log.warning(f"  TP2 failed: {e}")
 
     except Exception as e:
@@ -248,10 +252,6 @@ def execute_trade(deribit: DeribitClient, symbol, signal, entry, atr,
 
 
 # ════════════ TRADE MONITORING ════════════════════════════════════════
-
-def _fill_price(order: dict, fallback: float) -> float:
-    p = float(order.get("average_price") or order.get("price") or 0)
-    return p if p > 0 else fallback
 
 def check_open_trades(deribit: DeribitClient):
     trades = load_trades()
@@ -396,6 +396,17 @@ def run_execution_scan():
         if sig:
             execute_trade(deribit, sig["symbol"], sig["signal"], sig["entry"], sig["atr"], sig["confidence"], sig["score"], sig["reasons"], eff_risk, balance)
             time.sleep(1)
+
+def run_diagnostic():
+    from smart_scheduler import get_scan_mode, check_btc_volatility
+    mode=get_scan_mode(); vol=check_btc_volatility(); eff=get_effective_risk(mode,vol)
+    lines=["🔍 *Diagnostic — Deribit Testnet*", f"🕐 {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}","━━━━━━━━━━━━━━━━━━━━"]
+    try:
+        d=init_deribit(); bal=save_balance_json(d); pos=d.get_positions()
+        tradeable=d.get_tradeable()
+        lines+=[f"✅ Deribit Connected",f"💰 Portfolio: *${bal:.2f} USD*", f"📂 Positions: {len(pos)}", f"📋 Tradeable: {len(tradeable)}"]
+    except Exception as e: lines.append(f"❌ Deribit: {e}")
+    _send("\n".join(lines))
 
 if __name__ == "__main__":
     import sys
