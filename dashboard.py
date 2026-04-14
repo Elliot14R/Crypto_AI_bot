@@ -82,10 +82,15 @@ def deribit_client():
 @app.route("/")
 def index(): return send_from_directory("dashboard_static", "index.html")
 
-@app.route("/trading"); @app.route("/signals"); @app.route("/market")
-@app.route("/open-trades"); @app.route("/history"); @app.route("/performance")
+@app.route("/trading")
+@app.route("/signals")
+@app.route("/market")
+@app.route("/open-trades")
+@app.route("/history")
+@app.route("/performance")
 @app.route("/configuration")
-def spa(): return send_from_directory("dashboard_static", "index.html")
+def spa(): 
+    return send_from_directory("dashboard_static", "index.html")
 
 @app.route("/<path:path>")
 def static_files(path):
