@@ -21,10 +21,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: false  # 🔴 CRITICAL: This bypasses the frozen LFS budget!
+          lfs: false
+          # 🟢 FIX: Ensure the bot checks out with your PAT so it has permission to push later
+          token: ${{ secrets.GH_PAT_TOKEN }}
 
       - name: Download AI Model
-        # 🟢 Pulls directly from your v2.0 release to bypass LFS bandwidth limits
         run: |
           wget -q -O pro_crypto_ai_model.pkl "https://github.com/Elliot14R/Crypto_AI_bot/releases/download/v2.0/pro_crypto_ai_model.pkl"
 
@@ -59,7 +60,6 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          # 🟢 FIX: Added '-v2' to force a fresh cache and wipe the ghost trades
           key: bot-state-v2-${{ github.run_id }}
           restore-keys: |
             bot-state-v2-
@@ -80,7 +80,7 @@ jobs:
             python trade_executor.py
           fi
 
-      - name: Save state files
+      - name: Save state to Cache
         if: always()
         uses: actions/cache/save@v4
         with:
@@ -90,8 +90,17 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          # 🟢 FIX: Added '-v2' here as well
           key: bot-state-v2-${{ github.run_id }}
+
+      # 🟢 FIX: Push the state files directly to the repository so the Dashboard can read them
+      - name: Commit and Push State to Repo
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add trades.json trade_history.json signals.json balance.json scan_mode.json || true
+          git commit -m "Auto-update bot state [skip ci]" || echo "No changes to commit"
+          git push
 
       - name: Upload log
         if: always()
