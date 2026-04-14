@@ -26,7 +26,9 @@ class DeribitClient:
         payload = {"jsonrpc": "2.0", "id": int(time.time()*1000), "method": path.strip("/"), "params": body}
         r = self.session.post(f"{self.base}{path}", json=payload, timeout=15)
         data = r.json()
-        if "error" in data: raise Exception(f"Deribit: {data['error'].get('message')}")
+        if "error" in data:
+            # 🟢 FIX: Print the exact payload so we NEVER have to guess what caused the error again
+            raise Exception(f"Deribit: {data['error'].get('message')} | Payload: {body}")
         return data.get("result", data)
 
     def _get(self, path, params=None):
@@ -46,7 +48,6 @@ class DeribitClient:
         log.info(f"✓ Verified {len(self._supported_symbols)} USDC symbols")
 
     def test_connection(self):
-        """🟢 FIX: Added missing attribute for trade_executor"""
         total = self.get_total_equity_usd()
         log.info(f"✅ Deribit Live: ${total:.2f}")
         return True
@@ -63,14 +64,16 @@ class DeribitClient:
         step = float(self._instrument_cache[inst].get("min_trade_amount", 1.0))
         precision = len(str(step).split('.')[1].rstrip('0')) if '.' in str(step) else 0
         res = max(step, math.floor(raw / step) * step)
-        return float("{: .{}f}".format(res, precision).strip()) if precision > 0 else int(res)
+        clean_val = "{: .{}f}".format(res, precision).strip()
+        return float(clean_val) if precision > 0 else int(float(clean_val))
 
     def round_price(self, symbol, price):
         inst = self.get_instrument_name(symbol)
         tick = float(self._instrument_cache[inst].get("tick_size", 0.01))
         precision = len(str(tick).split('.')[1].rstrip('0')) if '.' in str(tick) else 0
         res = round(round(price / tick) * tick, precision)
-        return float("{: .{}f}".format(res, precision).strip()) if precision > 0 else int(res)
+        clean_val = "{: .{}f}".format(res, precision).strip()
+        return float(clean_val) if precision > 0 else int(float(clean_val))
 
     def calc_contracts(self, symbol, balance_usd, entry, stop, risk_mult=1.0):
         raw = (balance_usd * 0.01 * risk_mult) / abs(entry - stop)
@@ -85,14 +88,27 @@ class DeribitClient:
 
     def place_market_order(self, symbol, side, amount):
         inst = self.get_instrument_name(symbol)
-        return self._post(f"/private/{side.lower()}", {"instrument_name": inst, "amount": self.round_amount(symbol, amount), "type": "market", "time_in_force": "immediate_or_cancel"})
+        # 🟢 FIX: Removed 'time_in_force'. Deribit violently rejects this for Market orders.
+        payload = {
+            "instrument_name": inst, 
+            "amount": self.round_amount(symbol, amount), 
+            "type": "market"
+        }
+        return self._post(f"/private/{side.lower()}", payload)
 
     def place_limit_order(self, symbol, side, amount, price, stop_price=None):
         inst = self.get_instrument_name(symbol)
-        p = {"instrument_name": inst, "amount": self.round_amount(symbol, amount), "price": self.round_price(symbol, price), "reduce_only": True}
-        if stop_price: p.update({"type": "stop_limit", "trigger_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
-        else: p["type"] = "limit"
-        return self._post(f"/private/{side.lower()}", p)
+        payload = {
+            "instrument_name": inst, 
+            "amount": self.round_amount(symbol, amount), 
+            "price": self.round_price(symbol, price), 
+            "reduce_only": True
+        }
+        if stop_price: 
+            payload.update({"type": "stop_limit", "trigger_price": self.round_price(symbol, stop_price), "trigger": "last_price"})
+        else: 
+            payload["type"] = "limit"
+        return self._post(f"/private/{side.lower()}", payload)
 
     def get_order(self, oid): return self._post("/private/get_order_state", {"order_id": str(oid)})
     def is_order_filled(self, o): return o.get("order_state") == "filled"
