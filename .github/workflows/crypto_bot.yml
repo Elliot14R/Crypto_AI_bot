@@ -60,9 +60,9 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          key: bot-state-v2-${{ github.run_id }}
+          key: bot-state-v3-${{ github.run_id }}
           restore-keys: |
-            bot-state-v2-
+            bot-state-v3-
 
       - name: Init state files if missing
         run: |
@@ -90,7 +90,7 @@ jobs:
             signals.json
             scan_mode.json
             balance.json
-          key: bot-state-v2-${{ github.run_id }}
+          key: bot-state-v3-${{ github.run_id }}
 
       # 🟢 FIX: Pull latest changes first, then push state and logs to the repo
       - name: Commit and Push State to Repo
