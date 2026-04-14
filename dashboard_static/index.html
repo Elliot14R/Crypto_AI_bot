@@ -733,8 +733,8 @@ async function closeTrade(symbol) {
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({symbol})
   });
-  if (r && r.status === 'removed') {
-    fetchOpenTrades();
+  if (r && (r.status === 'removed' || r.ok)) {
+    if (typeof fetchOpenTrades === 'function') fetchOpenTrades();
     if (typeof fetchStatus === 'function') fetchStatus();
   } else {
     alert('Error: ' + (r?.error || 'Unknown error'));
@@ -847,7 +847,7 @@ async function fetchHistory() {
   ['h-total','h-wins','h-losses','h-wr','h-pnl'].forEach((id, i) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const vals = [total, wins.length, loss.length, wr?(wr+'%'):'—', (tpnl>=0?'+':'')+tpnl.toFixed(4)];
+    const vals = [total, wins.length, loss.length, wr?(wr+'%'):'—', (tpnl>0?'+':'')+tpnl.toFixed(4)];
     el.textContent = vals[i];
     if (id==='h-wr') el.className = 'stat-value ' + (parseFloat(wr)>=60?'green':parseFloat(wr)>=40?'amber':'red');
     if (id==='h-pnl') el.style.color = tpnl>=0?'var(--green)':'var(--red)';
@@ -873,7 +873,7 @@ async function fetchHistory() {
           <td><span class="tag ${t.signal==='BUY'?'buy':'sell'}">${t.signal||'—'}</span></td>
           <td style="color:var(--blue)">${fp(t.entry,dec)}</td>
           <td>${fp(t.close_price,dec)}</td>
-          <td style="color:${isWin?'var(--green)':'var(--red)'};font-weight:600">${(t.pnl>=0?'+':'')}${(t.pnl||0).toFixed(4)}</td>
+          <td style="color:${isWin?'var(--green)':'var(--red)'};font-weight:600">${(t.pnl>0?'+':'')}${(t.pnl||0).toFixed(4)}</td>
           <td><span class="tag ${isWin?'win':'loss'}">${isWin?'WIN':'LOSS'}</span></td>
           <td style="color:var(--text3)">${t.opened_at?new Date(t.opened_at).toLocaleDateString():' —'}</td>
           <td style="color:var(--text3)">${dur}</td>
@@ -888,8 +888,8 @@ async function fetchHistory() {
     const el = document.getElementById(id);
     if (!el) return;
     const vals = [
-      best  ? (best.pnl>=0?'+':'')+best.pnl.toFixed(4)   : '—',
-      worst ? (worst.pnl>=0?'+':'')+worst.pnl.toFixed(4)  : '—',
+      best  ? (best.pnl>0?'+':'')+best.pnl.toFixed(4)   : '—',
+      worst ? (worst.pnl>0?'+':'')+worst.pnl.toFixed(4)  : '—',
       avgW  ? '+'+avgW.toFixed(4) : '—',
       avgL  ? avgL.toFixed(4)     : '—',
     ];
@@ -1042,16 +1042,28 @@ async function fetchBtcAtr() {
 }
 
 async function fetchLog() {
-  const d   = await apiFetch('/api/log', {lines:[]});
+  const d   = await apiFetch('/api/log', {log: "", lines: []});
   const el  = document.getElementById('logPanel');
   const lb  = document.getElementById('logBadge');
   if (!el) return;
-  if (lb) lb.textContent = (d.lines||[]).length + ' lines';
-  if (!d.lines || !d.lines.length) {
+
+  // Gracefully handle both string logs and array logs from the backend
+  let linesArray = [];
+  if (Array.isArray(d.lines)) {
+      linesArray = d.lines;
+  } else if (typeof d.log === 'string' && d.log.trim() !== '') {
+      linesArray = d.log.split('\n');
+  } else if (Array.isArray(d.log)) {
+      linesArray = d.log;
+  }
+
+  if (lb) lb.textContent = linesArray.length + ' lines';
+  if (!linesArray.length) {
     el.innerHTML = '<span style="color:var(--text3)">No log entries. Bot runs via GitHub Actions.</span>';
     return;
   }
-  el.innerHTML = [...d.lines].reverse().slice(0,60).map(line => {
+  
+  el.innerHTML = [...linesArray].reverse().slice(0,60).map(line => {
     const cls = line.includes('SIGNAL')||line.includes('✅') ? 'sig'
                : line.includes('ERROR')||line.includes('❌') ? 'err'
                : line.includes('WARNING')||line.includes('⚠️') ? 'wrn' : '';
@@ -1067,7 +1079,8 @@ async function triggerScan() {
   btn.disabled    = true;
   try {
     const r = await apiFetch('/api/scan', {ok:false}, {method:'POST'});
-    if (r && r.ok) {
+    // Check for standard success OR the custom 'triggered' status
+    if (r && (r.ok || r.status === 'triggered')) {
       btn.textContent = '✓ Triggered';
       setTimeout(() => { btn.textContent='▶ Scan Now'; btn.disabled=false; scanRunning=false; }, 3000);
     } else {
@@ -1075,7 +1088,7 @@ async function triggerScan() {
       setTimeout(() => { btn.textContent='▶ Scan Now'; btn.disabled=false; scanRunning=false; }, 2000);
     }
   } catch(e) {
-    btn.textContent = '▶ Scan Now';
+    btn.textContent = '✗ Failed';
     btn.disabled    = false;
     scanRunning     = false;
   }
@@ -1133,9 +1146,9 @@ window.apiFetch = apiFetchWithMethod;
 
 async function refreshAll() {
   await Promise.all([
-    fetchStatus(),
-    fetchBalance(),
-    fetchOpenTrades(),
+    (typeof fetchStatus === 'function' ? fetchStatus() : Promise.resolve()),
+    (typeof fetchBalance === 'function' ? fetchBalance() : Promise.resolve()),
+    (typeof fetchOpenTrades === 'function' ? fetchOpenTrades() : Promise.resolve()),
     fetchSignals(),
     fetchBtcAtr(),
     fetchLog(),
