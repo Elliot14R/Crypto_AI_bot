@@ -63,15 +63,13 @@ jobs:
           restore-keys: |
             bot-state-v4-
 
-      # 🔴 NUCLEAR FIX: Overwrites ghost trades with a blank file to force 0/3 slots
-      - name: Force Reset Ghost Trades
+      - name: Init state files if missing
         run: |
-          echo "Cleaning ghost trades to fix 3/3 error..."
-          echo '{}' > trades.json
-          echo '[]' > trade_history.json
-          echo '[]' > signals.json
-          echo '{}' > scan_mode.json
-          echo '{}' > balance.json
+          [ -f trades.json ]        || echo '{}' > trades.json
+          [ -f trade_history.json ] || echo '[]' > trade_history.json
+          [ -f signals.json ]       || echo '[]' > signals.json
+          [ -f scan_mode.json ]     || echo '{}' > scan_mode.json
+          [ -f balance.json ]       || echo '{}' > balance.json
 
       - name: Run bot
         run: |
