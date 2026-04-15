@@ -741,40 +741,101 @@ async function closeTrade(symbol) {
   }
 }
   
+// In index.html, update the fetchSignals() function:
+
 async function fetchSignals() {
   const data = await apiFetch('/api/signals', []);
-  allSignals  = data.filter(s => !s.rejected);
+  
+  // FIX: Don't filter out rejected signals for display
+  // Instead, mark them as rejected for styling
+  allSignals = data.map(s => {
+    if (s.rejected) {
+      return {...s, isRejected: true, rejectedReason: s.rejectedReason || 'Slot full/Filtered'};
+    }
+    return s;
+  });
+  
   allSignals.sort((a,b) => new Date(b.generated_at||0) - new Date(a.generated_at||0));
 
   const badge = document.getElementById('signalCount');
-  if (badge) { badge.textContent = allSignals.length; badge.style.display = allSignals.length ? '' : 'none'; }
+  if (badge) { 
+    // Count only non-rejected signals for badge
+    const activeSignals = allSignals.filter(s => !s.isRejected);
+    badge.textContent = activeSignals.length; 
+    badge.style.display = activeSignals.length ? '' : 'none'; 
+  }
 
   const today = new Date().toISOString().slice(0,10);
-  const tod   = allSignals.filter(s => (s.generated_at||'').slice(0,10) === today);
-  const buy   = tod.filter(s => s.signal === 'BUY').length;
-  const sell  = tod.filter(s => s.signal === 'SELL').length;
-  const confs = allSignals.slice(0,20).map(s => s.confidence||0).filter(Boolean);
+  const tod = allSignals.filter(s => (s.generated_at||'').slice(0,10) === today);
+  const buy = tod.filter(s => s.signal === 'BUY' && !s.isRejected).length;
+  const sell = tod.filter(s => s.signal === 'SELL' && !s.isRejected).length;
+  const confs = tod.filter(s => !s.isRejected).map(s => s.confidence||0).filter(Boolean);
   const avgConf = confs.length ? (confs.reduce((a,b)=>a+b,0)/confs.length).toFixed(1) : 0;
 
-  ['sig-total','statSigToday'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=tod.length; });
-  const sb = document.getElementById('sig-buy');    if(sb) sb.textContent=buy;
-  const ss = document.getElementById('sig-sell');   if(ss) ss.textContent=sell;
-  const sa = document.getElementById('sig-avgconf');if(sa) sa.textContent=avgConf?avgConf+'%':'—';
-  const sb2= document.getElementById('statSigSub'); if(sb2) sb2.textContent=buy+' BUY · '+sell+' SELL';
+  ['sig-total','statSigToday'].forEach(id => { 
+    const el = document.getElementById(id); 
+    if(el) el.textContent = tod.filter(s => !s.isRejected).length; 
+  });
+  
+  const sb = document.getElementById('sig-buy');    
+  if(sb) sb.textContent = buy;
+  const ss = document.getElementById('sig-sell');   
+  if(ss) ss.textContent = sell;
+  const sa = document.getElementById('sig-avgconf');
+  if(sa) sa.textContent = avgConf ? avgConf + '%' : '—';
+  const sb2 = document.getElementById('statSigSub'); 
+  if(sb2) sb2.textContent = buy + ' BUY · ' + sell + ' SELL';
 
-  // Recent signals for dashboard
+  // Recent signals for dashboard - show all including rejected
   const recent = document.getElementById('recentSignalsBody');
-  const rsb    = document.getElementById('recentSigBadge');
-  if (rsb) rsb.textContent = 'last ' + Math.min(allSignals.length, 3);
+  const rsb = document.getElementById('recentSigBadge');
+  if (rsb) rsb.textContent = 'last ' + Math.min(allSignals.length, 5);
   if (recent) {
     if (!allSignals.length) {
       recent.innerHTML = '<div class="empty"><div class="eicon">⚡</div><div class="emsg">No signals yet</div></div>';
     } else {
-      recent.innerHTML = allSignals.slice(0,3).map(s => renderSignalCard(s, true)).join('');
+      recent.innerHTML = allSignals.slice(0,5).map(s => renderSignalCard(s, true)).join('');
     }
   }
 
   renderSignals();
+}
+
+// Update renderSignalCard to show rejected signals differently:
+
+function renderSignalCard(s, compact) {
+  const isBuy = s.signal === 'BUY';
+  const isRejected = s.isRejected || s.rejected;
+  const dec = (s.entry||1) < 10 ? 4 : 2;
+  const f = v => v ? '$'+Number(v).toFixed(dec) : '—';
+  
+  // Style for rejected signals
+  const borderColor = isRejected ? 'var(--amber)' : (isBuy ? 'var(--green)' : 'var(--red)');
+  const bgColor = isRejected ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg3)';
+  const rejectedBadge = isRejected ? 
+    '<span style="font-size:9px; padding:1px 6px; background:var(--amber2); color:var(--amber); border-radius:3px; margin-left:8px;">REJECTED</span>' : '';
+  
+  return `<div class="signal-card" style="border-left:3px solid ${borderColor}; background:${bgColor};">
+    <div class="sc-top">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="sc-sym">${s.symbol}</span>
+        <span class="dir-tag ${isBuy?'buy':'sell'}" style="${isRejected ? 'opacity:0.6;' : ''}">${s.signal}</span>
+        ${rejectedBadge}
+        <span class="stars">${stars(s.score)}</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:${isRejected ? 'var(--amber)' : 'var(--amber)'}">Conf: ${s.confidence||0}%</div>
+        <div style="font-size:10px;color:var(--text3)">${timeAgo(s.generated_at)}</div>
+      </div>
+    </div>
+    ${!compact ? `<div class="sc-prices">
+      <div class="sc-box"><div class="sc-lbl">⚡ Entry</div><div class="sc-val entry">${f(s.entry)}</div></div>
+      <div class="sc-box"><div class="sc-lbl">🛑 Stop</div><div class="sc-val sl">${f(s.stop)}</div></div>
+      <div class="sc-box"><div class="sc-lbl">🎯 T1</div><div class="sc-val tp">${f(s.tp1)}</div></div>
+      <div class="sc-box"><div class="sc-lbl">🎯 T2</div><div class="sc-val tp">${f(s.tp2)}</div></div>
+    </div>` : `<div style="font-size:11px;color:var(--text3)">Entry: ${f(s.entry)} · SL: ${f(s.stop)} · T1: ${f(s.tp1)}</div>`}
+    ${isRejected ? `<div style="margin-top:8px; padding:4px 8px; background:var(--amber2); border-radius:4px; font-size:10px; color:var(--amber);">${s.rejectedReason || 'Signal rejected'}</div>` : ''}
+  </div>`;
 }
 
 function renderSignals() {
@@ -790,30 +851,30 @@ function renderSignals() {
   el.innerHTML = sigs.slice(0,50).map(s => renderSignalCard(s, false)).join('');
 }
 
-function renderSignalCard(s, compact) {
-  const isBuy = s.signal === 'BUY';
-  const dec   = (s.entry||1) < 10 ? 4 : 2;
-  const f     = v => v ? '$'+Number(v).toFixed(dec) : '—';
-  return `<div class="signal-card ${isBuy?'buy':'sell'}">
-    <div class="sc-top">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="sc-sym">${s.symbol}</span>
-        <span class="dir-tag ${isBuy?'buy':'sell'}">${s.signal}</span>
-        <span class="stars">${stars(s.score)}</span>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:var(--amber)">Conf: ${s.confidence||0}%</div>
-        <div style="font-size:10px;color:var(--text3)">${timeAgo(s.generated_at)}</div>
-      </div>
-    </div>
-    ${!compact ? `<div class="sc-prices">
-      <div class="sc-box"><div class="sc-lbl">⚡ Entry</div><div class="sc-val entry">${f(s.entry)}</div></div>
-      <div class="sc-box"><div class="sc-lbl">🛑 Stop</div><div class="sc-val sl">${f(s.stop)}</div></div>
-      <div class="sc-box"><div class="sc-lbl">🎯 T1</div><div class="sc-val tp">${f(s.tp1)}</div></div>
-      <div class="sc-box"><div class="sc-lbl">🎯 T2</div><div class="sc-val tp">${f(s.tp2)}</div></div>
-    </div>` : `<div style="font-size:11px;color:var(--text3)">Entry: ${f(s.entry)} · SL: ${f(s.stop)} · T1: ${f(s.tp1)}</div>`}
-  </div>`;
-}
+// function renderSignalCard(s, compact) {
+//   const isBuy = s.signal === 'BUY';
+//   const dec   = (s.entry||1) < 10 ? 4 : 2;
+//   const f     = v => v ? '$'+Number(v).toFixed(dec) : '—';
+//   return `<div class="signal-card ${isBuy?'buy':'sell'}">
+//     <div class="sc-top">
+//       <div style="display:flex;align-items:center;gap:8px">
+//         <span class="sc-sym">${s.symbol}</span>
+//         <span class="dir-tag ${isBuy?'buy':'sell'}">${s.signal}</span>
+//         <span class="stars">${stars(s.score)}</span>
+//       </div>
+//       <div style="text-align:right">
+//         <div style="font-size:11px;color:var(--amber)">Conf: ${s.confidence||0}%</div>
+//         <div style="font-size:10px;color:var(--text3)">${timeAgo(s.generated_at)}</div>
+//       </div>
+//     </div>
+//     ${!compact ? `<div class="sc-prices">
+//       <div class="sc-box"><div class="sc-lbl">⚡ Entry</div><div class="sc-val entry">${f(s.entry)}</div></div>
+//       <div class="sc-box"><div class="sc-lbl">🛑 Stop</div><div class="sc-val sl">${f(s.stop)}</div></div>
+//       <div class="sc-box"><div class="sc-lbl">🎯 T1</div><div class="sc-val tp">${f(s.tp1)}</div></div>
+//       <div class="sc-box"><div class="sc-lbl">🎯 T2</div><div class="sc-val tp">${f(s.tp2)}</div></div>
+//     </div>` : `<div style="font-size:11px;color:var(--text3)">Entry: ${f(s.entry)} · SL: ${f(s.stop)} · T1: ${f(s.tp1)}</div>`}
+//   </div>`;
+// }
 
 function filterSig(type, btn) {
   sigFilter = type;
