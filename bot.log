@@ -4687,3 +4687,128 @@ SCAN START — 2026-04-16 18:45 UTC
 ════════════════════════════════════════════════════════
 SCAN COMPLETE
 ════════════════════════════════════════════════════════
+2026-04-16 19:51:08,681 
+════════════════════════════════════════════════════════
+SCAN START — 2026-04-16 19:51 UTC
+════════════════════════════════════════════════════════
+2026-04-16 19:51:09,228   ACTIVE HOURS | conf≥50% | score≥1 | ADX≥15 | ✓ Normal vol 0.40%
+2026-04-16 19:51:09,879 ✓ Verified 20 USDC symbols
+2026-04-16 19:51:10,022 ✅ Deribit Live: $86484.92
+2026-04-16 19:51:11,056 Scanning 20 coins | Mode: ACTIVE HOURS
+2026-04-16 19:51:11,056 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-16 19:51:12,316       ML: BUY 53.4% (need ≥50%)
+2026-04-16 19:51:12,316       ADX: 19.1 (need ≥15)
+2026-04-16 19:51:12,316       Score: 0 (need ≥1)
+2026-04-16 19:51:12,417 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-16 19:51:13,657       ML: BUY 41.0% (need ≥50%)
+2026-04-16 19:51:13,758 
+  ── BNBUSDT (👑 Big Three) ──
+2026-04-16 19:51:15,035       ML: BUY 78.4% (need ≥50%)
+2026-04-16 19:51:15,035       ADX: 35.8 (need ≥15)
+2026-04-16 19:51:15,035       Score: 2 (need ≥1)
+2026-04-16 19:51:15,036       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:15,136 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-04-16 19:51:16,340       ML: BUY 74.8% (need ≥50%)
+2026-04-16 19:51:16,340       ADX: 31.2 (need ≥15)
+2026-04-16 19:51:16,340       Score: 2 (need ≥1)
+2026-04-16 19:51:16,341       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:16,441 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-04-16 19:51:17,649       ML: BUY 70.2% (need ≥50%)
+2026-04-16 19:51:17,649       ADX: 23.2 (need ≥15)
+2026-04-16 19:51:17,649       Score: 2 (need ≥1)
+2026-04-16 19:51:17,650       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:17,750 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-04-16 19:51:19,008       ML: BUY 66.2% (need ≥50%)
+2026-04-16 19:51:19,009       ADX: 21.8 (need ≥15)
+2026-04-16 19:51:19,009       Score: 2 (need ≥1)
+2026-04-16 19:51:19,009       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:19,109 
+  ── SUIUSDT (⚡ High-Liquidity L1s) ──
+2026-04-16 19:51:20,537       ML: BUY 73.2% (need ≥50%)
+2026-04-16 19:51:20,538       ADX: 21.5 (need ≥15)
+2026-04-16 19:51:20,538       Score: 2 (need ≥1)
+2026-04-16 19:51:20,538       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:20,638 
+  ── APTUSDT (⚡ High-Liquidity L1s) ──
+2026-04-16 19:51:21,889       ML: BUY 77.9% (need ≥50%)
+2026-04-16 19:51:21,889       ADX: 25.2 (need ≥15)
+2026-04-16 19:51:21,889       Score: 2 (need ≥1)
+2026-04-16 19:51:21,890       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:21,990 
+  ── LINKUSDT (🏛 Institutional Alts) ──
+2026-04-16 19:51:23,271       ML: BUY 74.4% (need ≥50%)
+2026-04-16 19:51:23,272       ADX: 22.4 (need ≥15)
+2026-04-16 19:51:23,272       Score: 2 (need ≥1)
+2026-04-16 19:51:23,272       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:23,372 
+  ── DOTUSDT (🏛 Institutional Alts) ──
+2026-04-16 19:51:24,593       ML: BUY 71.9% (need ≥50%)
+2026-04-16 19:51:24,593       ADX: 39.4 (need ≥15)
+2026-04-16 19:51:24,593       Score: 2 (need ≥1)
+2026-04-16 19:51:24,593       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:24,693 
+  ── UNIUSDT (🏛 Institutional Alts) ──
+2026-04-16 19:51:25,921       ML: BUY 75.7% (need ≥50%)
+2026-04-16 19:51:25,921       ADX: 32.7 (need ≥15)
+2026-04-16 19:51:25,921       Score: 2 (need ≥1)
+2026-04-16 19:51:25,921       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:26,021 
+  ── AAVEUSDT (🏛 Institutional Alts) ──
+2026-04-16 19:51:27,234       ML: BUY 79.7% (need ≥50%)
+2026-04-16 19:51:27,234       ADX: 39.5 (need ≥15)
+2026-04-16 19:51:27,235       Score: 2 (need ≥1)
+2026-04-16 19:51:27,235       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:27,335 
+  ── XRPUSDT (🏛 Institutional Alts) ──
+2026-04-16 19:51:28,564       ML: BUY 75.8% (need ≥50%)
+2026-04-16 19:51:28,565       ADX: 27.8 (need ≥15)
+2026-04-16 19:51:28,565       Score: 2 (need ≥1)
+2026-04-16 19:51:28,565       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:28,665 
+  ── FETUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:29,867       ML: BUY 75.2% (need ≥50%)
+2026-04-16 19:51:29,867       ADX: 21.5 (need ≥15)
+2026-04-16 19:51:29,867       Score: 2 (need ≥1)
+2026-04-16 19:51:29,867       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:29,968 
+  ── RENDERUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:31,180       ML: BUY 46.7% (need ≥50%)
+2026-04-16 19:51:31,281 
+  ── ADAUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:32,538       ML: BUY 79.4% (need ≥50%)
+2026-04-16 19:51:32,538       ADX: 28.9 (need ≥15)
+2026-04-16 19:51:32,538       Score: 2 (need ≥1)
+2026-04-16 19:51:32,538       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:32,639 
+  ── INJUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:33,895       ML: BUY 72.7% (need ≥50%)
+2026-04-16 19:51:33,895       ADX: 23.2 (need ≥15)
+2026-04-16 19:51:33,895       Score: 2 (need ≥1)
+2026-04-16 19:51:33,895       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:33,996 
+  ── ARBUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:35,226       ML: BUY 70.4% (need ≥50%)
+2026-04-16 19:51:35,226       ADX: 34.3 (need ≥15)
+2026-04-16 19:51:35,226       Score: 2 (need ≥1)
+2026-04-16 19:51:35,226       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:35,326 
+  ── OPUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:36,532       ML: BUY 73.6% (need ≥50%)
+2026-04-16 19:51:36,532       ADX: 23.1 (need ≥15)
+2026-04-16 19:51:36,532       Score: 2 (need ≥1)
+2026-04-16 19:51:36,532       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:36,632 
+  ── SEIUSDT (🤖 AI & Momentum) ──
+2026-04-16 19:51:37,858       ML: BUY 77.1% (need ≥50%)
+2026-04-16 19:51:37,858       ADX: 29.2 (need ≥15)
+2026-04-16 19:51:37,858       Score: 2 (need ≥1)
+2026-04-16 19:51:37,858       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-16 19:51:37,959 
+════════════════════════════════════════════════════════
+SCAN COMPLETE
+════════════════════════════════════════════════════════
