@@ -1,3 +1,31 @@
 [
-
+  {
+    "symbol": "SUIUSDT",
+    "signal": "SELL",
+    "entry": 0.994,
+    "stop": 1.005,
+    "tp1": 0.979,
+    "tp2": 0.972,
+    "qty": 36130,
+    "qty_tp1": 18065,
+    "qty_tp2": 18065,
+    "risk_usd": 1833.26,
+    "balance_at_open": 183325.76,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-198018966872"
+    },
+    "opened_at": "2026-04-17T19:44:25.953148+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 63.0,
+    "score": 2,
+    "tier": "\u26a1 High-Liquidity L1s",
+    "exchange": "deribit_testnet",
+    "close_price": 0.994,
+    "pnl": 0.0,
+    "closed_at": "2026-04-17T20:30:20.039178+00:00",
+    "close_reason": "Ghost \u2014 auto-removed"
+  }
 ]

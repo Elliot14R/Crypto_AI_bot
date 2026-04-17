@@ -1,7 +1,7 @@
 {
-  "usdt": 183532.22,
-  "equity": 181156.7,
-  "unrealised": -2375.5218,
+  "usdt": 183716.07,
+  "equity": 181570.14,
+  "unrealised": -2145.9294,
   "assets": [
     {
       "asset": "BTC",
@@ -15,8 +15,8 @@
     },
     {
       "asset": "USDC",
-      "free": "10514.435455",
-      "total": "82431.26"
+      "free": "10710.068475",
+      "total": "82615.11"
     },
     {
       "asset": "USDT",
@@ -24,7 +24,7 @@
       "total": "100000.0"
     }
   ],
-  "updated_at": "2026-04-17 19:44 UTC",
+  "updated_at": "2026-04-17 20:30 UTC",
   "mode": "deribit_testnet",
   "exchange": "Deribit(by Coinbase) Testnet",
   "open_positions": 3
