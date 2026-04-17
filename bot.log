@@ -7591,3 +7591,91 @@ SCAN — 2026-04-17 23:03 UTC
 ════════════════════════════════════════════════════════
 DONE — 0 signal(s) | $184920.76
 ════════════════════════════════════════════════════════
+2026-04-17 23:53:56,365 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-17 23:53 UTC
+════════════════════════════════════════════════════════
+2026-04-17 23:53:57,068   QUIET HOURS | conf≥55% | score≥2 | ADX≥18 | ✓ Normal vol 0.20%
+2026-04-17 23:53:57,194 ✓ Deribit testnet authenticated
+2026-04-17 23:53:57,285 ✓ Tradeable: 19 — ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT', 'AVAXUSDT', 'LINKUSDT', 'NEARUSDT', 'DOTUSDT', 'UNIUSDT', 'ADAUSDT', 'AAVEUSDT', 'INJUSDT', 'ARBUSDT', 'SUIUSDT', 'OPUSDT', 'SEIUSDT', 'FETUSDT', 'APTUSDT']
+2026-04-17 23:53:57,659 ✅ Deribit OK — $185059.56 | 19 symbols | POST:✅ (Routed as URL Params)
+2026-04-17 23:53:58,776   QUIET HOURS | conf≥55% | score≥2 | ADX≥18 | risk:0.50
+2026-04-17 23:53:58,776 
+[0] Balance...
+2026-04-17 23:53:59,770   Balance: $185059.56 | upnl:+151.93 | positions:2
+2026-04-17 23:53:59,770 
+[1] Monitor open trades (TP/SL detection)...
+2026-04-17 23:53:59,771   Monitoring 2 trade(s)
+2026-04-17 23:54:01,134   Balance: $185059.56 | upnl:+151.93 | positions:2
+2026-04-17 23:54:01,134 
+[2] Clean ghost trades...
+2026-04-17 23:54:01,404 
+[3] Scanning 20 coins | Open:2/3
+2026-04-17 23:54:01,404     Tradeable: []
+2026-04-17 23:54:01,405 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-17 23:54:03,514     ML: NO_TRADE 98.3% (need ≥55%)
+2026-04-17 23:54:03,714 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-17 23:54:05,647     ML: NO_TRADE 98.5% (need ≥55%)
+2026-04-17 23:54:05,848 
+  ── BNBUSDT (👑 Big Three) ──
+2026-04-17 23:54:07,776     ML: NO_TRADE 98.3% (need ≥55%)
+2026-04-17 23:54:07,976 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 23:54:09,942     ML: BUY 43.6% (need ≥55%)
+2026-04-17 23:54:10,143 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 23:54:11,686     ML: NO_TRADE 98.6% (need ≥55%)
+2026-04-17 23:54:11,887 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 23:54:13,470     ML: NO_TRADE 98.1% (need ≥55%)
+2026-04-17 23:54:13,671 
+  ── SUIUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 23:54:15,680     ML: SELL 40.0% (need ≥55%)
+2026-04-17 23:54:15,880 
+  ── APTUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 23:54:17,422     ML: NO_TRADE 98.7% (need ≥55%)
+2026-04-17 23:54:17,623 
+  ── LINKUSDT (🏛 Institutional Alts) ──
+2026-04-17 23:54:19,183     ML: BUY 40.2% (need ≥55%)
+2026-04-17 23:54:19,384 
+  ── DOTUSDT (🏛 Institutional Alts) ──
+2026-04-17 23:54:21,101     ML: NO_TRADE 99.2% (need ≥55%)
+2026-04-17 23:54:21,302 
+  ── UNIUSDT (🏛 Institutional Alts) ──
+2026-04-17 23:54:23,104     ML: NO_TRADE 98.4% (need ≥55%)
+2026-04-17 23:54:23,305 
+  ── AAVEUSDT (🏛 Institutional Alts) ──
+2026-04-17 23:54:25,175     ML: NO_TRADE 97.5% (need ≥55%)
+2026-04-17 23:54:25,376 
+  ── XRPUSDT (🏛 Institutional Alts) ──
+2026-04-17 23:54:27,276     ML: NO_TRADE 98.5% (need ≥55%)
+2026-04-17 23:54:27,477 
+  ── FETUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:29,142     ML: BUY 41.3% (need ≥55%)
+2026-04-17 23:54:29,343 
+  ── RENDERUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:31,045     ML: BUY 39.7% (need ≥55%)
+2026-04-17 23:54:31,246 
+  ── ADAUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:33,179     ML: SELL 46.4% (need ≥55%)
+2026-04-17 23:54:33,380 
+  ── INJUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:34,922     ML: SELL 55.3% (need ≥55%)
+2026-04-17 23:54:34,922     ADX: 29.5 (need ≥18)
+2026-04-17 23:54:34,922     Score: 1 (need ≥2)
+2026-04-17 23:54:35,123 
+  ── ARBUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:36,778     ML: BUY 49.8% (need ≥55%)
+2026-04-17 23:54:36,979 
+  ── OPUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:38,697     ML: NO_TRADE 98.3% (need ≥55%)
+2026-04-17 23:54:38,898 
+  ── SEIUSDT (🤖 AI & Momentum) ──
+2026-04-17 23:54:40,429     ML: BUY 38.0% (need ≥55%)
+2026-04-17 23:54:41,638   Balance: $185042.56 | upnl:+134.93 | positions:2
+2026-04-17 23:54:41,638 
+════════════════════════════════════════════════════════
+DONE — 0 signal(s) | $185059.56
+════════════════════════════════════════════════════════
