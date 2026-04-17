@@ -6116,3 +6116,135 @@ SCAN START — 2026-04-17 14:11 UTC
 ════════════════════════════════════════════════════════
 SCAN COMPLETE
 ════════════════════════════════════════════════════════
+2026-04-17 14:43:14,293 
+════════════════════════════════════════════════════════
+SCAN START — 2026-04-17 14:43 UTC
+════════════════════════════════════════════════════════
+2026-04-17 14:43:15,100   ACTIVE HOURS | conf≥50% | score≥1 | ADX≥15 | ✓ Normal vol 0.61%
+2026-04-17 14:43:15,381 ✓ Verified 20 USDC symbols
+2026-04-17 14:43:15,480 ✅ Deribit Live: $86404.56
+2026-04-17 14:43:16,716 Scanning 20 coins | Mode: ACTIVE HOURS
+2026-04-17 14:43:16,717 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-17 14:43:18,436       ML: BUY 88.2% (need ≥50%)
+2026-04-17 14:43:18,437       ADX: 44.9 (need ≥15)
+2026-04-17 14:43:18,437       Score: 2 (need ≥1)
+2026-04-17 14:43:18,437       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:18,537 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-17 14:43:20,192       ML: BUY 86.3% (need ≥50%)
+2026-04-17 14:43:20,192       ADX: 50.7 (need ≥15)
+2026-04-17 14:43:20,192       Score: 2 (need ≥1)
+2026-04-17 14:43:20,192       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:20,293 
+  ── BNBUSDT (👑 Big Three) ──
+2026-04-17 14:43:21,831       ML: BUY 77.2% (need ≥50%)
+2026-04-17 14:43:21,832       ADX: 41.2 (need ≥15)
+2026-04-17 14:43:21,832       Score: 2 (need ≥1)
+2026-04-17 14:43:21,832       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:21,932 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 14:43:24,174       ML: BUY 73.5% (need ≥50%)
+2026-04-17 14:43:24,174       ADX: 30.4 (need ≥15)
+2026-04-17 14:43:24,174       Score: 2 (need ≥1)
+2026-04-17 14:43:24,175       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:24,275 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 14:43:26,046       ML: BUY 65.5% (need ≥50%)
+2026-04-17 14:43:26,046       ADX: 35.1 (need ≥15)
+2026-04-17 14:43:26,046       Score: 2 (need ≥1)
+2026-04-17 14:43:26,047       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:26,147 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 14:43:28,103       ML: BUY 58.3% (need ≥50%)
+2026-04-17 14:43:28,103       ADX: 22.9 (need ≥15)
+2026-04-17 14:43:28,103       Score: 1 (need ≥1)
+2026-04-17 14:43:28,104       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:28,204 
+  ── SUIUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 14:43:29,791       ML: BUY 78.6% (need ≥50%)
+2026-04-17 14:43:29,792       ADX: 51.1 (need ≥15)
+2026-04-17 14:43:29,792       Score: 2 (need ≥1)
+2026-04-17 14:43:29,792       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:29,892 
+  ── APTUSDT (⚡ High-Liquidity L1s) ──
+2026-04-17 14:43:31,844       ML: BUY 73.0% (need ≥50%)
+2026-04-17 14:43:31,844       ADX: 21.1 (need ≥15)
+2026-04-17 14:43:31,844       Score: 2 (need ≥1)
+2026-04-17 14:43:31,845       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:31,945 
+  ── LINKUSDT (🏛 Institutional Alts) ──
+2026-04-17 14:43:33,731       ML: BUY 81.8% (need ≥50%)
+2026-04-17 14:43:33,731       ADX: 39.6 (need ≥15)
+2026-04-17 14:43:33,731       Score: 2 (need ≥1)
+2026-04-17 14:43:33,732       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:33,832 
+  ── DOTUSDT (🏛 Institutional Alts) ──
+2026-04-17 14:43:35,505       ML: BUY 72.4% (need ≥50%)
+2026-04-17 14:43:35,505       ADX: 20.6 (need ≥15)
+2026-04-17 14:43:35,506       Score: 2 (need ≥1)
+2026-04-17 14:43:35,506       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:35,606 
+  ── UNIUSDT (🏛 Institutional Alts) ──
+2026-04-17 14:43:37,323       ML: BUY 73.2% (need ≥50%)
+2026-04-17 14:43:37,323       ADX: 41.2 (need ≥15)
+2026-04-17 14:43:37,323       Score: 2 (need ≥1)
+2026-04-17 14:43:37,323       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:37,424 
+  ── AAVEUSDT (🏛 Institutional Alts) ──
+2026-04-17 14:43:38,976       ML: BUY 72.2% (need ≥50%)
+2026-04-17 14:43:38,976       ADX: 29.5 (need ≥15)
+2026-04-17 14:43:38,976       Score: 3 (need ≥1)
+2026-04-17 14:43:38,977       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:39,077 
+  ── XRPUSDT (🏛 Institutional Alts) ──
+2026-04-17 14:43:40,612       ML: BUY 71.4% (need ≥50%)
+2026-04-17 14:43:40,612       ADX: 45.0 (need ≥15)
+2026-04-17 14:43:40,612       Score: 2 (need ≥1)
+2026-04-17 14:43:40,612       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:40,712 
+  ── FETUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:42,326       ML: BUY 55.7% (need ≥50%)
+2026-04-17 14:43:42,326       ADX: 26.1 (need ≥15)
+2026-04-17 14:43:42,326       Score: 1 (need ≥1)
+2026-04-17 14:43:42,327       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:42,427 
+  ── RENDERUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:43,971       ML: BUY 53.2% (need ≥50%)
+2026-04-17 14:43:43,971       ADX: 30.3 (need ≥15)
+2026-04-17 14:43:43,971       Score: 1 (need ≥1)
+2026-04-17 14:43:43,971       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:44,071 
+  ── ADAUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:45,617       ML: BUY 78.0% (need ≥50%)
+2026-04-17 14:43:45,618       ADX: 42.2 (need ≥15)
+2026-04-17 14:43:45,618       Score: 2 (need ≥1)
+2026-04-17 14:43:45,618       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:45,718 
+  ── INJUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:47,237       ML: BUY 67.8% (need ≥50%)
+2026-04-17 14:43:47,237       ADX: 21.9 (need ≥15)
+2026-04-17 14:43:47,237       Score: 2 (need ≥1)
+2026-04-17 14:43:47,238       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:47,338 
+  ── ARBUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:48,875       ML: BUY 70.1% (need ≥50%)
+2026-04-17 14:43:48,876       ADX: 33.5 (need ≥15)
+2026-04-17 14:43:48,876       Score: 2 (need ≥1)
+2026-04-17 14:43:48,876       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:48,976 
+  ── OPUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:50,515       ML: BUY 76.5% (need ≥50%)
+2026-04-17 14:43:50,515       ADX: 23.9 (need ≥15)
+2026-04-17 14:43:50,515       Score: 2 (need ≥1)
+2026-04-17 14:43:50,515       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:50,616 
+  ── SEIUSDT (🤖 AI & Momentum) ──
+2026-04-17 14:43:52,437       ML: BUY 70.9% (need ≥50%)
+2026-04-17 14:43:52,437       ADX: 39.5 (need ≥15)
+2026-04-17 14:43:52,437       Score: 2 (need ≥1)
+2026-04-17 14:43:52,438       🛑 MARGIN PROTECTED: Slots full (3/3). Trade skipped.
+2026-04-17 14:43:52,538 
+════════════════════════════════════════════════════════
+SCAN COMPLETE
+════════════════════════════════════════════════════════
