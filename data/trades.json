@@ -27,34 +27,6 @@
     "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
   },
-  "ETHUSDT": {
-    "symbol": "ETHUSDT",
-    "signal": "SELL",
-    "entry": 2358.1,
-    "stop": 2369.75,
-    "tp1": 2342.55,
-    "tp2": 2334.75,
-    "qty": 15.194,
-    "qty_tp1": 7.597,
-    "qty_tp2": 7.597,
-    "risk_usd": 1343.67,
-    "balance_at_open": 179156.27,
-    "risk_mult": 0.75,
-    "order_ids": {
-      "entry": "USDC-198258146492",
-      "stop_loss": "USDC-SLTB-18733",
-      "tp1": "USDC-198258153164",
-      "tp2": "USDC-198258153649"
-    },
-    "opened_at": "2026-04-18T12:51:11.841809+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 52.7,
-    "score": 1,
-    "tier": "\ud83d\udc51 Big Three",
-    "exchange": "deribit_testnet"
-  },
   "SOLUSDT": {
     "symbol": "SOLUSDT",
     "signal": "SELL",
@@ -81,6 +53,34 @@
     "confidence": 53.2,
     "score": 1,
     "tier": "\u26a1 High-Liquidity L1s",
+    "exchange": "deribit_testnet"
+  },
+  "ETHUSDT": {
+    "symbol": "ETHUSDT",
+    "signal": "SELL",
+    "entry": 2360.85,
+    "stop": 2372.75,
+    "tp1": 2344.95,
+    "tp2": 2337.05,
+    "qty": 15.16,
+    "qty_tp1": 7.58,
+    "qty_tp2": 7.58,
+    "risk_usd": 1341.94,
+    "balance_at_open": 178925.96,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-198315388628",
+      "stop_loss": "USDC-SLTB-18745",
+      "tp1": "USDC-198315395729",
+      "tp2": "USDC-198315396521"
+    },
+    "opened_at": "2026-04-18T16:54:40.252984+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 54.4,
+    "score": 1,
+    "tier": "\ud83d\udc51 Big Three",
     "exchange": "deribit_testnet"
   }
 }
