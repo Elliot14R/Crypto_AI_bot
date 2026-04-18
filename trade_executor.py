@@ -375,7 +375,8 @@ def check_open_trades(deribit: DeribitClient):
             if trade.get("tp1_hit") and not trade.get("tp2_hit") and oids.get("stop_loss"):
                 live = deribit.get_live_price(symbol)
                 if live > 0:
-                    halfway = (entry+float(trade["tp2"]))/2
+                    # FIX: Calculate halfway between TP1 and TP2, not Entry and TP2
+                    halfway = (float(trade["tp1"]) + float(trade["tp2"])) / 2
                     at_t    = (trade["signal"]=="BUY" and live>=halfway) or \
                               (trade["signal"]=="SELL" and live<=halfway)
                     sl_be   = abs(float(trade.get("stop",0))-entry)<entry*0.001
