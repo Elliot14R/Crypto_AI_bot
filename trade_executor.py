@@ -1,4 +1,4 @@
-# trade_executor.py — Professional grade with all enhancements
+# trade_executor.py — Professional grade with all enhancement
 #
 # NEW vs previous version:
 #   1. Time-based exit: trades > 48h without TP1 → market close (prevent dead capital)
