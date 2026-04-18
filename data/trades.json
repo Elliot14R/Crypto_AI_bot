@@ -27,32 +27,6 @@
     "tier": "\ud83d\udc51 Big Three",
     "exchange": "deribit_testnet"
   },
-  "ADAUSDT": {
-    "symbol": "ADAUSDT",
-    "signal": "SELL",
-    "entry": 0.245,
-    "stop": 0.25,
-    "tp1": 0.24,
-    "tp2": 0.24,
-    "qty": 143739.4,
-    "qty_tp1": 71869.6,
-    "qty_tp2": 71869.8,
-    "risk_usd": 1389.6,
-    "balance_at_open": 185280.34,
-    "risk_mult": 0.75,
-    "order_ids": {
-      "entry": "USDC-198155234173",
-      "stop_loss": "USDC-SLTB-18710"
-    },
-    "opened_at": "2026-04-18T05:25:43.449974+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 50.1,
-    "score": 2,
-    "tier": "\ud83e\udd16 AI & Momentum",
-    "exchange": "deribit_testnet"
-  },
   "ETHUSDT": {
     "symbol": "ETHUSDT",
     "signal": "BUY",
@@ -79,6 +53,34 @@
     "confidence": 58.0,
     "score": 2,
     "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet"
+  },
+  "DOTUSDT": {
+    "symbol": "DOTUSDT",
+    "signal": "SELL",
+    "entry": 1.2985,
+    "stop": 1.311,
+    "tp1": 1.282,
+    "tp2": 1.274,
+    "qty": 27748,
+    "qty_tp1": 13874,
+    "qty_tp2": 13874,
+    "risk_usd": 1360.0,
+    "balance_at_open": 181333.2,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-198217522269",
+      "stop_loss": "USDC-SLTB-18731",
+      "tp1": "USDC-198217528748",
+      "tp2": "USDC-198217529351"
+    },
+    "opened_at": "2026-04-18T09:58:05.834332+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 52.6,
+    "score": 1,
+    "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
   }
 }

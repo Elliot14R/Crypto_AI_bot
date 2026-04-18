@@ -59,5 +59,35 @@
     "pnl": 387.8485,
     "closed_at": "2026-04-18T09:01:58.761897+00:00",
     "close_reason": "TP2 hit"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "signal": "SELL",
+    "entry": 0.245,
+    "stop": 0.25,
+    "tp1": 0.24,
+    "tp2": 0.24,
+    "qty": 143739.4,
+    "qty_tp1": 71869.6,
+    "qty_tp2": 71869.8,
+    "risk_usd": 1389.6,
+    "balance_at_open": 185280.34,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-198155234173",
+      "stop_loss": "USDC-SLTB-18710"
+    },
+    "opened_at": "2026-04-18T05:25:43.449974+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 50.1,
+    "score": 2,
+    "tier": "\ud83e\udd16 AI & Momentum",
+    "exchange": "deribit_testnet",
+    "close_price": 0.245,
+    "pnl": 0.0,
+    "closed_at": "2026-04-18T09:57:42.933247+00:00",
+    "close_reason": "Ghost \u2014 auto-removed"
   }
 ]

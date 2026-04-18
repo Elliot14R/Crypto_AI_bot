@@ -143,5 +143,35 @@
     "exchange": "deribit_testnet",
     "type": "executed",
     "generated_at": "2026-04-18T09:02:06.293226+00:00"
+  },
+  {
+    "symbol": "DOTUSDT",
+    "signal": "SELL",
+    "entry": 1.2985,
+    "stop": 1.311,
+    "tp1": 1.282,
+    "tp2": 1.274,
+    "qty": 27748,
+    "qty_tp1": 13874,
+    "qty_tp2": 13874,
+    "risk_usd": 1360.0,
+    "balance_at_open": 181333.2,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-198217522269",
+      "stop_loss": "USDC-SLTB-18731",
+      "tp1": "USDC-198217528748",
+      "tp2": "USDC-198217529351"
+    },
+    "opened_at": "2026-04-18T09:58:05.834332+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 52.6,
+    "score": 1,
+    "tier": "\ud83c\udfdb Institutional Alts",
+    "exchange": "deribit_testnet",
+    "type": "executed",
+    "generated_at": "2026-04-18T09:58:05.835287+00:00"
   }
 ]
