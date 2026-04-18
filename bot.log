@@ -8055,3 +8055,49 @@ SCAN — 2026-04-18 10:53 UTC
 2026-04-18 10:53:58,897 
 [3] MAX TRADES REACHED (3/3) — no new trades allowed
 2026-04-18 10:53:59,887   Balance: $181396.13 | upnl:+133.26 | positions:3
+2026-04-18 11:43:43,837 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-18 11:43 UTC
+════════════════════════════════════════════════════════
+2026-04-18 11:43:44,683   WEEKEND MODE | conf≥50% | score≥1 | ADX≥15 | ✓ Normal vol 0.29%
+2026-04-18 11:43:45,132 ✓ Deribit testnet authenticated
+2026-04-18 11:43:45,232 ✓ Tradeable: 19 — ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT', 'AVAXUSDT', 'LINKUSDT', 'NEARUSDT', 'DOTUSDT', 'UNIUSDT', 'ADAUSDT', 'AAVEUSDT', 'INJUSDT', 'ARBUSDT', 'SUIUSDT', 'OPUSDT', 'SEIUSDT', 'FETUSDT', 'APTUSDT']
+2026-04-18 11:43:45,651 ✅ Deribit OK — $181202.15 | 19 symbols | POST:✅ (Routed as URL Params)
+2026-04-18 11:43:46,785   WEEKEND MODE | conf≥50% | score≥1 | ADX≥15 | risk:0.75
+2026-04-18 11:43:46,785 
+[0] Balance...
+2026-04-18 11:43:47,901   Balance: $181202.15 | upnl:+426.03 | positions:2
+2026-04-18 11:43:47,901 
+[1] Monitor open trades (TP/SL detection)...
+2026-04-18 11:43:47,901   Monitoring 3 trade(s)
+2026-04-18 11:43:49,793   Balance: $181202.15 | upnl:+448.39 | positions:2
+2026-04-18 11:43:49,793 
+[2] Clean ghost trades...
+2026-04-18 11:43:50,089   🗑️ BTCUSDT: no live Deribit position — ghost trade
+2026-04-18 11:43:50,090   ✅ Removed 1 ghost trade(s): ['BTCUSDT']
+2026-04-18 11:43:50,717 
+[3] Scanning 20 coins | Open:2/3
+2026-04-18 11:43:50,717     Tradeable: []
+2026-04-18 11:43:50,717 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-18 11:43:52,975     ML: BUY 65.6% (need ≥50%)
+2026-04-18 11:43:52,975     ADX: 49.0 (need ≥15)
+2026-04-18 11:43:52,975     Score: 3 (need ≥1)
+2026-04-18 11:43:52,975   Contracts: 0.4782 BTCUSDT (risk=$1359.02 stop_dist=285.1900)
+2026-04-18 11:43:52,975   BUY BTCUSDT total=0.4782 tp1=0.2391 tp2=0.2391
+2026-04-18 11:43:52,975   SL=75494.80 TP1=76160.24 TP2=76350.37
+2026-04-18 11:43:53,075   ✅ MARKET BUY 0.4782 BTC_USDC-PERPETUAL id=USDC-198242344311 state=filled
+2026-04-18 11:43:53,075   ✅ Entry @ 77046.50
+2026-04-18 11:43:54,675   ✅ SL SELL 0.4782 BTC_USDC-PERPETUAL @ 76761.5 id=USDC-SLTS-18732 state=untriggered
+2026-04-18 11:43:54,675   ✅ SL @ 76761.50 id:USDC-SLTS-18732
+2026-04-18 11:43:54,775   ✅ TP SELL 0.2391 BTC_USDC-PERPETUAL @ 77427.0 id=USDC-198242351154 state=open
+2026-04-18 11:43:54,775   ✅ TP1 @ 77427.00 × 0.2391 id:USDC-198242351154
+2026-04-18 11:43:54,875   ✅ TP SELL 0.2391 BTC_USDC-PERPETUAL @ 77617.0 id=USDC-198242351360 state=open
+2026-04-18 11:43:54,875   ✅ TP2 @ 77617.00 × 0.2391 id:USDC-198242351360
+2026-04-18 11:43:55,450   ✅✅ TRADE OPENED: BTCUSDT BUY | SL:USDC-SLTS-18732 TP1:USDC-198242351154 TP2:USDC-198242351360
+2026-04-18 11:43:56,951   🛑 Max trades (3) reached — stopping scan
+2026-04-18 11:43:58,068   Balance: $181184.07 | upnl:+426.45 | positions:3
+2026-04-18 11:43:58,068 
+════════════════════════════════════════════════════════
+DONE — 1 signal(s) | $181202.15
+════════════════════════════════════════════════════════

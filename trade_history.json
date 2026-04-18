@@ -89,5 +89,37 @@
     "pnl": 0.0,
     "closed_at": "2026-04-18T09:57:42.933247+00:00",
     "close_reason": "Ghost \u2014 auto-removed"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "signal": "BUY",
+    "entry": 77388.5,
+    "stop": 76874.5,
+    "tp1": 78074.0,
+    "tp2": 78417.0,
+    "qty": 0.4739,
+    "qty_tp1": 0.2369,
+    "qty_tp2": 0.237,
+    "risk_usd": 1833.26,
+    "balance_at_open": 183325.76,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-198018888643",
+      "stop_loss": "USDC-SLTS-18655",
+      "tp1": "USDC-198018897429",
+      "tp2": "USDC-198018899460"
+    },
+    "opened_at": "2026-04-17T19:44:07.037618+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 51.2,
+    "score": 2,
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "close_price": 77388.5,
+    "pnl": 0.0,
+    "closed_at": "2026-04-18T11:43:50.089464+00:00",
+    "close_reason": "Ghost \u2014 auto-removed"
   }
 ]
