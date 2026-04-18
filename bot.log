@@ -7886,3 +7886,24 @@ SCAN — 2026-04-18 06:49 UTC
 2026-04-18 06:49:14,453 
 [3] MAX TRADES REACHED (3/3) — no new trades allowed
 2026-04-18 06:49:16,149   Balance: $183530.90 | upnl:-1611.80 | positions:3
+2026-04-18 07:50:34,243 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-18 07:50 UTC
+════════════════════════════════════════════════════════
+2026-04-18 07:50:35,384   WEEKEND MODE | conf≥50% | score≥1 | ADX≥15 | ✓ Normal vol 0.13%
+2026-04-18 07:50:35,837 ✓ Deribit testnet authenticated
+2026-04-18 07:50:35,965 ✓ Tradeable: 19 — ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT', 'AVAXUSDT', 'LINKUSDT', 'NEARUSDT', 'DOTUSDT', 'UNIUSDT', 'ADAUSDT', 'AAVEUSDT', 'INJUSDT', 'ARBUSDT', 'SUIUSDT', 'OPUSDT', 'SEIUSDT', 'FETUSDT', 'APTUSDT']
+2026-04-18 07:50:36,502 ✅ Deribit OK — $182324.71 | 19 symbols | POST:✅ (Routed as URL Params)
+2026-04-18 07:50:37,566   WEEKEND MODE | conf≥50% | score≥1 | ADX≥15 | risk:0.75
+2026-04-18 07:50:37,566 
+[0] Balance...
+2026-04-18 07:50:38,992   Balance: $182308.99 | upnl:-2816.18 | positions:3
+2026-04-18 07:50:38,992 
+[1] Monitor open trades (TP/SL detection)...
+2026-04-18 07:50:38,992   Monitoring 3 trade(s)
+2026-04-18 07:50:41,173   Balance: $182308.99 | upnl:-2816.18 | positions:3
+2026-04-18 07:50:41,173 
+[2] Clean ghost trades...
+2026-04-18 07:50:41,555 
+[3] MAX TRADES REACHED (3/3) — no new trades allowed
+2026-04-18 07:50:42,981   Balance: $182308.99 | upnl:-2816.18 | positions:3
