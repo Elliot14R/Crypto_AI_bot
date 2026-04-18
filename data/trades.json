@@ -31,7 +31,7 @@
     "symbol": "AVAXUSDT",
     "signal": "SELL",
     "entry": 9.80875,
-    "stop": 9.912,
+    "stop": 9.80875,
     "tp1": 9.671,
     "tp2": 9.601,
     "qty": 3733.7,
@@ -42,17 +42,43 @@
     "risk_mult": 1.0,
     "order_ids": {
       "entry": "USDC-198018936856",
-      "stop_loss": "USDC-SLTB-18656",
+      "stop_loss": "USDC-SLTB-18709",
       "tp1": "USDC-198018944296",
       "tp2": "USDC-198018945099"
     },
     "opened_at": "2026-04-17T19:44:18.539774+00:00",
-    "tp1_hit": false,
+    "tp1_hit": true,
     "tp2_hit": false,
     "closed": false,
     "confidence": 53.2,
     "score": 1,
     "tier": "\u26a1 High-Liquidity L1s",
+    "exchange": "deribit_testnet"
+  },
+  "ADAUSDT": {
+    "symbol": "ADAUSDT",
+    "signal": "SELL",
+    "entry": 0.245,
+    "stop": 0.25,
+    "tp1": 0.24,
+    "tp2": 0.24,
+    "qty": 143739.4,
+    "qty_tp1": 71869.6,
+    "qty_tp2": 71869.8,
+    "risk_usd": 1389.6,
+    "balance_at_open": 185280.34,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-198155234173",
+      "stop_loss": "USDC-SLTB-18710"
+    },
+    "opened_at": "2026-04-18T05:25:43.449974+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 50.1,
+    "score": 2,
+    "tier": "\ud83e\udd16 AI & Momentum",
     "exchange": "deribit_testnet"
   }
 }
