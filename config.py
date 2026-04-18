@@ -4,6 +4,21 @@
 #   ATR multipliers kept at 1.5/2.0/3.0 (good risk:reward = 1:2)
 #   MAX_TRADE_AGE_HOURS = 48 (new: auto-exit stale trades)
 
+# ── File Paths ────────────────────────────────────────────────────────
+RAW_DATA_FILE = "data/crypto_historical_15m_expanded.csv"
+FEATURES_FILE = "data/crypto_features_15m_expanded.csv"
+MODEL_FILE    = "pro_crypto_ai_model.pkl"
+LOG_FILE      = "bot.log"
+
+# ── Features List ─────────────────────────────────────────────────────
+FEATURES = [
+    'rsi', 'macd', 'macd_signal', 'macd_hist', 'stoch_k', 'stoch_d',
+    'adx', 'cci', 'atr', 'bb_upper', 'bb_middle', 'bb_lower',
+    'ema20', 'ema50', 'sma200', 'volume_ratio', 'price_change',
+    'rsi_1h', 'adx_1h', 'trend_1h'
+]
+
+# ── Coin Tiers ────────────────────────────────────────────────────────
 TIER_BIG3   = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
 TIER_LIQ1   = ["SOLUSDT", "AVAXUSDT", "XRPUSDT", "LINKUSDT", "NEARUSDT"]
 TIER_INST   = ["DOTUSDT", "ADAUSDT", "INJUSDT", "ARBUSDT", "OPUSDT"]
@@ -39,7 +54,3 @@ MAX_SAME_DIRECTION = 2      # max 2 BUY or 2 SELL simultaneously
 # If a trade has been open for > 48 hours without hitting TP1,
 # exit at market. Prevents capital being locked in stale positions.
 MAX_TRADE_AGE_HOURS = 48
-
-# Files
-MODEL_FILE  = "pro_crypto_ai_model.pkl"
-LOG_FILE    = "bot.log"
