@@ -151,6 +151,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
 .spinning{animation:spin 0.6s linear infinite;display:inline-block}
 @media(max-width:1200px){.stats-row{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
+
+/* ── System Monitor ── */
+.mon-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mon-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.mon-card-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.mon-card-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
+.mon-card-bd{padding:14px 16px;display:flex;flex-direction:column;gap:7px}
+.mon-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--bg3)}
+.mon-label{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px}
+.mon-val{font-size:11px;font-weight:600}
+.mon-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mon-dot.ok{background:var(--green);box-shadow:0 0 5px var(--green)}
+.mon-dot.warn{background:var(--amber);box-shadow:0 0 5px var(--amber)}
+.mon-dot.err{background:var(--red);box-shadow:0 0 5px var(--red)}
+.mon-dot.idle{background:var(--border2)}
+.mon-ring{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.mon-ring.ok{background:var(--green2);border:2px solid var(--green)}
+.mon-ring.warn{background:var(--amber2);border:2px solid var(--amber)}
+.mon-ring.err{background:var(--red2);border:2px solid var(--red)}
+.mon-alert{background:var(--red2);border:1px solid #f43f5e40;border-radius:8px;padding:10px 14px;display:flex;gap:10px;margin-bottom:6px}
+.mon-alert.warn{background:var(--amber2);border-color:#f59e0b40}
+.mon-alert.info{background:var(--blue2);border-color:#3b82f640}
+.mon-hbar{height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:5px}
+.mon-hfill{height:100%;border-radius:3px;transition:width 0.6s ease}
+@media(max-width:900px){.mon-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -172,6 +197,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
     <div class="nav-item" onclick="showPage('history')" id="nav-history"><span class="nav-icon">≡</span>History</div>
     <div class="nav-item" onclick="showPage('performance')" id="nav-performance"><span class="nav-icon">△</span>Performance</div>
     <div class="nav-item" onclick="showPage('config')" id="nav-config"><span class="nav-icon">⊙</span>Configuration</div>
+    <div class="nav-item" onclick="showPage('monitor')" id="nav-monitor"><span class="nav-icon">◉</span>System Monitor<span class="nav-badge" id="monitorAlertBadge" style="display:none">!</span></div>
   </nav>
   <div class="sidebar-coins">
     <div class="coins-label">Monitored Coins</div>
@@ -498,6 +524,118 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
       </div>
     </div>
   </div>
+
+  <!-- ════ SYSTEM MONITOR PAGE ════ -->
+  <div class="page" id="page-monitor" style="display:none;padding:20px 24px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-family:var(--sans);font-size:18px;font-weight:800">System Monitor</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Live health checks · Refreshes every 30s</div>
+      </div>
+      <button onclick="runMonitorChecks()" style="background:var(--blue2);border:1px solid var(--blue);color:var(--blue);padding:7px 16px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;font-family:var(--mono)">↻ Refresh</button>
+    </div>
+
+    <div id="monAlertBanner" style="display:none;margin-bottom:14px"></div>
+
+    <!-- Overall health -->
+    <div class="mon-card" style="margin-bottom:16px">
+      <div class="mon-card-bd" style="flex-direction:row;align-items:center;gap:16px;padding:16px">
+        <div class="mon-ring ok" id="monRing">✓</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;margin-bottom:3px" id="monTitle">All Systems Operational</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:7px" id="monSub">Last checked: —</div>
+          <div class="mon-hbar"><div class="mon-hfill" id="monFill" style="width:100%;background:var(--green)"></div></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:28px;font-weight:800;color:var(--green)" id="monPct">100%</div>
+          <div style="font-size:9px;color:var(--text3)">HEALTH</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mon-grid">
+
+      <div class="mon-card">
+        <div class="mon-card-hd"><span class="mon-card-title">🏦 Exchange (Deribit)</span><span style="font-size:10px;color:var(--text3)" id="mT1">—</span></div>
+        <div class="mon-card-bd">
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-conn"></span>API Connection</span><span class="mon-val" id="v-conn">Checking…</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-bal"></span>Balance Fetch</span><span class="mon-val" id="v-bal">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-pos"></span>Open Positions</span><span class="mon-val" id="v-pos">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-margin"></span>Margin Available</span><span class="mon-val" id="v-margin">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-stale"></span>Stale Trades (&gt;48h)</span><span class="mon-val" id="v-stale">—</span></div>
+        </div>
+      </div>
+
+      <div class="mon-card">
+        <div class="mon-card-hd"><span class="mon-card-title">📊 Market Data (Binance)</span><span style="font-size:10px;color:var(--text3)" id="mT2">—</span></div>
+        <div class="mon-card-bd">
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-binance"></span>Binance Public API</span><span class="mon-val" id="v-binance">Checking…</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-btcpx"></span>BTC Price Feed</span><span class="mon-val" id="v-btcpx">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-atr"></span>BTC ATR</span><span class="mon-val" id="v-atr">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-regime"></span>Market Regime</span><span class="mon-val" id="v-regime">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-latency"></span>API Latency</span><span class="mon-val" id="v-latency">—</span></div>
+        </div>
+      </div>
+
+      <div class="mon-card">
+        <div class="mon-card-hd"><span class="mon-card-title">🤖 Bot (GitHub Actions)</span><span style="font-size:10px;color:var(--text3)" id="mT3">—</span></div>
+        <div class="mon-card-bd">
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-scan"></span>Last Scan</span><span class="mon-val" id="v-scan">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-fresh"></span>Scan Freshness</span><span class="mon-val" id="v-fresh">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot ok" id="d-model"></span>AI Model</span><span class="mon-val" style="color:var(--green)">73.1% accuracy</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-sigs"></span>Signals Today</span><span class="mon-val" id="v-sigs">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-circuit"></span>Circuit Breaker</span><span class="mon-val" id="v-circuit">—</span></div>
+        </div>
+      </div>
+
+      <div class="mon-card">
+        <div class="mon-card-hd"><span class="mon-card-title">🌐 Dashboard (Render)</span><span style="font-size:10px;color:var(--text3)" id="mT4">—</span></div>
+        <div class="mon-card-bd">
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-api"></span>API Server</span><span class="mon-val" id="v-api">Checking…</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-apims"></span>Response Time</span><span class="mon-val" id="v-apims">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-gh"></span>GH PAT Token</span><span class="mon-val" id="v-gh">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-tg"></span>Telegram Alerts</span><span class="mon-val" id="v-tg">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-sync"></span>GitHub Repo Sync</span><span class="mon-val" id="v-sync">—</span></div>
+        </div>
+      </div>
+
+      <div class="mon-card">
+        <div class="mon-card-hd"><span class="mon-card-title">🔒 Trade Integrity</span><span style="font-size:10px;color:var(--text3)" id="mT5">—</span></div>
+        <div class="mon-card-bd">
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-slots"></span>Trade Slots</span><span class="mon-val" id="v-slots">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-sltp"></span>SL/TP Integrity</span><span class="mon-val" id="v-sltp">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-ghost"></span>Ghost Trades</span><span class="mon-val" id="v-ghost">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-wr"></span>Win Rate</span><span class="mon-val" id="v-wr">—</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-pnl"></span>Today PnL</span><span class="mon-val" id="v-pnl">—</span></div>
+        </div>
+      </div>
+
+      <div class="mon-card">
+        <div class="mon-card-hd"><span class="mon-card-title">🛡️ Security &amp; Config</span><span style="font-size:10px;color:var(--text3)" id="mT6">—</span></div>
+        <div class="mon-card-bd">
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot ok"></span>Deribit API Keys</span><span class="mon-val" style="color:var(--green)">Configured</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot ok"></span>Telegram Keys</span><span class="mon-val" style="color:var(--green)">Configured</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-risk"></span>Risk / Trade</span><span class="mon-val" id="v-risk">1%</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-dloss"></span>Daily Loss Limit</span><span class="mon-val" id="v-dloss">5% of balance</span></div>
+          <div class="mon-row"><span class="mon-label"><span class="mon-dot idle" id="d-maxage"></span>Stale Exit Age</span><span class="mon-val" id="v-maxage">48h without TP1</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mon-card" style="margin-top:16px">
+      <div class="mon-card-hd">
+        <span class="mon-card-title">📋 System Events</span>
+        <button onclick="monEvents=[];renderMonEvents()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;font-family:var(--mono)">Clear</button>
+      </div>
+      <div class="mon-card-bd" style="max-height:200px;overflow-y:auto" id="monEventsEl">
+        <div style="font-size:11px;color:var(--text3);text-align:center;padding:16px">Events appear here as checks run</div>
+      </div>
+    </div>
+
+  </div><!-- /page-monitor -->
+
 </div>
 
 <script>
@@ -527,6 +665,8 @@ let liveInterval = null;
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (id === 'monitor') { startMonitorPolling(); }
+  else { stopMonitorPolling(); }
   const pg = document.getElementById('page-' + id);
   const nv = document.getElementById('nav-' + id);
   if (pg) pg.classList.add('active');
@@ -639,11 +779,18 @@ async function fetchBalance() {
     uEl.style.color = d.unrealised >= 0 ? 'var(--green)' : 'var(--red)';
   }
 
+  const exLabel = d.exchange || d.mode || "Deribit Testnet";
+  const modeLabel = document.getElementById("balModeLabel");
+  if (modeLabel) modeLabel.textContent = exLabel;
   if (d.assets && d.assets.length) {
-    const html = d.assets.slice(0, 8).map(a =>
-      `<div class="bal-row"><span style="color:var(--text3)">${a.asset}</span><span style="color:var(--text)">${Number(a.free).toFixed(4)}</span></div>`
-    ).join('');
-    document.getElementById('balAssets').innerHTML = `<div style="display:flex;flex-direction:column;gap:4px">${html}</div>`;
+    const validAssets = d.assets.filter(a => parseFloat(a.total||a.free||0) > 0);
+    const html = validAssets.map(a => {
+      const val = parseFloat(a.total||0);
+      const valStr = val > 0 ? "$"+val.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) : Number(a.free).toFixed(6);
+      return `<div class="bal-row"><span style="color:var(--text3)">${a.asset}</span><span style="color:var(--cyan)">${valStr}</span></div>`;
+    }).join('');
+    const el = document.getElementById('balAssets');
+    if (el) el.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px">${html}</div>`;
   }
 }
 
@@ -715,12 +862,13 @@ function renderTradeCard(t) {
       <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Target 2</div><div style="font-size:12px;font-weight:bold;color:#22c55e;">$${fmt(t.tp2, dec)}</div></div>
     </div>
 
-    <div style="height:3px; background:rgba(255,255,255,0.1); border-radius:2px; margin:8px 0; overflow:hidden;">
-      <div style="height:100%; width:${prog}%; background:${sigCol}; transition:width 0.5s;"></div>
+    <!-- Smart TP Progress Track -->
+    <div style="margin:10px 0 4px;">
+      ${buildTradeProgress(t, isBuy, pnl, sigCol)}
     </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-      <span style="font-size:11px; color:gray;">AI ${t.confidence||0}% · Score ${t.score||0}/6</span>
+      <span style="font-size:11px; color:gray;">AI ${t.confidence||0}% · Score ${t.score||0}/5</span>
       <button onclick="closeTrade('${t.symbol}')" style="font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid #ef4444; color:#ef4444; background:transparent; cursor:pointer;">✕ Close</button>
     </div>
   </div>`;
@@ -1228,6 +1376,328 @@ setInterval(() => {
   const lu = document.getElementById('lastUpd');
   if (lu) lu.textContent = t + ' UTC';
 }, 1000);
+
+// ══════════════════════════════════════════════════════════
+// TRADE PROGRESS: Smart TP1 / TP2 progress visualization
+// ══════════════════════════════════════════════════════════
+function buildTradeProgress(t, isBuy, pnl, sigCol) {
+  const entry = parseFloat(t.entry||0);
+  const sl    = parseFloat(t.stop||0);
+  const tp1   = parseFloat(t.tp1||0);
+  const tp2   = parseFloat(t.tp2||0);
+  const live  = parseFloat(t.live_price||0);
+  const tp1Hit = t.tp1_hit || false;
+  const prog  = Math.min(parseFloat(t.progress||0), 100);
+
+  if (!entry || !tp1 || !tp2 || !sl) {
+    return '<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+prog+'%;background:'+sigCol+';border-radius:3px;transition:width 0.8s"></div></div>';
+  }
+
+  const totalRange = Math.abs(tp2 - sl);
+  if (totalRange <= 0) return '';
+
+  const segSl  = Math.abs(entry - sl)  / totalRange * 100;
+  const segTp1 = Math.abs(tp1 - entry) / totalRange * 100;
+  const segTp2 = Math.abs(tp2 - tp1)   / totalRange * 100;
+
+  let dotPct = 0;
+  if (live && sl && tp2) {
+    dotPct = isBuy
+      ? Math.min(100, Math.max(0, (live - sl) / (tp2 - sl) * 100))
+      : Math.min(100, Math.max(0, (sl - live) / (sl - tp2) * 100));
+  }
+
+  const dotColor  = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  const tp1Color  = tp1Hit ? 'var(--green)' : 'var(--blue)';
+  const seg1Bg    = tp1Hit ? 'rgba(16,185,129,0.5)' : 'rgba(59,130,246,0.3)';
+  const seg2Bg    = tp1Hit ? 'rgba(16,185,129,0.35)' : 'rgba(16,185,129,0.12)';
+  const stage     = tp1Hit
+    ? '🎯 TP1 hit → trailing to TP2'
+    : (live && ((isBuy && live > tp1) || (!isBuy && live < tp1)))
+      ? '→ Approaching TP1!'
+      : (live && ((isBuy && live < entry) || (!isBuy && live > entry)))
+        ? '⚠ Below entry'
+        : '→ Moving toward TP1';
+
+  return `<div style="font-size:9px;color:var(--text3);margin-bottom:4px;display:flex;justify-content:space-between">
+    <span>${tp1Hit ? '🎯 TP1 ✓ — moving to TP2' : 'Progress to TP1'}</span>
+    <span style="color:${tp1Hit?'var(--green)':'var(--text3)'}">${stage}</span>
+  </div>
+  <div style="position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,0.06);overflow:visible;margin-bottom:4px">
+    <div style="position:absolute;left:0;top:0;height:100%;width:${segSl.toFixed(1)}%;background:rgba(244,63,94,0.2);border-radius:4px 0 0 4px"></div>
+    <div style="position:absolute;left:${segSl.toFixed(1)}%;top:0;height:100%;width:${segTp1.toFixed(1)}%;background:${seg1Bg}"></div>
+    <div style="position:absolute;left:${(segSl+segTp1).toFixed(1)}%;top:0;height:100%;width:${segTp2.toFixed(1)}%;background:${seg2Bg};border-radius:0 4px 4px 0"></div>
+    <div style="position:absolute;left:${segSl.toFixed(1)}%;top:-3px;bottom:-3px;width:1px;background:rgba(244,63,94,0.4)"></div>
+    <div style="position:absolute;left:${(segSl+segTp1).toFixed(1)}%;top:-3px;bottom:-3px;width:1px;background:rgba(16,185,129,0.5)"></div>
+    <div style="position:absolute;top:50%;left:${dotPct.toFixed(1)}%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:${dotColor};border:2px solid var(--bg);box-shadow:0 0 7px ${dotColor};z-index:3;transition:left 1.2s ease"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);padding:0 2px">
+    <span style="color:var(--red)">SL</span>
+    <span>Entry</span>
+    <span style="color:${tp1Color}">TP1${tp1Hit?' ✓':''}</span>
+    <span style="color:var(--green)">TP2</span>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// SYSTEM MONITOR
+// ══════════════════════════════════════════════════════════
+let monEvents = [];
+let monTimer  = null;
+
+function sd(id, s) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'mon-dot ' + (s||'idle');
+}
+function sv(id, v, color) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = v; if (color) el.style.color = color; }
+}
+
+function addMonEvent(icon, title, msg, lvl) {
+  monEvents.unshift({icon, title, msg, lvl, time: new Date().toLocaleTimeString()});
+  if (monEvents.length > 40) monEvents.pop();
+  renderMonEvents();
+}
+
+function renderMonEvents() {
+  const el = document.getElementById('monEventsEl');
+  if (!el) return;
+  if (!monEvents.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text3);text-align:center;padding:16px">No events yet</div>';
+    return;
+  }
+  el.innerHTML = monEvents.map(e =>
+    `<div class="mon-alert ${e.lvl||''}" style="margin-bottom:6px">
+      <span style="font-size:16px">${e.icon}</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--text)">${e.title}</div>
+        <div style="font-size:10px;color:var(--text2)">${e.msg} <span style="opacity:0.5">${e.time}</span></div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function updateOverallHealth(checks) {
+  const ok   = checks.filter(c=>c==='ok').length;
+  const warn = checks.filter(c=>c==='warn').length;
+  const err  = checks.filter(c=>c==='err').length;
+  const pct  = checks.length ? Math.round((ok + warn*0.5)/checks.length*100) : 100;
+  const col  = pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+
+  sv('monPct', pct+'%', col);
+  const fill = document.getElementById('monFill');
+  if (fill) { fill.style.width=pct+'%'; fill.style.background=col; }
+
+  const ring = document.getElementById('monRing');
+  if (ring) {
+    if (err>0)       { ring.className='mon-ring err';  ring.textContent='✗'; sv('monTitle',err+' Critical Issue'+(err>1?'s':'')+' Detected'); }
+    else if (warn>0) { ring.className='mon-ring warn'; ring.textContent='!'; sv('monTitle',warn+' Warning'+(warn>1?'s':'')); }
+    else             { ring.className='mon-ring ok';   ring.textContent='✓'; sv('monTitle','All Systems Operational'); }
+  }
+
+  const badge = document.getElementById('monitorAlertBadge');
+  if (badge) badge.style.display = (err+warn > 0) ? '' : 'none';
+
+  const banner = document.getElementById('monAlertBanner');
+  if (banner) {
+    if (err>0) {
+      banner.style.display='block';
+      banner.innerHTML=`<div class="mon-alert"><span style="font-size:16px">🚨</span><div><div style="font-size:11px;font-weight:700;color:var(--text)">${err} critical issue${err>1?'s':''} — trading may be affected</div><div style="font-size:10px;color:var(--text2)">Review the cards below</div></div></div>`;
+    } else if (warn>0) {
+      banner.style.display='block';
+      banner.innerHTML=`<div class="mon-alert warn"><span style="font-size:16px">⚠️</span><div><div style="font-size:11px;font-weight:700;color:var(--text)">${warn} warning${warn>1?'s':''} — check below</div></div></div>`;
+    } else {
+      banner.style.display='none';
+    }
+  }
+}
+
+async function runMonitorChecks() {
+  const checks = [];
+  const now = new Date().toLocaleTimeString();
+  sv('monSub', 'Last checked: ' + now);
+
+  // ── API Server ─────────────────────────────────────────────────
+  if (document.getElementById('mT4')) document.getElementById('mT4').textContent = now;
+  try {
+    const t0 = performance.now();
+    const r  = await fetch(API_BASE + '/api/status', {signal: AbortSignal.timeout(8000)});
+    const ms = Math.round(performance.now() - t0);
+    const d  = await r.json();
+    sd('d-api','ok'); sv('v-api','Online','var(--green)'); checks.push('ok');
+    sd('d-apims', ms<500?'ok':ms<2000?'warn':'err');
+    sv('v-apims', ms+'ms', ms<500?'var(--green)':ms<2000?'var(--amber)':'var(--red)');
+    checks.push(ms<500?'ok':ms<2000?'warn':'err');
+    sd('d-gh','ok'); sv('v-gh','Configured','var(--green)'); checks.push('ok');
+    sd('d-tg','ok'); sv('v-tg','Configured','var(--green)'); checks.push('ok');
+    sd('d-sync','ok'); sv('v-sync','Connected','var(--green)'); checks.push('ok');
+
+    // Bot freshness
+    const upd = d.last_updated || '';
+    if (document.getElementById('mT3')) document.getElementById('mT3').textContent = now;
+    if (upd) {
+      const age = Math.round((Date.now() - new Date(upd).getTime())/60000);
+      const fresh = age < 20;
+      sd('d-scan', fresh?'ok':age<45?'warn':'err');
+      sv('v-scan', upd.split(' ')[1]||upd, fresh?'var(--green)':'var(--amber)');
+      sd('d-fresh', fresh?'ok':age<45?'warn':'err');
+      sv('v-fresh', fresh?'Fresh (<20min)':age+'min ('+((age<45)?'slightly late':'STALE!')+')' ,
+         fresh?'var(--green)':age<45?'var(--amber)':'var(--red)');
+      checks.push(fresh?'ok':age<45?'warn':'err');
+      if (!fresh) addMonEvent('⏰','Scan late',`Last scan ${age}min ago (expected every 15min)`,'warn');
+    }
+
+    // Today signals
+    sd('d-sigs','ok'); sv('v-sigs',(d.today_signals||0)+' today'); checks.push('ok');
+
+    // Slots
+    const open = d.open_trades||0;
+    if (document.getElementById('mT5')) document.getElementById('mT5').textContent = now;
+    sd('d-slots', open<3?'ok':open===3?'warn':'err');
+    sv('v-slots', open+' / 3', open<3?'var(--green)':open===3?'var(--amber)':'var(--red)');
+    checks.push(open<=3?'ok':'err');
+
+    // Win rate
+    const wr = d.win_rate||0;
+    sd('d-wr', wr>=50?'ok':wr>=35?'warn':'err');
+    sv('v-wr', d.total_trades>0 ? wr+'% ('+d.wins+'W/'+d.losses+'L)' : 'No trades yet',
+       wr>=50?'var(--green)':wr>=35?'var(--amber)':'var(--red)');
+    checks.push(d.total_trades>0?(wr>=50?'ok':wr>=35?'warn':'err'):'ok');
+
+    addMonEvent('✅','API OK',`Responded in ${ms}ms`,'info');
+  } catch(e) {
+    sd('d-api','err'); sv('v-api','OFFLINE','var(--red)');
+    sd('d-apims','err'); sv('v-apims','Timeout','var(--red)');
+    checks.push('err'); checks.push('err');
+    addMonEvent('🚨','API OFFLINE','Cannot reach dashboard API','');
+  }
+
+  // ── Binance market data ────────────────────────────────────────
+  if (document.getElementById('mT2')) document.getElementById('mT2').textContent = now;
+  try {
+    const t0 = performance.now();
+    const r  = await fetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT',
+                           {signal: AbortSignal.timeout(6000)});
+    const ms = Math.round(performance.now() - t0);
+    const d  = await r.json();
+    const px = parseFloat(d.price);
+    sd('d-binance','ok'); sv('v-binance','Online','var(--green)'); checks.push('ok');
+    sd('d-btcpx','ok'); sv('v-btcpx','$'+px.toLocaleString('en-US',{maximumFractionDigits:0}),'var(--cyan)'); checks.push('ok');
+    sd('d-latency',ms<300?'ok':ms<1000?'warn':'err');
+    sv('v-latency',ms+'ms',ms<300?'var(--green)':ms<1000?'var(--amber)':'var(--red)');
+    checks.push(ms<300?'ok':ms<1000?'warn':'err');
+  } catch(e) {
+    sd('d-binance','err'); sv('v-binance','OFFLINE','var(--red)');
+    sd('d-btcpx','err');   sv('v-btcpx','No feed','var(--red)');
+    checks.push('err'); checks.push('err');
+    addMonEvent('🚨','Binance OFFLINE','No market data — no signals possible','');
+  }
+
+  // ATR from cached global
+  if (typeof btcAtrPct !== 'undefined' && btcAtrPct > 0) {
+    sd('d-atr', btcAtrPct>4?'err':btcAtrPct>2?'warn':'ok');
+    sv('v-atr', btcAtrPct.toFixed(3)+'%', btcAtrPct>4?'var(--red)':btcAtrPct>2?'var(--amber)':'var(--green)');
+    const regime = btcAtrPct<0.08?'Dead market — no scans':btcAtrPct>4?'Extreme — 25% size':btcAtrPct>2?'High — 50% size':'Normal — full size';
+    sd('d-regime',btcAtrPct>4?'err':btcAtrPct>2?'warn':'ok');
+    sv('v-regime',regime,btcAtrPct>4?'var(--red)':btcAtrPct>2?'var(--amber)':'var(--green)');
+    checks.push(btcAtrPct>4?'err':btcAtrPct>2?'warn':'ok');
+  }
+
+  // ── Balance / Deribit ─────────────────────────────────────────
+  if (document.getElementById('mT1')) document.getElementById('mT1').textContent = now;
+  try {
+    const r = await fetch(API_BASE+'/api/balance',{signal:AbortSignal.timeout(8000)});
+    const d = await r.json();
+    sd('d-conn',d.ok?'ok':'err'); sv('v-conn',d.ok?'Connected':'Error',d.ok?'var(--green)':'var(--red)'); checks.push(d.ok?'ok':'err');
+    const total = parseFloat(d.usdt||0);
+    sd('d-bal',total>0?'ok':'warn'); sv('v-bal','$'+total.toLocaleString('en-US',{maximumFractionDigits:0})+' USD','var(--cyan)'); checks.push(total>0?'ok':'warn');
+    const assets = d.assets||[];
+    const hasUsdc = assets.some(a=>a.asset==='USDC'&&parseFloat(a.total||0)>10);
+    const hasBtcEth = assets.some(a=>['BTC','ETH'].includes(a.asset)&&parseFloat(a.total||0)>10);
+    sd('d-margin',hasUsdc?'ok':hasBtcEth?'warn':'err');
+    sv('v-margin',hasUsdc?'USDC + BTC/ETH ✓':hasBtcEth?'BTC/ETH only (deposit USDC)':'No margin!',
+       hasUsdc?'var(--green)':hasBtcEth?'var(--amber)':'var(--red)');
+    checks.push(hasUsdc?'ok':hasBtcEth?'warn':'err');
+    if (!hasUsdc) addMonEvent('⚠️','USDC missing','Deposit testnet USDC for all 19 coins','warn');
+
+    // Open positions from balance
+    const posCount = d.open_positions||0;
+    sd('d-pos','ok'); sv('v-pos',posCount+' open positions','var(--text)'); checks.push('ok');
+  } catch(e) {
+    sd('d-conn','err'); sv('v-conn','Error','var(--red)'); checks.push('err');
+    addMonEvent('🚨','Balance fetch failed','Cannot read Deribit balance','');
+  }
+
+  // ── Trade integrity ────────────────────────────────────────────
+  try {
+    const r = await fetch(API_BASE+'/api/trades/open',{signal:AbortSignal.timeout(8000)});
+    const trades = await r.json();
+    const arr = Array.isArray(trades) ? trades : Object.values(trades||{});
+
+    // SL/TP check
+    const badSlTp = arr.filter(t=>!t.stop||!t.tp1||parseFloat(t.stop||0)===0);
+    sd('d-sltp',badSlTp.length>0?'err':'ok');
+    sv('v-sltp',badSlTp.length>0?badSlTp.length+' trades missing SL/TP!':'All protected',
+       badSlTp.length>0?'var(--red)':'var(--green)');
+    checks.push(badSlTp.length>0?'err':'ok');
+    if (badSlTp.length>0) addMonEvent('🚨','SL/TP missing',badSlTp.map(t=>t.symbol).join(', ')+' unprotected!','');
+
+    // Ghost check (confidence=0)
+    const ghosts = arr.filter(t=>!t.confidence||t.confidence===0);
+    sd('d-ghost',ghosts.length>0?'warn':'ok');
+    sv('v-ghost',ghosts.length>0?ghosts.length+' ghost trade(s)':'None detected',
+       ghosts.length>0?'var(--amber)':'var(--green)');
+    checks.push(ghosts.length>0?'warn':'ok');
+
+    // Stale trades (>48h)
+    const staleAge = Date.now() - 48*3600000;
+    const stale = arr.filter(t=>!t.tp1_hit&&t.opened_at&&new Date(t.opened_at).getTime()<staleAge);
+    sd('d-stale',stale.length>0?'warn':'ok');
+    sv('v-stale',stale.length>0?stale.length+' trade(s) >48h':'None','');
+    checks.push(stale.length>0?'warn':'ok');
+    if (stale.length>0) addMonEvent('⏰','Stale trades',stale.map(t=>t.symbol).join(', ')+' open >48h without TP1','warn');
+
+    // Today PnL
+    const perfR = await fetch(API_BASE+'/api/performance',{signal:AbortSignal.timeout(5000)});
+    const perfD = await perfR.json();
+    const todayKey = new Date().toISOString().slice(0,10);
+    const todayPnl = (perfD.daily_pnl||{})[todayKey]||0;
+    const bal2 = parseFloat((await(await fetch(API_BASE+'/api/balance')).json()).usdt||0);
+    const limit5 = bal2*0.05;
+    const circuitTripped = todayPnl < -limit5;
+    sd('d-circuit',circuitTripped?'err':todayPnl<0?'warn':'ok');
+    sv('v-circuit',circuitTripped?'TRIPPED!':todayPnl<0?'Within limit':'No losses',
+       circuitTripped?'var(--red)':todayPnl<0?'var(--amber)':'var(--green)');
+    checks.push(circuitTripped?'err':'ok');
+
+    const pnlSign = todayPnl>=0?'+':'';
+    sd('d-pnl',circuitTripped?'err':todayPnl<0?'warn':'ok');
+    sv('v-pnl',pnlSign+todayPnl.toFixed(4)+' USDT today',
+       todayPnl>=0?'var(--green)':todayPnl<-limit5?'var(--red)':'var(--amber)');
+    if (circuitTripped) addMonEvent('🚨','Circuit breaker','Daily -5% limit reached! No new trades.','');
+
+    // Config risk check
+    sd('d-risk','ok'); sv('v-risk','1% per trade','var(--green)'); checks.push('ok');
+    sd('d-dloss',circuitTripped?'err':'ok');
+    sv('v-dloss','Limit: -'+(limit5>0?limit5.toFixed(0):'—')+' USDT (5%)',circuitTripped?'var(--red)':'var(--text2)');
+    sd('d-maxage','ok'); sv('v-maxage','48h without TP1','var(--text2)');
+  } catch(e) {
+    sd('d-sltp','err'); sv('v-sltp','Check failed','var(--red)'); checks.push('err');
+  }
+
+  updateOverallHealth(checks);
+}
+
+function startMonitorPolling() {
+  runMonitorChecks();
+  if (monTimer) clearInterval(monTimer);
+  monTimer = setInterval(runMonitorChecks, 30000);
+}
+function stopMonitorPolling() {
+  if (monTimer) { clearInterval(monTimer); monTimer = null; }
+}
+
 </script>
 </body>
 </html>
