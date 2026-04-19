@@ -60,5 +60,39 @@
     ],
     "tier": "\u26a1 High-Liquidity L1s",
     "exchange": "deribit_testnet"
+  },
+  "BTCUSDT": {
+    "symbol": "BTCUSDT",
+    "signal": "SELL",
+    "entry": 75225.5,
+    "stop": 75442.0,
+    "tp1": 74937.0,
+    "tp2": 74793.0,
+    "qty": 0.4788,
+    "qty_tp1": 0.2394,
+    "qty_tp2": 0.2394,
+    "risk_usd": 900.09,
+    "balance_at_open": 180018.46,
+    "risk_mult": 0.5,
+    "order_ids": {
+      "entry": "USDC-198569020002",
+      "stop_loss": "USDC-SLTB-18789",
+      "tp1": "USDC-198569026557",
+      "tp2": "USDC-198569027193"
+    },
+    "opened_at": "2026-04-19T10:53:58.113620+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 76.4,
+    "score": 4,
+    "reasons": [
+      "High conf (76%)",
+      "Strong ADX 45",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet"
   }
 }
