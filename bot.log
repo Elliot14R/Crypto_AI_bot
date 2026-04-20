@@ -12177,3 +12177,86 @@ SCAN — 2026-04-20 21:28 UTC
 ════════════════════════════════════════════════════════
 DONE — 0 signal(s) | $176118.28
 ════════════════════════════════════════════════════════
+2026-04-20 22:24:59,604 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-20 22:24 UTC
+════════════════════════════════════════════════════════
+2026-04-20 22:25:00,347   QUIET HOURS | conf≥70% | score≥3 | ADX≥22 | ✓ Normal vol 0.25% | BTC ADX 37
+2026-04-20 22:25:00,483 ✓ Deribit testnet authenticated
+2026-04-20 22:25:00,576 ✓ Tradeable: 19 — ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT', 'AVAXUSDT', 'LINKUSDT', 'NEARUSDT', 'DOTUSDT', 'UNIUSDT', 'ADAUSDT', 'AAVEUSDT', 'INJUSDT', 'ARBUSDT', 'SUIUSDT', 'OPUSDT', 'SEIUSDT', 'FETUSDT', 'APTUSDT']
+2026-04-20 22:25:00,957 ✅ Deribit OK — $176118.28 | 19 symbols
+2026-04-20 22:25:01,984   QUIET HOURS | conf≥70% | score≥3 | ADX≥22 | risk:0.50
+2026-04-20 22:25:01,984 
+[0] Balance...
+2026-04-20 22:25:03,002   Balance: $176118.28 | upnl:+0.00 | positions:0
+2026-04-20 22:25:03,002 
+[1] Monitor trades (TP/SL)...
+2026-04-20 22:25:03,002   No open trades
+2026-04-20 22:25:03,002 
+[2] Stale trade check (>48h)...
+2026-04-20 22:25:03,003 
+[3] Ghost trade recovery...
+2026-04-20 22:25:04,047   Balance: $176118.28 | upnl:+0.00 | positions:0
+2026-04-20 22:25:04,047 
+[4] Scanning 18 coins | Open:0/3
+2026-04-20 22:25:04,047 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-20 22:25:06,022     ML: BUY 57.8% (need ≥70%)
+2026-04-20 22:25:06,223 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-20 22:25:08,370     ML: BUY 61.1% (need ≥70%)
+2026-04-20 22:25:08,570 
+  ── BNBUSDT (👑 Big Three) ──
+2026-04-20 22:25:10,422     ML: BUY 75.6% (need ≥70%)
+2026-04-20 22:25:10,423     ADX: 26.7 (need ≥22)
+2026-04-20 22:25:10,423     Volume 0.27 < 0.7 — skip
+2026-04-20 22:25:10,623 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-04-20 22:25:12,481     ML: BUY 69.7% (need ≥70%)
+2026-04-20 22:25:12,682 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-04-20 22:25:14,261     ML: BUY 54.5% (need ≥70%)
+2026-04-20 22:25:14,461 
+  ── XRPUSDT (⚡ High-Liquidity L1s) ──
+2026-04-20 22:25:16,304     ML: NO_TRADE 98.1% (need ≥70%)
+2026-04-20 22:25:16,505 
+  ── LINKUSDT (⚡ High-Liquidity L1s) ──
+2026-04-20 22:25:18,052     ML: BUY 51.8% (need ≥70%)
+2026-04-20 22:25:18,253 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-04-20 22:25:19,802     ML: NO_TRADE 97.8% (need ≥70%)
+2026-04-20 22:25:20,003 
+  ── DOTUSDT (🏛 Institutional Alts) ──
+2026-04-20 22:25:21,740     ML: BUY 44.7% (need ≥70%)
+2026-04-20 22:25:21,940 
+  ── ADAUSDT (🏛 Institutional Alts) ──
+2026-04-20 22:25:23,633     ML: BUY 58.4% (need ≥70%)
+2026-04-20 22:25:23,833 
+  ── INJUSDT (🏛 Institutional Alts) ──
+2026-04-20 22:25:25,401     ML: BUY 44.3% (need ≥70%)
+2026-04-20 22:25:25,602 
+  ── ARBUSDT (🏛 Institutional Alts) ──
+2026-04-20 22:25:27,385     ML: NO_TRADE 98.7% (need ≥70%)
+2026-04-20 22:25:27,586 
+  ── OPUSDT (🏛 Institutional Alts) ──
+2026-04-20 22:25:29,264     ML: BUY 54.2% (need ≥70%)
+2026-04-20 22:25:29,465 
+  ── FETUSDT (🤖 AI & Momentum) ──
+2026-04-20 22:25:31,186     ML: NO_TRADE 99.1% (need ≥70%)
+2026-04-20 22:25:31,387 
+  ── RENDERUSDT (🤖 AI & Momentum) ──
+2026-04-20 22:25:33,174     ML: BUY 60.5% (need ≥70%)
+2026-04-20 22:25:33,375 
+  ── UNIUSDT (🤖 AI & Momentum) ──
+2026-04-20 22:25:35,058     ML: NO_TRADE 99.5% (need ≥70%)
+2026-04-20 22:25:35,259 
+  ── AAVEUSDT (🤖 AI & Momentum) ──
+2026-04-20 22:25:37,095     ML: BUY 53.6% (need ≥70%)
+2026-04-20 22:25:37,295 
+  ── SEIUSDT (🤖 AI & Momentum) ──
+2026-04-20 22:25:38,976     ML: BUY 58.7% (need ≥70%)
+2026-04-20 22:25:40,410   Balance: $176118.28 | upnl:+0.00 | positions:0
+2026-04-20 22:25:40,410 
+════════════════════════════════════════════════════════
+DONE — 0 signal(s) | $176118.28
+════════════════════════════════════════════════════════
