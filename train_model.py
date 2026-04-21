@@ -11,6 +11,7 @@
 #   + stoch_k/d     — Stochastic oscillator
 #   + price_change3/6 — multi-period momentum
 #   + hammer/doji   — candlestick reversal patterns
+#   + class_weight  — fixed NO_TRADE imbalance
 
 import os, json, time, logging, joblib, requests
 import pandas as pd
@@ -25,6 +26,7 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.preprocessing import LabelEncoder
+from sklearn.utils.class_weight import compute_sample_weight
 from xgboost import XGBClassifier
 
 from feature_engineering import add_indicators, ALL_FEATURES
@@ -41,7 +43,7 @@ SYMBOLS = [
 INTERVALS    = ["15m", "1h"]
 LIMIT        = 1000          # candles per symbol per interval
 TARGET_BARS  = 6             # predict 6 bars ahead
-TARGET_PCT   = 0.005         # 0.5% move = signal
+TARGET_PCT   = 0.0035        # 0.35% move = signal (lowered to balance classes)
 TEST_SPLIT   = 0.25
 MODEL_FILE   = "pro_crypto_ai_model.pkl"
 
@@ -71,8 +73,8 @@ def fetch_klines(symbol: str, interval: str, limit: int = 1000) -> pd.DataFrame:
 def make_targets(df: pd.DataFrame) -> pd.Series:
     """
     Label each candle:
-      BUY      if price rises >0.5% in next 6 bars
-      SELL     if price falls >0.5% in next 6 bars
+      BUY      if price rises >0.35% in next 6 bars
+      SELL     if price falls >0.35% in next 6 bars
       NO_TRADE otherwise
     """
     future_close = df["close"].shift(-TARGET_BARS)
@@ -95,7 +97,7 @@ def build_dataset():
 
         # Fetch 15m and 1h
         df15 = fetch_klines(symbol, "15m", LIMIT)
-        df1h  = fetch_klines(symbol, "1h",  LIMIT // 4)
+        df1h = fetch_klines(symbol, "1h",  LIMIT // 4)
         if df15.empty or len(df15) < 100:
             log.warning(f"  {symbol}: insufficient data"); continue
         time.sleep(0.3)  # rate limit
@@ -157,6 +159,9 @@ def train(dataset: pd.DataFrame):
     X_train   = X.iloc[:split];  y_train = y[:split]
     X_test    = X.iloc[split:];  y_test  = y[split:]
 
+    # Calculate sample weights to fix the class imbalance (forces AI to care about BUY/SELL)
+    sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+
     # Feature selection — top 20 features
     selector  = SelectKBest(f_classif, k=min(20, len(ALL_FEATURES)))
     X_tr_sel  = selector.fit_transform(X_train, y_train)
@@ -175,11 +180,12 @@ def train(dataset: pd.DataFrame):
         use_label_encoder=False, eval_metric="mlogloss",
         random_state=42, n_jobs=-1
     )
-    xgb.fit(X_tr_sel, y_train)
+    xgb.fit(X_tr_sel, y_train, sample_weight=sample_weights)
 
     log.info("Training RandomForest...")
     rf = RandomForestClassifier(
         n_estimators=200, max_depth=10, min_samples_leaf=5,
+        class_weight="balanced", # Built-in balancing for Random Forest
         random_state=42, n_jobs=-1
     )
     rf.fit(X_tr_sel, y_train)
@@ -189,7 +195,7 @@ def train(dataset: pd.DataFrame):
         n_estimators=200, max_depth=5, learning_rate=0.05,
         subsample=0.8, random_state=42
     )
-    gb.fit(X_tr_sel, y_train)
+    gb.fit(X_tr_sel, y_train, sample_weight=sample_weights)
 
     # ── Ensemble ──────────────────────────────────────────────────────
     log.info("Building ensemble...")
@@ -198,9 +204,9 @@ def train(dataset: pd.DataFrame):
         voting="soft",
         weights=[2, 1, 1]  # XGB gets 2x weight (usually best)
     )
-    # VotingClassifier needs unfitted estimators — use pre-fitted trick
-    # by fitting on the selected features
-    ensemble.fit(X_tr_sel, y_train)
+    
+    # Pass sample weights into the VotingClassifier so they pass down to XGB and GB during refit
+    ensemble.fit(X_tr_sel, y_train, sample_weight=sample_weights)
 
     # ── Evaluation ────────────────────────────────────────────────────
     y_pred = ensemble.predict(X_te_sel)
@@ -218,13 +224,12 @@ def train(dataset: pd.DataFrame):
             cls_acc = (y_pred[mask] == i).mean()
             log.info(f"  {cls}: {cls_acc*100:.1f}% ({mask.sum()} samples)")
 
-    # Cross-val on training set
+    # Cross-val on training set (we bypass weights here just for simple variance checking)
     cv_scores = cross_val_score(ensemble, X_tr_sel, y_train, cv=5, n_jobs=-1)
     log.info(f"\nCross-val (5-fold): {cv_scores.mean()*100:.1f}% ± {cv_scores.std()*100:.1f}%")
 
     # Label map for trade_executor
     label_map = {i: cls for i, cls in enumerate(classes)}
-    # Make sure 0=BUY, 1=SELL, 2=NO_TRADE (standard for our bot)
     inverse_map = {cls: i for i, cls in enumerate(classes)}
 
     # ── Save pipeline ─────────────────────────────────────────────────
