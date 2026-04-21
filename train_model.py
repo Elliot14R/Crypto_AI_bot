@@ -124,7 +124,22 @@ def train(dataset):
     ensemble.fit(X_train_sel, y_train)
 
     # ── 5. The Output ───────────────────────────────────────────────────
-    y_pred = ensemble.predict(X_test_sel)
+    # ── 5. The Output (With 60% Confidence Threshold) ───────────────────
+    probas = ensemble.predict_proba(X_test_sel)
+    y_pred = []
+    
+    # Find which internal number represents NO_TRADE
+    notrade_idx = list(le.classes_).index("NO_TRADE")
+    
+    for prob in probas:
+        best_class = np.argmax(prob)
+        confidence = prob[best_class]
+        
+        # THE DIAL: Force NO_TRADE if confidence is under 60%
+        if best_class != notrade_idx and confidence < 0.60:
+            y_pred.append(notrade_idx)
+        else:
+            y_pred.append(best_class)
     acc = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred, target_names=classes, output_dict=True)
     
