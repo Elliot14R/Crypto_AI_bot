@@ -1,9 +1,9 @@
 {
-  "accuracy": 39.2,
-  "cv_mean": 30.5,
-  "cv_std": 11.0,
-  "n_train": 11182,
-  "n_test": 3728,
+  "accuracy": 61.1,
+  "cv_mean": 60.2,
+  "cv_std": 0.5,
+  "n_train": 14196,
+  "n_test": 3549,
   "features": [
     "ema9",
     "ema20",
@@ -52,6 +52,7 @@
     "trend_1h"
   ],
   "selected": [
+    "ema9",
     "ema20",
     "ema50",
     "ema200",
@@ -62,21 +63,32 @@
     "price_vs_ema200",
     "ema20_vs_ema50",
     "rsi",
+    "rsi_slope",
     "rsi_fast",
+    "stoch_k",
+    "stoch_d",
+    "adx",
     "adx_pos",
+    "adx_neg",
     "di_diff",
+    "atr",
     "atr_pct",
+    "bb_high",
+    "bb_low",
     "bb_pct",
     "bb_width",
+    "volume_ratio",
+    "obv_slope",
+    "price_change",
+    "price_change3",
     "price_change6",
     "high_low_pct",
     "volatility",
-    "adx_1h"
+    "bullish_candle",
+    "rsi_1h",
+    "trend_1h"
   ],
-  "label_map": {
-    "0": "BUY",
-    "1": "NO_TRADE",
-    "2": "SELL"
-  },
-  "trained_at": "2026-04-21T13:58:11.843893+00:00"
+  "target_pct": 0.005,
+  "n_symbols": 24,
+  "test_accuracy": 0.6106
 }
