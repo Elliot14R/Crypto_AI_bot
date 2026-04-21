@@ -1,0 +1,79 @@
+# .github/workflows/train_model.yml
+# Run model training directly on GitHub Actions — FREE, no VSCode needed
+# Trigger: manually from GitHub UI → Actions → Train Model → Run workflow
+# Runtime: ~15-20 minutes on GitHub's free Ubuntu runner
+# Output: pro_crypto_ai_model.pkl uploaded back to repo automatically
+
+name: Train ML Model
+
+on:
+  workflow_dispatch:
+    inputs:
+      symbols:
+        description: 'Symbols to train on (comma-separated, leave blank for default 15)'
+        required: false
+        default: ''
+      note:
+        description: 'Reason for retraining (optional note)'
+        required: false
+        default: 'Manual retrain'
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -q pandas numpy scikit-learn xgboost joblib requests
+
+      - name: Run training
+        run: |
+          echo "Starting model training at $(date -u)"
+          echo "Note: ${{ github.event.inputs.note }}"
+          python train_model.py
+          echo "Training complete at $(date -u)"
+
+      - name: Show results
+        run: |
+          python -c "
+          import json
+          with open('model_performance.json') as f:
+            p = json.load(f)
+          print('='*50)
+          print(f'ACCURACY:  {p[\"accuracy\"]}%')
+          print(f'CV SCORE:  {p[\"cv_mean\"]}% ± {p[\"cv_std\"]}%')
+          print(f'TRAIN SET: {p[\"n_train\"]} samples')
+          print(f'TEST SET:  {p[\"n_test\"]} samples')
+          print(f'FEATURES:  {len(p[\"features\"])} total, {len(p[\"selected\"])} selected')
+          print('='*50)
+          "
+
+      - name: Upload model to repo
+        run: |
+          git config user.name  "CryptoBot AI"
+          git config user.email "bot@cryptobot.ai"
+          git add pro_crypto_ai_model.pkl model_performance.json
+          git commit -m "🤖 Retrain model — $(python -c "import json; p=json.load(open('model_performance.json')); print(f'{p[\"accuracy\"]}% accuracy')")"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload model as artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model-${{ github.run_number }}
+          path: |
+            pro_crypto_ai_model.pkl
+            model_performance.json
+          retention-days: 30
