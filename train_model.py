@@ -1,12 +1,14 @@
 # train_model.py — Retrain model with enhanced features
 # Run on GitHub Actions (free, no local setup needed)
-# Expected accuracy: 74-77% (volume features add edge)
+# Expected accuracy: 70%+ (sniper mode, high precision)
 #
 # Included Fixes:
+#   + Expanded to 19 Coins (Added MATIC, LTC, BCH, ATOM)
 #   + Data Shuffling (fixes the altcoin blindspot)
-#   + Class Weighting (forces AI to care about BUY/SELL signals)
-#   + Top-25 Feature Selection (drops noise, keeps volume indicators)
+#   + ALL 45 Features Used (Bypassed linear filter to keep volume/volatility data)
+#   + Class Weighting Removed (Allows the AI to safely skip bad trades)
 #   + Target tuned to 0.4% for optimal signal detection
+#   + Fixed cv_std reporting bug
 
 import os, json, time, logging, joblib, requests
 import pandas as pd
@@ -16,11 +18,9 @@ from datetime import datetime, timezone
 from sklearn.ensemble import (
     RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 )
-from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report, accuracy_score
-from sklearn.preprocessing import LabelEncoder
-from sklearn.utils.class_weight import compute_sample_weight
+from sklearn.preprocessing import LabelEncoder, FunctionTransformer
 from xgboost import XGBClassifier
 
 from feature_engineering import add_indicators, ALL_FEATURES
@@ -33,6 +33,7 @@ SYMBOLS = [
     "BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","AVAXUSDT",
     "XRPUSDT","LINKUSDT","NEARUSDT","DOTUSDT","ADAUSDT",
     "INJUSDT","ARBUSDT","OPUSDT","UNIUSDT","AAVEUSDT",
+    "MATICUSDT","LTCUSDT","BCHUSDT","ATOMUSDT" # <-- NEW COINS ADDED HERE
 ]
 INTERVALS    = ["15m", "1h"]
 LIMIT        = 1000          # candles per symbol per interval
@@ -131,16 +132,12 @@ def train(dataset: pd.DataFrame):
     # SHUFFLE FIX: Properly shuffle the data so the AI learns all coins equally!
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SPLIT, random_state=42, shuffle=True)
 
-    # CLASS WEIGHTING: Force the AI to care about BUY/SELL signals
-    sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+    # OPTIMIZATION: Feed all 45 features to the AI (keeps non-linear volume data)
+    selector = FunctionTransformer(lambda x: x) # Passes data through untouched
+    X_train_sel = selector.transform(X_train)
+    X_test_sel = selector.transform(X_test)
+    selected = ALL_FEATURES
 
-    # OPTIMIZATION: Keep the top 25 features (keeps the good volume data, drops the confusing noise)
-    selector  = SelectKBest(f_classif, k=min(25, len(ALL_FEATURES)))
-    X_train_sel  = selector.fit_transform(X_train, y_train)
-    X_test_sel   = selector.transform(X_test)
-
-    mask     = selector.get_support()
-    selected = [f for f,m in zip(ALL_FEATURES, mask) if m]
     log.info(f"Selected features ({len(selected)}): {selected}")
 
     # ── Models ────────────────────────────────────────────────────────
@@ -151,12 +148,11 @@ def train(dataset: pd.DataFrame):
         eval_metric="mlogloss",
         random_state=42, n_jobs=-1
     )
-    xgb.fit(X_train_sel, y_train, sample_weight=sample_weights)
+    xgb.fit(X_train_sel, y_train)
 
     log.info("Training RandomForest...")
     rf = RandomForestClassifier(
         n_estimators=200, max_depth=10, min_samples_leaf=5,
-        class_weight="balanced", # Built-in balancing for Random Forest
         random_state=42, n_jobs=-1
     )
     rf.fit(X_train_sel, y_train)
@@ -166,7 +162,7 @@ def train(dataset: pd.DataFrame):
         n_estimators=200, max_depth=5, learning_rate=0.05,
         subsample=0.8, random_state=42
     )
-    gb.fit(X_train_sel, y_train, sample_weight=sample_weights)
+    gb.fit(X_train_sel, y_train)
 
     # ── Ensemble ──────────────────────────────────────────────────────
     log.info("Building ensemble...")
@@ -175,8 +171,7 @@ def train(dataset: pd.DataFrame):
         voting="soft",
         weights=[2, 1, 1] 
     )
-    # Pass sample weights so they apply to the final ensemble fit
-    ensemble.fit(X_train_sel, y_train, sample_weight=sample_weights)
+    ensemble.fit(X_train_sel, y_train)
 
     # ── Evaluation ────────────────────────────────────────────────────
     y_pred = ensemble.predict(X_test_sel)
@@ -207,9 +202,11 @@ def train(dataset: pd.DataFrame):
     joblib.dump(pipeline, MODEL_FILE)
     log.info(f"\n✅ Model saved: {MODEL_FILE}")
 
+    # FIXED: Added cv_std to prevent GitHub Action KeyError
     perf = {
         "accuracy":      round(acc*100,1),
         "cv_mean":       round(cv_scores.mean()*100,1),
+        "cv_std":        round(cv_scores.std()*100,1),
         "n_train":       int(len(X_train)),
         "n_test":        int(len(X_test)),
         "features":      ALL_FEATURES,
