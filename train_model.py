@@ -30,10 +30,14 @@ log = logging.getLogger(__name__)
 
 # ── Config ────────────────────────────────────────────────────────────
 SYMBOLS = [
-    "BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","AVAXUSDT",
-    "XRPUSDT","LINKUSDT","NEARUSDT","DOTUSDT","ADAUSDT",
-    "INJUSDT","ARBUSDT","OPUSDT","UNIUSDT","AAVEUSDT",
-    "MATICUSDT","LTCUSDT","BCHUSDT","ATOMUSDT" # <-- NEW COINS ADDED HERE
+    # Big 3
+    "BTCUSDT", "ETHUSDT", "BNBUSDT",
+    # High-Liquidity L1s
+    "SOLUSDT", "AVAXUSDT", "NEARUSDT", "SUIUSDT", "APTUSDT", "MATICUSDT", "ATOMUSDT",
+    # Institutional Alts
+    "LINKUSDT", "DOTUSDT", "UNIUSDT", "AAVEUSDT", "XRPUSDT", "LTCUSDT", "BCHUSDT",
+    # AI & Momentum
+    "FETUSDT", "RENDERUSDT", "ADAUSDT", "INJUSDT", "ARBUSDT", "OPUSDT", "SEIUSDT"
 ]
 INTERVALS    = ["15m", "1h"]
 LIMIT        = 1000          # candles per symbol per interval
