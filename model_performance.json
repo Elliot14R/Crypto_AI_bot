@@ -1,7 +1,7 @@
 {
-  "accuracy": 43.9,
-  "cv_mean": 35.7,
-  "cv_std": 14.3,
+  "accuracy": 39.2,
+  "cv_mean": 30.5,
+  "cv_std": 11.0,
   "n_train": 11182,
   "n_test": 3728,
   "features": [
@@ -60,6 +60,7 @@
     "price_vs_ema20",
     "price_vs_ema50",
     "price_vs_ema200",
+    "ema20_vs_ema50",
     "rsi",
     "rsi_fast",
     "adx_pos",
@@ -67,7 +68,6 @@
     "atr_pct",
     "bb_pct",
     "bb_width",
-    "price_change3",
     "price_change6",
     "high_low_pct",
     "volatility",
@@ -78,5 +78,5 @@
     "1": "NO_TRADE",
     "2": "SELL"
   },
-  "trained_at": "2026-04-21T13:34:39.455581+00:00"
+  "trained_at": "2026-04-21T13:58:11.843893+00:00"
 }
