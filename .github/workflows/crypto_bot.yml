@@ -1,100 +1,117 @@
-# .github/workflows/crypto_bot.yml
-# Main bot runner — downloads model from GitHub Release (no LFS needed)
-name: CryptoBot AI Scanner
+name: CryptoBot AI — Trading Scanner
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # every 15 minutes
+    - cron: '4,19,34,49 * * * *'
   workflow_dispatch:
     inputs:
       mode:
-        description: 'scan or diagnostic'
+        description: 'Run mode'
         required: false
         default: 'scan'
+        type: choice
+        options: [scan, diagnostic]
 
 jobs:
-  scan:
+  run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
+    timeout-minutes: 12
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: false          # skip LFS — model comes from GitHub Releases
+          lfs: false
+          # Uses your PAT to ensure the bot has permissions to bypass branch protection
+          token: ${{ secrets.GH_PAT_TOKEN }}
 
-      - name: Setup Python 3.11
+      - name: Download AI Model
+        run: |
+          wget -q -O pro_crypto_ai_model.pkl "https://github.com/Elliot14R/Crypto_AI_bot/releases/download/v2.0/pro_crypto_ai_model.pkl"
+
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install -q -r requirements.txt
+        run: pip install -r requirements.txt
 
-      - name: Download model from GitHub Release
+      - name: Write .env from secrets
         run: |
-          REPO="${{ github.repository }}"
-          TOKEN="${{ secrets.GITHUB_TOKEN }}"
-          TAG="model-latest"
-          
-          echo "Downloading model from release: $TAG"
-          
-          # Get asset download URL
-          ASSET_URL=$(curl -s -H "Authorization: token $TOKEN" \
-            "https://api.github.com/repos/$REPO/releases/tags/$TAG" | \
-            python3 -c "
-          import json, sys
-          d = json.load(sys.stdin)
-          assets = d.get('assets', [])
-          for a in assets:
-              if a['name'] == 'pro_crypto_ai_model.pkl':
-                  print(a['url'])
-                  break
-          ")
-          
-          if [ -z "$ASSET_URL" ]; then
-            echo "ERROR: Model not found in releases. Run Train ML Model workflow first."
-            exit 1
-          fi
-          
-          # Download with auth (required for private repos)
-          curl -L -s \
-            -H "Authorization: token $TOKEN" \
-            -H "Accept: application/octet-stream" \
-            -o pro_crypto_ai_model.pkl \
-            "$ASSET_URL"
-          
-          SIZE=$(du -sh pro_crypto_ai_model.pkl | cut -f1)
-          echo "Model downloaded: $SIZE"
+          echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}"         >> .env
+          echo "BINANCE_SECRET=${{ secrets.BINANCE_SECRET }}"           >> .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}"           >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}"       >> .env
+          echo "GH_PAT_TOKEN=${{ secrets.GH_PAT_TOKEN }}"               >> .env
+          echo "GITHUB_REPO=Elliot14R/Crypto_AI_bot"                    >> .env
+          echo "GITHUB_BRANCH=main"                                     >> .env
+          echo "DERIBIT_CLIENT_ID=${{ secrets.DERIBIT_CLIENT_ID }}"         >> .env
+          echo "DERIBIT_CLIENT_SECRET=${{ secrets.DERIBIT_CLIENT_SECRET }}" >> .env
 
-      - name: Run bot scan
-        env:
-          DERIBIT_CLIENT_ID:     ${{ secrets.DERIBIT_CLIENT_ID }}
-          DERIBIT_CLIENT_SECRET: ${{ secrets.DERIBIT_CLIENT_SECRET }}
-          TELEGRAM_TOKEN:        ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_PAT_TOKEN:          ${{ secrets.GH_PAT_TOKEN }}
+      - name: Restore state files
+        uses: actions/cache@v4
+        id: state-cache
+        with:
+          path: |
+            trades.json
+            trade_history.json
+            signals.json
+            scan_mode.json
+            balance.json
+            data/
+          key: bot-state-v4-${{ github.run_id }}
+          restore-keys: |
+            bot-state-v4-
+
+      - name: Init state files if missing
         run: |
-          MODE="${{ github.event.inputs.mode || 'scan' }}"
-          if [ "$MODE" = "diagnostic" ]; then
+          [ -f trades.json ]        || echo '{}' > trades.json
+          [ -f trade_history.json ] || echo '[]' > trade_history.json
+          [ -f signals.json ]       || echo '[]' > signals.json
+          [ -f scan_mode.json ]     || echo '{}' > scan_mode.json
+          [ -f balance.json ]       || echo '{}' > balance.json
+          mkdir -p data
+
+      - name: Run bot
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "diagnostic" ]; then
             python trade_executor.py diagnostic
           else
             python trade_executor.py
           fi
 
-      - name: Sync state files to repo
+      - name: Save state to Cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            trades.json
+            trade_history.json
+            signals.json
+            scan_mode.json
+            balance.json
+            data/
+          key: bot-state-v4-${{ github.run_id }}
+
+      - name: Commit and Push State to Repo
+        if: always()
         run: |
-          git config user.name  "CryptoBot AI"
-          git config user.email "bot@cryptobot.ai"
-          mkdir -p data
-          git add data/ trades.json trade_history.json signals.json \
-                  balance.json scan_mode.json bot.log 2>/dev/null || true
-          git diff --staged --quiet || \
-            git commit -m "Sync Bot State [skip ci]"
-          git pull --rebase origin main || true
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 1. DELETE the secrets file so it never gets committed!
+          rm -f .env
+          
+          # 2. Stage EVERYTHING else
+          git add -A
+          
+          # 3. Commit locally
+          git commit -m "Sync Bot State [skip ci]" || echo "No changes to commit"
+          
+          # 4. Pull with rebase AND autostash
+          git pull --rebase origin main --autostash
+          
+          # 5. Push back to the repo
+          git push origin main
