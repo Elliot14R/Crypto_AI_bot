@@ -84,15 +84,25 @@ class DeribitClient:
         return data.get("result", data)
 
     def _post(self, path: str, body: dict) -> dict:
-        """Plain HTTP POST — NO JSON-RPC wrapper (that's WebSocket only)."""
+        """Deribit strictly requires HTTP POST payloads to be wrapped in JSON-RPC."""
         self._ensure_auth()
-        r    = self.session.post(f"{self.base}{path}", json=body, timeout=15)
+        
+        payload = {
+            "jsonrpc": "2.0",
+            "id": int(time.time() * 1000),
+            "method": path.strip("/"),  # Converts "/private/buy" to "private/buy"
+            "params": body
+        }
+        
+        r    = self.session.post(f"{self.base}{path}", json=payload, timeout=15)
         data = r.json()
+        
         if "error" in data:
             err  = data["error"]
             msg  = err.get("message", str(err)) if isinstance(err, dict) else str(err)
             code = err.get("code", "")          if isinstance(err, dict) else ""
             raise Exception(f"{msg} (Code:{code})" if code else msg)
+            
         r.raise_for_status()
         return data.get("result", data)
 
