@@ -233,12 +233,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
   <div class="page active" id="page-dashboard">
     <div class="stats-row">
       <div class="stat-card c-green"><div class="stat-label">Testnet Balance</div><div class="stat-value green" id="statBalance">—</div><div class="stat-sub">USDT(Deribit Live Balance)</div></div>
-      <div class="stat-card c-blue"><div class="stat-label">Open Trades</div><div class="stat-value blue" id="statOpen">0</div><div class="stat-sub" id="statOpenSub">of 3 max</div></div>
+      <div class="stat-card c-blue"><div class="stat-label">Open Trades</div><div class="stat-value blue" id="statOpen">0</div><div class="stat-sub" id="statOpenSub">of 4 max</div></div>
       <div class="stat-card c-cyan"><div class="stat-label">Win Rate</div><div class="stat-value cyan" id="statWR">—</div><div class="stat-sub" id="statWRSub">— W / — L</div></div>
-      <div class="stat-card c-amber"><div class="stat-label">Total PnL</div><div class="stat-value" id="statPnl">+0.0000</div><div class="stat-sub">USDT closed trades</div></div>
-      <div class="stat-card c-purple"><div class="stat-label">Model Accuracy</div><div class="stat-value purple">73.1%</div><div class="stat-sub">XGB + RF + GB</div></div>
+      <div class="stat-card c-amber"><div class="stat-label">Total PnL</div><div class="stat-value" id="statPnl">+0.0000</div><div class="stat-sub">USDC closed trades</div></div>
+      <div class="stat-card c-purple"><div class="stat-label">Model Accuracy</div><div class="stat-value purple">59.2%</div><div class="stat-sub">XGB + RF + GB</div></div>
       <div class="stat-card c-green"><div class="stat-label">Today Signals</div><div class="stat-value green" id="statSigToday">0</div><div class="stat-sub" id="statSigSub">0 BUY · 0 SELL</div></div>
-      <div class="stat-card c-blue"><div class="stat-label">Monitoring</div><div class="stat-value blue" style="font-size:16px">20 pairs</div><div class="stat-sub">4 tiers · 15 min scan</div></div>
+      <div class="stat-card c-blue"><div class="stat-label">Monitoring</div><div class="stat-value blue" style="font-size:16px">24 pairs</div><div class="stat-sub">4 tiers · 15 min scan</div></div>
     </div>
     <div class="scan-mode-bar active-mode" id="scanModeBar">
       <div class="smode-dot"></div>
@@ -451,79 +451,99 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12
     </div>
   </div>
 
-  <!-- CONFIG PAGE -->
   <div class="page" id="page-config">
-    <div class="g2" style="align-items:start">
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">Current Thresholds</span></div>
-        <div class="panel-body">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <div style="font-size:12px;font-weight:600;color:var(--green)">📈 Active Hours (08:00–20:00 UTC)</div>
-                <div style="font-size:10px;color:var(--green);background:var(--green2);padding:2px 8px;border-radius:10px;border:1px solid #10b98130">15 min scan</div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--green)">65%</div></div>
-                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">3 / 6</div></div>
-                <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">20</div></div>
-              </div>
+  <div class="g2" style="align-items:start">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Current AI Thresholds</span></div>
+      <div class="panel-body">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:12px;font-weight:600;color:var(--green)">📈 Active Hours (08:00–20:00 UTC)</div>
+              <div style="font-size:10px;color:var(--green);background:var(--green2);padding:2px 8px;border-radius:10px;border:1px solid #10b98130">15 min scan</div>
             </div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <div style="font-size:12px;font-weight:600;color:var(--purple)">🌙 Quiet Hours (00:00–08:00 UTC)</div>
-                <div style="font-size:10px;color:var(--purple);background:var(--purple2);padding:2px 8px;border-radius:10px;border:1px solid #8b5cf630">30 min scan</div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--purple)">72%</div></div>
-                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">4 / 6</div></div>
-                <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">25</div></div>
-              </div>
-            </div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <div style="font-size:12px;font-weight:600;color:var(--amber)">📅 Weekend Mode (Sat–Sun)</div>
-                <div style="font-size:10px;color:var(--amber);background:var(--amber2);padding:2px 8px;border-radius:10px;border:1px solid #f59e0b30">15–30 min scan</div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                <div class="price-box"><div class="price-lbl">Min Confidence</div><div class="price-val" style="color:var(--amber)">65%</div></div>
-                <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">3 / 6</div></div>
-                <div class="price-box"><div class="price-lbl">Risk Mult</div><div class="price-val" style="color:var(--amber)">75%</div></div>
-              </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div class="price-box"><div class="price-lbl">Min Conf</div><div class="price-val" style="color:var(--green)">60%</div></div>
+              <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">1 / 5</div></div>
+              <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">15</div></div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><span class="panel-title">Risk Management</span></div>
-        <div class="panel-body">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div class="bal-row"><span style="color:var(--text3)">Risk Per Trade</span><span style="color:var(--green)">1.0% of balance</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Max Open Trades</span><span style="color:var(--blue)">3 simultaneously</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Max Same Direction</span><span style="color:var(--cyan)">2 BUY or 2 SELL</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Stop Loss</span><span style="color:var(--red)">1.5x ATR</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Target 1</span><span style="color:var(--green)">2.0x ATR</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Target 2</span><span style="color:var(--green)">3.0x ATR</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">High Vol (&gt;2% ATR)</span><span style="color:var(--amber)">50% position size</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Extreme Vol (&gt;4%)</span><span style="color:var(--red)">25% position size</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Position Cap</span><span style="color:var(--text2)">Max 20% of balance</span></div>
-            <div class="bal-row"><span style="color:var(--text3)">Min Balance</span><span style="color:var(--text2)">10 USDT required</span></div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:12px;font-weight:600;color:var(--purple)">🌙 Quiet Hours (20:00–08:00 UTC)</div>
+              <div style="font-size:10px;color:var(--purple);background:var(--purple2);padding:2px 8px;border-radius:10px;border:1px solid #8b5cf630">30 min scan</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div class="price-box"><div class="price-lbl">Min Conf</div><div class="price-val" style="color:var(--purple)">65%</div></div>
+              <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">2 / 5</div></div>
+              <div class="price-box"><div class="price-lbl">Min ADX</div><div class="price-val" style="color:var(--cyan)">18</div></div>
+            </div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:13px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:12px;font-weight:600;color:var(--amber)">📅 Weekend Mode (Sat–Sun)</div>
+              <div style="font-size:10px;color:var(--amber);background:var(--amber2);padding:2px 8px;border-radius:10px;border:1px solid #f59e0b30">15 min scan</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div class="price-box"><div class="price-lbl">Min Conf</div><div class="price-val" style="color:var(--amber)">60%</div></div>
+              <div class="price-box"><div class="price-lbl">Min Score</div><div class="price-val" style="color:var(--amber)">1 / 5</div></div>
+              <div class="price-box"><div class="price-lbl">Risk Mult</div><div class="price-val" style="color:var(--amber)">75%</div></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="panel">
-      <div class="panel-header"><span class="panel-title">Monitored Coins (20 pairs · 4 tiers)</span></div>
+      <div class="panel-header"><span class="panel-title">Risk Management (V2.0)</span></div>
       <div class="panel-body">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-          <div><div style="font-size:10px;color:var(--amber);margin-bottom:8px;letter-spacing:1px">👑 BIG THREE</div><div style="display:flex;flex-direction:column;gap:4px" id="cfg-big3"></div></div>
-          <div><div style="font-size:10px;color:var(--cyan);margin-bottom:8px;letter-spacing:1px">⚡ HIGH-LIQUIDITY L1s</div><div style="display:flex;flex-direction:column;gap:4px" id="cfg-liq1"></div></div>
-          <div><div style="font-size:10px;color:var(--blue);margin-bottom:8px;letter-spacing:1px">🏛 INSTITUTIONAL ALTS</div><div style="display:flex;flex-direction:column;gap:4px" id="cfg-inst"></div></div>
-          <div><div style="font-size:10px;color:var(--purple);margin-bottom:8px;letter-spacing:1px">🤖 AI & MOMENTUM</div><div style="display:flex;flex-direction:column;gap:4px" id="cfg-ai"></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="bal-row"><span style="color:var(--text3)">Risk Per Trade</span><span style="color:var(--green)">1.0% of balance</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Max Open Trades</span><span style="color:var(--blue)">4 simultaneously</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Max Same Direction</span><span style="color:var(--cyan)">4 BUY or 4 SELL</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Stop Loss</span><span style="color:var(--red)">1.5x ATR</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Target 1 (TP1)</span><span style="color:var(--green)">2.0x ATR</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Target 2 (TP2)</span><span style="color:var(--green)">3.0x ATR</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Circuit Breaker</span><span style="color:var(--red)">-5% Daily PnL</span></div>
+          <div class="bal-row"><span style="color:var(--text3)">Stale Trade Exit</span><span style="color:var(--text2)">48h without TP1</span></div>
         </div>
       </div>
     </div>
   </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Monitored Assets (24 Pairs)</span></div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div>
+          <div style="font-size:10px;color:var(--amber);margin-bottom:8px;letter-spacing:1px">👑 BIG THREE</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="bal-row">BTC / USDC</div><div class="bal-row">ETH / USDC</div><div class="bal-row">BNB / USDC</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--cyan);margin-bottom:8px;letter-spacing:1px">⚡ HIGH-LIQUIDITY L1s</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="bal-row">SOL</div><div class="bal-row">AVAX</div><div class="bal-row">NEAR</div>
+            <div class="bal-row">SUI</div><div class="bal-row">APT</div><div class="bal-row">MATIC</div><div class="bal-row">ATOM</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--blue);margin-bottom:8px;letter-spacing:1px">🏛️ INSTITUTIONAL ALTS</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="bal-row">LINK</div><div class="bal-row">DOT</div><div class="bal-row">UNI</div>
+            <div class="bal-row">AAVE</div><div class="bal-row">XRP</div><div class="bal-row">LTC</div><div class="bal-row">BCH</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--purple);margin-bottom:8px;letter-spacing:1px">🤖 AI & MOMENTUM</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="bal-row">FET</div><div class="bal-row">RENDER</div><div class="bal-row">ADA</div>
+            <div class="bal-row">INJ</div><div class="bal-row">ARB</div><div class="bal-row">OP</div><div class="bal-row">SEI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   <!-- ════ SYSTEM MONITOR PAGE ════ -->
   <div class="page" id="page-monitor">
@@ -828,7 +848,7 @@ async function fetchOpenTrades() {
 
 function renderTradeCard(t) {
   const isBuy  = t.signal === 'BUY';
-  const dec    = parseFloat(t.entry || 0) > 100 ? 2 : 4;
+  const dec    = 4; // FORCES 4 DECIMALS ON ALL PRICES
   const pnl    = parseFloat(t.unrealised || 0); // Matches Python API
   const pnlPct = parseFloat(t.pnl_pct || 0);
   const prog   = Math.min(parseFloat(t.progress || 0), 100);
@@ -849,9 +869,16 @@ function renderTradeCard(t) {
         <span style="font-size:16px; font-weight:bold;">${t.symbol.replace('USDT','')}<span style="font-size:12px;color:gray;">/USDT</span></span>
         <span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; background:${sigBg}; color:${sigCol};">${t.signal}</span>
       </div>
-      <div style="text-align:right; font-weight:bold; color:${pnlColor}">
-        <div style="font-size:15px;">${pnlSign}$${Math.abs(pnl).toFixed(4)}</div>
-        <div style="font-size:11px; opacity:0.8;">(${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</div>
+      
+      <div style="display: flex; align-items: flex-start; gap: 24px;">
+        <div style="text-align: right;">
+            <div style="font-size: 0.7rem; color: #8b9bb4; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">SIZE</div>
+            <div style="font-size: 1.05rem; color: #e2e8f0; font-weight: 600;">$${fmt(t.risk_usd || (t.qty * t.entry) || 0, 2)}</div>
+        </div>
+        <div style="text-align:right; font-weight:bold; color:${pnlColor}">
+          <div style="font-size:15px;">${pnlSign}$${Math.abs(pnl).toFixed(4)}</div>
+          <div style="font-size:11px; opacity:0.8;">(${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</div>
+        </div>
       </div>
     </div>
 
@@ -863,7 +890,6 @@ function renderTradeCard(t) {
       <div><div style="font-size:9px;color:gray;text-transform:uppercase;">Target 2</div><div style="font-size:12px;font-weight:bold;color:#22c55e;">$${fmt(t.tp2, dec)}</div></div>
     </div>
 
-    <!-- Smart TP Progress Track -->
     <div style="margin:10px 0 4px;">
       ${buildTradeProgress(t, isBuy, pnl, sigCol)}
     </div>
