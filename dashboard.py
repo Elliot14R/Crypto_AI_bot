@@ -416,4 +416,4 @@ def health():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     log.info(f"Dashboard starting — port {port} | repo {GH_REPO}")
-    
+    app.run(host="0.0.0.0", port=port, debug=False)
