@@ -567,5 +567,43 @@
     "pnl": 227.0268,
     "closed_at": "2026-04-19T19:23:57.603120+00:00",
     "close_reason": "TP2 hit"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "signal": "SELL",
+    "entry": 2315.70833333,
+    "stop": 2326.7,
+    "tp1": 2301.05,
+    "tp2": 2293.7,
+    "qty": 15.213,
+    "qty_tp1": 7.606,
+    "qty_tp2": 7.607,
+    "risk_usd": 1761.18,
+    "balance_at_open": 176118.28,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-199892216693",
+      "stop_loss": "USDC-SLTB-18962",
+      "tp1": "USDC-199892223446",
+      "tp2": "USDC-199892223636"
+    },
+    "opened_at": "2026-04-23T11:02:31.904733+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 62.0,
+    "score": 4,
+    "reasons": [
+      "Conf (62%)",
+      "Strong ADX 65",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "close_price": 2326.7,
+    "pnl": -167.2162,
+    "closed_at": "2026-04-23T12:24:12.484262+00:00",
+    "close_reason": "TP2 hit (recovered)"
   }
 ]
