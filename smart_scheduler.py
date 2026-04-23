@@ -1,5 +1,5 @@
 # smart_scheduler.py — Fixed: removed blocking circuit breaker from scan path
-#
+# test
 # ROOT CAUSE OF NO TRADES FOR 1.5 DAYS:
 #   check_daily_loss_limit() was called inside should_scan().
 #   If balance.json was missing, stale, or showed 0 USDT:
