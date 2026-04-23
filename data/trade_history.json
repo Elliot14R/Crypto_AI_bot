@@ -681,5 +681,42 @@
     "pnl": 0.2512,
     "closed_at": "2026-04-23T16:22:20.345733+00:00",
     "close_reason": "TP2 hit (recovered)"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "signal": "SELL",
+    "entry": 77732.375,
+    "stop": 77997.0,
+    "tp1": 77379.5,
+    "tp2": 77203.0,
+    "qty": 0.4522,
+    "qty_tp1": 0.2261,
+    "qty_tp2": 0.2261,
+    "risk_usd": 1756.85,
+    "balance_at_open": 175685.34,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-199911750144",
+      "stop_loss": "USDC-SLTB-18965",
+      "tp1": "USDC-199911757384",
+      "tp2": "USDC-199911758044"
+    },
+    "opened_at": "2026-04-23T12:24:18.553976+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 61.4,
+    "score": 3,
+    "reasons": [
+      "Conf (61%)",
+      "Strong ADX 38",
+      "EMA bearish"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "close_price": 77997.0,
+    "pnl": -119.6634,
+    "closed_at": "2026-04-23T17:54:53.544763+00:00",
+    "close_reason": "TP2 hit (recovered)"
   }
 ]

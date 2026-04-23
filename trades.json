@@ -1,37 +1,4 @@
 {
-  "BTCUSDT": {
-    "symbol": "BTCUSDT",
-    "signal": "SELL",
-    "entry": 77732.375,
-    "stop": 77997.0,
-    "tp1": 77379.5,
-    "tp2": 77203.0,
-    "qty": 0.4522,
-    "qty_tp1": 0.2261,
-    "qty_tp2": 0.2261,
-    "risk_usd": 1756.85,
-    "balance_at_open": 175685.34,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "entry": "USDC-199911750144",
-      "stop_loss": "USDC-SLTB-18965",
-      "tp1": "USDC-199911757384",
-      "tp2": "USDC-199911758044"
-    },
-    "opened_at": "2026-04-23T12:24:18.553976+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 61.4,
-    "score": 3,
-    "reasons": [
-      "Conf (61%)",
-      "Strong ADX 38",
-      "EMA bearish"
-    ],
-    "tier": "\ud83d\udc51 Big Three",
-    "exchange": "deribit_testnet"
-  },
   "BNBUSDT": {
     "symbol": "BNBUSDT",
     "signal": "SELL",
@@ -101,7 +68,7 @@
     "symbol": "LTCUSDT",
     "signal": "SELL",
     "entry": 55.67,
-    "stop": 55.91,
+    "stop": 55.67,
     "tp1": 55.36,
     "tp2": 55.2,
     "qty": 627.6,
@@ -112,12 +79,12 @@
     "risk_mult": 1.0,
     "order_ids": {
       "entry": "USDC-199969374877",
-      "stop_loss": "USDC-SLTB-18986",
+      "stop_loss": "USDC-SLTB-18994",
       "tp1": "USDC-199969382341",
       "tp2": "USDC-199969382606"
     },
     "opened_at": "2026-04-23T16:22:53.142563+00:00",
-    "tp1_hit": false,
+    "tp1_hit": true,
     "tp2_hit": false,
     "closed": false,
     "confidence": 65.0,
