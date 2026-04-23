@@ -28,7 +28,7 @@ TRADES_FILE     = "trades.json"
 HISTORY_FILE    = "trade_history.json"
 SIGNALS_FILE    = "signals.json"
 BALANCE_FILE    = "balance.json"
-MAX_OPEN_TRADES = 3
+MAX_OPEN_TRADES = 4
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s",
     handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler()])
