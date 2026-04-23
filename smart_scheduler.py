@@ -133,10 +133,16 @@ def check_daily_pnl_advisory() -> str:
 
 
 def check_correlation(trades: dict, new_signal: str) -> bool:
-    """Max 2 trades in the same direction."""
+    """Uses the limit defined in config.py instead of a hardcoded value."""
+    try:
+        from config import MAX_SAME_DIRECTION
+    except ImportError:
+        MAX_SAME_DIRECTION = 2  # Fallback safety
+        
     same = sum(1 for t in trades.values()
                if t.get("signal") == new_signal and not t.get("closed", False))
-    if same >= 2:
+               
+    if same >= MAX_SAME_DIRECTION:
         log.info(f"  Correlation filter: {same} {new_signal} already open — skip")
         return False
     return True
