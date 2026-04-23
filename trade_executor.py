@@ -1,6 +1,6 @@
 # trade_executor.py — Fixed: no blocking bugs, trades will execute
 #
-# FIXES for "no trades for 1.5 days":
+# FIXES for "no trades for 1.5 days": with below issues also
 #   1. Removed daily loss circuit breaker from scan path (was blocking all scans)
 #   2. Removed volume_ratio check (feature may not exist in all model versions)
 #   3. Lowered score requirement to 1 during active hours
