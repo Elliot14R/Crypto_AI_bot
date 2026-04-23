@@ -143,7 +143,7 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     if "trend_1h" not in df.columns: df["trend_1h"] = 0.0
 
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.fillna(method="ffill", inplace=True)
+    df.ffill(inplace=True)
     df.fillna(0, inplace=True)
     return df
 
