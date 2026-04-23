@@ -57,7 +57,7 @@ RISK_PER_TRADE     = 0.01   # 1% per trade — strict, never change this
 ATR_STOP_MULT      = 1.5    # SL = entry ± 1.5 × ATR
 ATR_TARGET1_MULT   = 2.0    # TP1 = entry ± 2.0 × ATR  (R:R = 1.33:1)
 ATR_TARGET2_MULT   = 3.0    # TP2 = entry ± 3.0 × ATR  (R:R = 2:1)
-MAX_SAME_DIRECTION = 2      # max 2 BUY or 2 SELL simultaneously
+MAX_SAME_DIRECTION = 4      # max 2 BUY or 2 SELL simultaneously
 
 # ── NEW: Time-based exit ──────────────────────────────────────────────
 # If a trade has been open for > 48 hours without hitting TP1,
