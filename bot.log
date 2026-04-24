@@ -19108,3 +19108,51 @@ SCAN — 2026-04-24 22:04 UTC
 ════════════════════════════════════════════════════════
 DONE — 0 signal(s) | $174466.93
 ════════════════════════════════════════════════════════
+2026-04-24 22:54:10,243 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-24 22:54 UTC
+════════════════════════════════════════════════════════
+2026-04-24 22:54:11,056   QUIET HOURS | conf≥65% | score≥2 | ADX≥18 | ✓ Normal vol — BTC ATR 0.15%
+2026-04-24 22:54:11,510 ✓ Deribit testnet authenticated
+2026-04-24 22:54:11,652 ✓ Tradeable: 22 — ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'AVAXUSDT', 'NEARUSDT', 'SUIUSDT', 'APTUSDT', 'ATOMUSDT', 'LINKUSDT', 'DOTUSDT', 'UNIUSDT', 'AAVEUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'FETUSDT', 'ADAUSDT', 'INJUSDT', 'ARBUSDT', 'OPUSDT', 'SEIUSDT']
+2026-04-24 22:54:12,234 ✅ Deribit OK — $174720.96 | 22 symbols
+2026-04-24 22:54:12,690   QUIET HOURS | conf≥65% | score≥2 | ADX≥18 | risk:0.50
+2026-04-24 22:54:12,690 
+[0] Balance...
+2026-04-24 22:54:14,277   Balance: $174721.27 | upnl:-348.45 | positions:3
+2026-04-24 22:54:14,277 
+[1] Monitor trades...
+2026-04-24 22:54:14,277   Monitoring 3 trade(s)
+2026-04-24 22:54:15,525 
+[2] Stale trade check...
+2026-04-24 22:54:15,525 
+[3] Ghost trade recovery...
+2026-04-24 22:54:17,515   Balance: $174721.27 | upnl:-348.45 | positions:3
+2026-04-24 22:54:17,515 
+[4] Scanning 24 coins | Open:3/4
+2026-04-24 22:54:17,515 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-24 22:54:19,534     ML: SELL 58.0% (need ≥65%)
+2026-04-24 22:54:19,735 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-24 22:54:21,056     ML: SELL 70.9% (need ≥65%)
+2026-04-24 22:54:21,056     ADX: 29.3 (need ≥18)
+2026-04-24 22:54:21,056     Score: 4 (need ≥2)
+2026-04-24 22:54:21,057   Contracts: 15.114 ETHUSDT (risk=$873.61)
+2026-04-24 22:54:21,057   SELL ETHUSDT total=15.114 risk=$873.61
+2026-04-24 22:54:21,057   SL=2319.10 TP1=2302.37 TP2=2297.59
+2026-04-24 22:54:21,198   ✅ MARKET SELL 15.114 ETH_USDC-PERPETUAL id=USDC-200374010679 state=filled
+2026-04-24 22:54:21,198   ✅ Entry @ 2312.09
+2026-04-24 22:54:22,837   ✅ SL BUY 15.114 ETH_USDC-PERPETUAL @ 2319.25 id=USDC-SLTB-19007 state=untriggered
+2026-04-24 22:54:22,837   ✅ SL @ 2319.25 × 15.114 id:USDC-SLTB-19007
+2026-04-24 22:54:22,977   ✅ TP BUY 7.557 ETH_USDC-PERPETUAL @ 2302.55 id=USDC-200374016747 state=open
+2026-04-24 22:54:22,977   ✅ TP1 @ 2302.55 × 7.557 id:USDC-200374016747
+2026-04-24 22:54:23,117   ✅ TP BUY 7.557 ETH_USDC-PERPETUAL @ 2297.75 id=USDC-200374017108 state=open
+2026-04-24 22:54:23,117   ✅ TP2 @ 2297.75 × 7.557 id:USDC-200374017108
+2026-04-24 22:54:23,928   ✅✅ TRADE OPENED: ETHUSDT SELL
+2026-04-24 22:54:25,428   🛑 Max trades — stop
+2026-04-24 22:54:26,990   Balance: $174692.26 | upnl:-359.99 | positions:4
+2026-04-24 22:54:26,990 
+════════════════════════════════════════════════════════
+DONE — 1 signal(s) | $174721.27
+════════════════════════════════════════════════════════

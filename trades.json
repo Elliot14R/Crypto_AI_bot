@@ -96,5 +96,39 @@
     ],
     "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
+  },
+  "ETHUSDT": {
+    "symbol": "ETHUSDT",
+    "signal": "SELL",
+    "entry": 2312.09285714,
+    "stop": 2319.25,
+    "tp1": 2302.55,
+    "tp2": 2297.75,
+    "qty": 15.114,
+    "qty_tp1": 7.557,
+    "qty_tp2": 7.557,
+    "risk_usd": 873.61,
+    "balance_at_open": 174721.27,
+    "risk_mult": 0.5,
+    "order_ids": {
+      "entry": "USDC-200374010679",
+      "stop_loss": "USDC-SLTB-19007",
+      "tp1": "USDC-200374016747",
+      "tp2": "USDC-200374017108"
+    },
+    "opened_at": "2026-04-24T22:54:23.117293+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 70.9,
+    "score": 4,
+    "reasons": [
+      "High conf (71%)",
+      "Strong ADX 29",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet"
   }
 }
