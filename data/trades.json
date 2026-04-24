@@ -63,5 +63,38 @@
     ],
     "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
+  },
+  "LTCUSDT": {
+    "symbol": "LTCUSDT",
+    "signal": "SELL",
+    "entry": 56.13625,
+    "stop": 56.36,
+    "tp1": 55.83,
+    "tp2": 55.68,
+    "qty": 622.5,
+    "qty_tp1": 311.2,
+    "qty_tp2": 311.3,
+    "risk_usd": 1748.99,
+    "balance_at_open": 174899.48,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-200267391661",
+      "stop_loss": "USDC-SLTB-19004",
+      "tp1": "USDC-200267397856",
+      "tp2": "USDC-200267398199"
+    },
+    "opened_at": "2026-04-24T14:10:08.792203+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 61.1,
+    "score": 3,
+    "reasons": [
+      "Conf (61%)",
+      "ADX 21",
+      "RSI bearish (50)"
+    ],
+    "tier": "\ud83c\udfdb Institutional Alts",
+    "exchange": "deribit_testnet"
   }
 }
