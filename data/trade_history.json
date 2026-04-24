@@ -718,5 +718,43 @@
     "pnl": -119.6634,
     "closed_at": "2026-04-23T17:54:53.544763+00:00",
     "close_reason": "TP2 hit (recovered)"
+  },
+  {
+    "symbol": "LTCUSDT",
+    "signal": "SELL",
+    "entry": 55.67,
+    "stop": 55.67,
+    "tp1": 55.36,
+    "tp2": 55.2,
+    "qty": 627.6,
+    "qty_tp1": 313.8,
+    "qty_tp2": 313.8,
+    "risk_usd": 1748.51,
+    "balance_at_open": 174850.81,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-199969374877",
+      "stop_loss": "USDC-SLTB-18994",
+      "tp1": "USDC-199969382341",
+      "tp2": "USDC-199969382606"
+    },
+    "opened_at": "2026-04-23T16:22:53.142563+00:00",
+    "tp1_hit": true,
+    "tp2_hit": true,
+    "closed": true,
+    "confidence": 65.0,
+    "score": 4,
+    "reasons": [
+      "Conf (65%)",
+      "Strong ADX 39",
+      "RSI bearish (59)",
+      "1h confirms"
+    ],
+    "tier": "\ud83c\udfdb Institutional Alts",
+    "exchange": "deribit_testnet",
+    "close_price": 55.2,
+    "pnl": 147.486,
+    "closed_at": "2026-04-24T12:08:02.054790+00:00",
+    "close_reason": "TP2 hit"
   }
 ]
