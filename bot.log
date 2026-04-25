@@ -19879,3 +19879,122 @@ SCAN — 2026-04-25 15:51 UTC
 ════════════════════════════════════════════════════════
 DONE — 0 signal(s) | $174508.73
 ════════════════════════════════════════════════════════
+2026-04-25 16:51:47,200 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-25 16:51 UTC
+════════════════════════════════════════════════════════
+2026-04-25 16:51:47,662   WEEKEND MODE | conf≥60% | score≥1 | ADX≥15 | ✓ Normal vol — BTC ATR 0.15%
+2026-04-25 16:51:48,170 ✓ Deribit testnet authenticated
+2026-04-25 16:51:48,328 ✓ Tradeable: 22 — ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'AVAXUSDT', 'NEARUSDT', 'SUIUSDT', 'APTUSDT', 'ATOMUSDT', 'LINKUSDT', 'DOTUSDT', 'UNIUSDT', 'AAVEUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'FETUSDT', 'ADAUSDT', 'INJUSDT', 'ARBUSDT', 'OPUSDT', 'SEIUSDT']
+2026-04-25 16:51:48,979 ✅ Deribit OK — $174539.02 | 22 symbols
+2026-04-25 16:51:49,432   WEEKEND MODE | conf≥60% | score≥1 | ADX≥15 | risk:0.75
+2026-04-25 16:51:49,433 
+[0] Balance...
+2026-04-25 16:51:51,208   Balance: $174539.02 | upnl:+1.01 | positions:3
+2026-04-25 16:51:51,208 
+[1] Monitor trades...
+2026-04-25 16:51:51,208   Monitoring 3 trade(s)
+2026-04-25 16:51:52,303   cancel USDC-SLTB-19034: order_not_found (Code:10004)
+2026-04-25 16:51:52,465   ✅ SL BUY 12190 XRP_USDC-PERPETUAL @ 1.4283 id=USDC-SLTB-19035 state=untriggered
+2026-04-25 16:51:53,482   ✅ TP2 XRPUSDT @ 1.4267 pnl≈+58.0244
+2026-04-25 16:51:54,364 
+[2] Stale trade check...
+2026-04-25 16:51:54,364 
+[3] Ghost trade recovery...
+2026-04-25 16:51:56,630   Balance: $174573.80 | upnl:+35.79 | positions:3
+2026-04-25 16:51:56,630 
+[4] Scanning 24 coins | Open:2/4
+2026-04-25 16:51:56,631 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-25 16:51:58,259     ML: SELL 45.1% (need ≥60%)
+2026-04-25 16:51:58,460 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-25 16:52:00,220     ML: SELL 54.8% (need ≥60%)
+2026-04-25 16:52:00,421 
+  ── BNBUSDT (👑 Big Three) ──
+2026-04-25 16:52:01,942     ML: SELL 63.3% (need ≥60%)
+2026-04-25 16:52:01,943     ADX: 63.4 (need ≥15)
+2026-04-25 16:52:01,943     Score: 4 (need ≥1)
+2026-04-25 16:52:01,943   Contracts: 55.46 BNBUSDT (risk=$1309.04)
+2026-04-25 16:52:01,943   SELL BNBUSDT total=55.46 risk=$1309.04
+2026-04-25 16:52:01,943   SL=631.19 TP1=626.92 TP2=625.70
+2026-04-25 16:52:02,102   ✅ MARKET SELL 55.46 BNB_USDC-PERPETUAL id=USDC-200583327947 state=filled
+2026-04-25 16:52:02,102   ✅ Entry @ 628.82
+2026-04-25 16:52:03,772   ✅ SL BUY 55.46 BNB_USDC-PERPETUAL @ 630.65 id=USDC-SLTB-19036 state=untriggered
+2026-04-25 16:52:03,772   ✅ SL @ 630.65 × 55.46 id:USDC-SLTB-19036
+2026-04-25 16:52:03,942   ✅ TP BUY 27.73 BNB_USDC-PERPETUAL @ 626.38 id=USDC-200583334062 state=open
+2026-04-25 16:52:03,942   ✅ TP1 @ 626.38 × 27.73 id:USDC-200583334062
+2026-04-25 16:52:04,100   ✅ TP BUY 27.73 BNB_USDC-PERPETUAL @ 625.16 id=USDC-200583334682 state=open
+2026-04-25 16:52:04,100   ✅ TP2 @ 625.16 × 27.73 id:USDC-200583334682
+2026-04-25 16:52:04,938   ✅✅ TRADE OPENED: BNBUSDT SELL
+2026-04-25 16:52:06,438 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:07,885     ML: SELL 55.1% (need ≥60%)
+2026-04-25 16:52:08,086 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:09,738     ML: SELL 41.9% (need ≥60%)
+2026-04-25 16:52:09,939 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:11,256     ML: SELL 43.7% (need ≥60%)
+2026-04-25 16:52:11,456 
+  ── SUIUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:13,617     ML: SELL 37.7% (need ≥60%)
+2026-04-25 16:52:13,818 
+  ── APTUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:15,288     ML: NO_TRADE 39.4% (need ≥60%)
+2026-04-25 16:52:15,489 
+  ── MATICUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:17,551     ML: SELL 46.7% (need ≥60%)
+2026-04-25 16:52:17,752 
+  ── ATOMUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 16:52:19,002     ML: NO_TRADE 37.7% (need ≥60%)
+2026-04-25 16:52:19,202 
+  ── LINKUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:20,216     ML: BUY 41.9% (need ≥60%)
+2026-04-25 16:52:20,417 
+  ── DOTUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:21,890     ML: SELL 45.6% (need ≥60%)
+2026-04-25 16:52:22,091 
+  ── UNIUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:23,209     ML: NO_TRADE 42.8% (need ≥60%)
+2026-04-25 16:52:23,410 
+  ── AAVEUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:24,623     ML: NO_TRADE 36.4% (need ≥60%)
+2026-04-25 16:52:24,823 
+  ── XRPUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:26,387     ML: SELL 42.9% (need ≥60%)
+2026-04-25 16:52:26,587 
+  ── LTCUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:27,695     ML: SELL 54.3% (need ≥60%)
+2026-04-25 16:52:27,896 
+  ── BCHUSDT (🏛 Institutional Alts) ──
+2026-04-25 16:52:28,905     ML: SELL 53.1% (need ≥60%)
+2026-04-25 16:52:29,105 
+  ── FETUSDT (🤖 AI & Momentum) ──
+2026-04-25 16:52:30,222     ML: SELL 50.3% (need ≥60%)
+2026-04-25 16:52:30,423 
+  ── RENDERUSDT (🤖 AI & Momentum) ──
+2026-04-25 16:52:31,479     ML: SELL 40.0% (need ≥60%)
+2026-04-25 16:52:31,679 
+  ── ADAUSDT (🤖 AI & Momentum) ──
+2026-04-25 16:52:32,787     ML: SELL 44.5% (need ≥60%)
+2026-04-25 16:52:32,987 
+  ── INJUSDT (🤖 AI & Momentum) ──
+2026-04-25 16:52:34,116     ML: BUY 73.8% (need ≥60%)
+2026-04-25 16:52:34,117     ADX: 24.5 (need ≥15)
+2026-04-25 16:52:34,117     Score: 4 (need ≥1)
+2026-04-25 16:52:34,117   Contracts: 9696 INJUSDT (risk=$1309.04)
+2026-04-25 16:52:34,117   BUY INJUSDT total=9696 risk=$1309.04
+2026-04-25 16:52:34,117   SL=3.5449 TP1=3.6734 TP2=3.7101
+2026-04-25 16:52:34,290   ✅ MARKET BUY 9696 INJ_USDC-PERPETUAL id=USDC-200583433247 state=open
+2026-04-25 16:52:34,290   ✅ Entry @ 3.6750
+2026-04-25 16:52:35,948   SL failed: invalid_trigger_price (Code:11036)
+2026-04-25 16:52:36,102   TP1 failed: other_reject invalid_reduce_only_order (Code:11030)
+2026-04-25 16:52:36,261   TP2 failed: other_reject invalid_reduce_only_order (Code:11030)
+2026-04-25 16:52:36,990   ✅✅ TRADE OPENED: INJUSDT BUY
+2026-04-25 16:52:38,490   🛑 Max trades — stop
+2026-04-25 16:52:40,276   Balance: $174509.07 | upnl:-11.50 | positions:4
+2026-04-25 16:52:40,276 
+════════════════════════════════════════════════════════
+DONE — 2 signal(s) | $174539.02
+════════════════════════════════════════════════════════
