@@ -794,5 +794,42 @@
     "pnl": -203.4985,
     "closed_at": "2026-04-24T21:08:04.077938+00:00",
     "close_reason": "STOPPED OUT \u274c"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "signal": "SELL",
+    "entry": 633.908,
+    "stop": 635.58,
+    "tp1": 631.68,
+    "tp2": 630.57,
+    "qty": 55.38,
+    "qty_tp1": 27.69,
+    "qty_tp2": 27.69,
+    "risk_usd": 1756.09,
+    "balance_at_open": 175608.89,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-199915097339",
+      "stop_loss": "USDC-SLTB-18967",
+      "tp1": "USDC-199915103998",
+      "tp2": "USDC-199915104624"
+    },
+    "opened_at": "2026-04-23T12:38:28.455261+00:00",
+    "tp1_hit": true,
+    "tp2_hit": false,
+    "closed": true,
+    "confidence": 69.9,
+    "score": 3,
+    "reasons": [
+      "Conf (70%)",
+      "Strong ADX 40",
+      "EMA bearish"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "close_price": 636.035,
+    "pnl": -117.7933,
+    "closed_at": "2026-04-25T01:07:12.552641+00:00",
+    "close_reason": "STOPPED OUT \u274c"
   }
 ]
