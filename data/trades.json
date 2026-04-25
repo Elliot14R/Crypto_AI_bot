@@ -64,40 +64,6 @@
     "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
   },
-  "BTCUSDT": {
-    "symbol": "BTCUSDT",
-    "signal": "SELL",
-    "entry": 77548.375,
-    "stop": 77636.5,
-    "tp1": 77431.0,
-    "tp2": 77372.0,
-    "qty": 0.4505,
-    "qty_tp1": 0.2252,
-    "qty_tp2": 0.2253,
-    "risk_usd": 1309.47,
-    "balance_at_open": 174595.39,
-    "risk_mult": 0.75,
-    "order_ids": {
-      "entry": "USDC-200457210841",
-      "stop_loss": "USDC-SLTB-19024",
-      "tp1": "USDC-200457217227",
-      "tp2": "USDC-200457217534"
-    },
-    "opened_at": "2026-04-25T06:00:09.221333+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 60.9,
-    "score": 4,
-    "reasons": [
-      "Conf (61%)",
-      "ADX 23",
-      "EMA bearish",
-      "1h confirms"
-    ],
-    "tier": "\ud83d\udc51 Big Three",
-    "exchange": "deribit_testnet"
-  },
   "XRPUSDT": {
     "symbol": "XRPUSDT",
     "signal": "SELL",
@@ -129,6 +95,40 @@
       "EMA bearish"
     ],
     "tier": "\ud83c\udfdb Institutional Alts",
+    "exchange": "deribit_testnet"
+  },
+  "BTCUSDT": {
+    "symbol": "BTCUSDT",
+    "signal": "SELL",
+    "entry": 77655.75,
+    "stop": 77751.0,
+    "tp1": 77529.0,
+    "tp2": 77465.5,
+    "qty": 0.4498,
+    "qty_tp1": 0.2249,
+    "qty_tp2": 0.2249,
+    "risk_usd": 1309.86,
+    "balance_at_open": 174648.53,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-200541306864",
+      "stop_loss": "USDC-SLTB-19032",
+      "tp1": "USDC-200541312535",
+      "tp2": "USDC-200541312716"
+    },
+    "opened_at": "2026-04-25T13:15:36.680212+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 60.7,
+    "score": 4,
+    "reasons": [
+      "Conf (61%)",
+      "ADX 22",
+      "RSI bearish (50)",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
     "exchange": "deribit_testnet"
   }
 }
