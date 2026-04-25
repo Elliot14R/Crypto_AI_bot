@@ -312,14 +312,24 @@ class DeribitClient:
 
         return False
 
+# REASON: stop_limit orders on Deribit go to "triggered" state (not "filled")
+# when the trigger price is crossed. The original order_id never becomes "filled".
+# Without this method, SL detection crashes with AttributeError and trades stay open.
+
     def is_sl_triggered(self, order: dict) -> bool:
-        """
-        FIX: Stop-limit SL orders go to 'triggered' state when price hits them.
-        The original order_id never reaches 'filled' — only the spawned child does.
-        Treating 'triggered' as hit is correct: price crossed the stop level.
-        """
-        state = order.get("order_state", "").lower()
-        return state in ("filled", "triggered", "cancelled")
+    """
+       Stop-loss detection for Deribit stop-limit orders.
+    
+       Deribit stop-limit lifecycle:
+         untriggered → triggered (price crossed stop) → child limit fills
+    
+       We check the ORIGINAL order_id which stays as "triggered".
+       "triggered" = price definitively crossed the stop level = SL was hit.
+       "filled"    = stop executed immediately at market (rare).
+       "cancelled" = position was closed another way (TP hit, manual close).
+       """
+       state = order.get("order_state", "").lower()
+       return state in ("filled", "triggered")
 
     def get_order_fill_price(self, order: dict, fallback: float) -> float:
         """Extract fill price — handles both normal fills and triggered stop fills."""
