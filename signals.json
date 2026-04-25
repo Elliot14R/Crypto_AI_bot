@@ -1031,5 +1031,38 @@
     "exchange": "deribit_testnet",
     "type": "executed",
     "generated_at": "2026-04-25T13:15:36.681411+00:00"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "signal": "SELL",
+    "entry": 1.39618,
+    "stop": 1.4014,
+    "tp1": 1.3893,
+    "tp2": 1.3858,
+    "qty": 24810,
+    "qty_tp1": 12400,
+    "qty_tp2": 12410,
+    "risk_usd": 1309.15,
+    "balance_at_open": 174552.87,
+    "risk_mult": 0.75,
+    "order_ids": {
+      "entry": "USDC-200551823868",
+      "stop_loss": "USDC-SLTB-19033"
+    },
+    "opened_at": "2026-04-25T14:09:56.033553+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 61.2,
+    "score": 3,
+    "reasons": [
+      "Conf (61%)",
+      "Strong ADX 47",
+      "EMA bearish"
+    ],
+    "tier": "\u26a1 High-Liquidity L1s",
+    "exchange": "deribit_testnet",
+    "type": "executed",
+    "generated_at": "2026-04-25T14:09:56.034762+00:00"
   }
 ]

@@ -19615,3 +19615,65 @@ SCAN — 2026-04-25 13:15 UTC
 ════════════════════════════════════════════════════════
 DONE — 1 signal(s) | $174648.53
 ════════════════════════════════════════════════════════
+2026-04-25 14:09:35,610 
+════════════════════════════════════════════════════════
+SCAN — 2026-04-25 14:09 UTC
+════════════════════════════════════════════════════════
+2026-04-25 14:09:36,317   WEEKEND MODE | conf≥60% | score≥1 | ADX≥15 | ✓ Normal vol — BTC ATR 0.09%
+2026-04-25 14:09:36,774 ✓ Deribit testnet authenticated
+2026-04-25 14:09:36,912 ✓ Tradeable: 22 — ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'AVAXUSDT', 'NEARUSDT', 'SUIUSDT', 'APTUSDT', 'ATOMUSDT', 'LINKUSDT', 'DOTUSDT', 'UNIUSDT', 'AAVEUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'FETUSDT', 'ADAUSDT', 'INJUSDT', 'ARBUSDT', 'OPUSDT', 'SEIUSDT']
+2026-04-25 14:09:37,496 ✅ Deribit OK — $174552.87 | 22 symbols
+2026-04-25 14:09:37,961   WEEKEND MODE | conf≥60% | score≥1 | ADX≥15 | risk:0.75
+2026-04-25 14:09:37,961 
+[0] Balance...
+2026-04-25 14:09:39,516   Balance: $174552.87 | upnl:+144.44 | positions:3
+2026-04-25 14:09:39,516 
+[1] Monitor trades...
+2026-04-25 14:09:39,516   Monitoring 4 trade(s)
+2026-04-25 14:09:41,036   ⚠️ BTCUSDT: price 77695.2300 crossed SL 77751.0000 → forcing close
+2026-04-25 14:09:41,175   ❌ SL BTCUSDT @ 77695.23 pnl≈-17.7581 (state=not_found)
+2026-04-25 14:09:42,055   cancel USDC-200541312535: not_open_order (Code:11044)
+2026-04-25 14:09:42,193   cancel USDC-200541312716: not_open_order (Code:11044)
+2026-04-25 14:09:42,195 
+[2] Stale trade check...
+2026-04-25 14:09:42,195 
+[3] Ghost trade recovery...
+2026-04-25 14:09:44,160   Balance: $174552.11 | upnl:+145.98 | positions:3
+2026-04-25 14:09:44,161 
+[4] Scanning 24 coins | Open:3/4
+2026-04-25 14:09:44,161 
+  ── BTCUSDT (👑 Big Three) ──
+2026-04-25 14:09:45,759     ML: SELL 46.7% (need ≥60%)
+2026-04-25 14:09:45,960 
+  ── ETHUSDT (👑 Big Three) ──
+2026-04-25 14:09:47,848     ML: SELL 47.0% (need ≥60%)
+2026-04-25 14:09:48,048 
+  ── BNBUSDT (👑 Big Three) ──
+2026-04-25 14:09:49,662     ML: SELL 46.6% (need ≥60%)
+2026-04-25 14:09:49,863 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 14:09:51,182     ML: SELL 48.4% (need ≥60%)
+2026-04-25 14:09:51,383 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 14:09:52,469     ML: SELL 48.4% (need ≥60%)
+2026-04-25 14:09:52,670 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-04-25 14:09:53,974     ML: SELL 61.2% (need ≥60%)
+2026-04-25 14:09:53,974     ADX: 47.4 (need ≥15)
+2026-04-25 14:09:53,974     Score: 3 (need ≥1)
+2026-04-25 14:09:53,974   Contracts: 24810 NEARUSDT (risk=$1309.15)
+2026-04-25 14:09:53,974   SELL NEARUSDT total=24810 risk=$1309.15
+2026-04-25 14:09:53,974   SL=1.4122 TP1=1.4001 TP2=1.3966
+2026-04-25 14:09:54,116   ✅ MARKET SELL 24810 NEAR_USDC-PERPETUAL id=USDC-200551823868 state=open
+2026-04-25 14:09:54,116   ✅ Entry @ 1.3962
+2026-04-25 14:09:55,756   ✅ SL BUY 24810 NEAR_USDC-PERPETUAL @ 1.4014 id=USDC-SLTB-19033 state=untriggered
+2026-04-25 14:09:55,756   ✅ SL @ 1.4014 × 24810 id:USDC-SLTB-19033
+2026-04-25 14:09:55,895   TP1 failed: order_overlap (Code:10003)
+2026-04-25 14:09:56,033   TP2 failed: order_overlap (Code:10003)
+2026-04-25 14:09:56,776   ✅✅ TRADE OPENED: NEARUSDT SELL
+2026-04-25 14:09:58,277   🛑 Max trades — stop
+2026-04-25 14:09:59,833   Balance: $174338.48 | upnl:-52.41 | positions:4
+2026-04-25 14:09:59,833 
+════════════════════════════════════════════════════════
+DONE — 1 signal(s) | $174552.87
+════════════════════════════════════════════════════════
