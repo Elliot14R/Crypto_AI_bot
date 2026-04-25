@@ -1,36 +1,4 @@
 {
-  "BCHUSDT": {
-    "symbol": "BCHUSDT",
-    "signal": "SELL",
-    "entry": 457.0316,
-    "stop": 459.034,
-    "tp1": 454.362,
-    "tp2": 453.028,
-    "qty": 76.66,
-    "qty_tp1": 38.32,
-    "qty_tp2": 38.34,
-    "risk_usd": 1755.7,
-    "balance_at_open": 175570.01,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "entry": "USDC-199943853478",
-      "stop_loss": "USDC-SLTB-18969"
-    },
-    "opened_at": "2026-04-23T14:37:21.262554+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 60.8,
-    "score": 4,
-    "reasons": [
-      "Conf (61%)",
-      "Strong ADX 29",
-      "RSI bearish (63)",
-      "EMA bearish"
-    ],
-    "tier": "\ud83c\udfdb Institutional Alts",
-    "exchange": "deribit_testnet"
-  },
   "LTCUSDT": {
     "symbol": "LTCUSDT",
     "signal": "SELL",
