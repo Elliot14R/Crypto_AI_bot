@@ -36,7 +36,7 @@
     "symbol": "XRPUSDT",
     "signal": "SELL",
     "entry": 1.43146,
-    "stop": 1.4338,
+    "stop": 1.43146,
     "tp1": 1.4283,
     "tp2": 1.4267,
     "qty": 24370,
@@ -47,12 +47,12 @@
     "risk_mult": 0.75,
     "order_ids": {
       "entry": "USDC-200457307119",
-      "stop_loss": "USDC-SLTB-19025",
+      "stop_loss": "USDC-SLTB-19034",
       "tp1": "USDC-200457313360",
       "tp2": "USDC-200457313509"
     },
     "opened_at": "2026-04-25T06:00:38.977914+00:00",
-    "tp1_hit": false,
+    "tp1_hit": true,
     "tp2_hit": false,
     "closed": false,
     "confidence": 62.8,
