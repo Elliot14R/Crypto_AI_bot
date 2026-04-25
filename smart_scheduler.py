@@ -30,8 +30,8 @@ def get_scan_mode() -> dict:
     if is_weekend:
         return {
             "mode": "weekend", "label": "WEEKEND MODE", "emoji": "📅",
-            "min_confidence": 60, "min_score": 1, "min_adx": 15,
-            "interval_min": 15, "risk_mult": 0.75,
+            "min_confidence": 70, "min_score": 3, "min_adx": 22,
+            "interval_min": 15, "risk_mult": 0.85,
         }
     if is_active:
         return {
