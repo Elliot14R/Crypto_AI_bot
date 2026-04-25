@@ -141,6 +141,15 @@ def generate_signal(symbol, pipeline, thresholds):
         log.info(f"    ADX: {adx:.1f} (need ≥{thresholds['min_adx']})")
         if adx < thresholds["min_adx"]: return None
 
+        # NEW: BTC Trend Gate - Do not short if BTC is pumping
+        if sig == "SELL":
+            btc_df = add_indicators(get_data("BTCUSDT", TIMEFRAME_ENTRY))
+            if not btc_df.empty:
+                b_row = btc_df.iloc[-1]
+                if b_row["ema20"] > b_row["ema50"] and b_row["close"] > b_row["ema20"]:
+                    log.info(f"    BTC uptrend detected — skipping SELL signal for {symbol}")
+                    return None
+
         # Quality score
         score = 0; reasons = []
         if conf >= 70:   score+=1; reasons.append(f"High conf ({conf:.0f}%)")
