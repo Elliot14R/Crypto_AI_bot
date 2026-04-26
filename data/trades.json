@@ -3,7 +3,7 @@
     "symbol": "LTCUSDT",
     "signal": "SELL",
     "entry": 56.13625,
-    "stop": 56.36,
+    "stop": 56.13625,
     "tp1": 55.83,
     "tp2": 55.68,
     "qty": 622.5,
@@ -14,12 +14,12 @@
     "risk_mult": 1.0,
     "order_ids": {
       "entry": "USDC-200267391661",
-      "stop_loss": "USDC-SLTB-19004",
+      "stop_loss": "USDC-SLTB-19068",
       "tp1": "USDC-200267397856",
       "tp2": "USDC-200267398199"
     },
     "opened_at": "2026-04-24T14:10:08.792203+00:00",
-    "tp1_hit": false,
+    "tp1_hit": true,
     "tp2_hit": false,
     "closed": false,
     "confidence": 61.1,
