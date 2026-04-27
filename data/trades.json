@@ -1,35 +1,4 @@
 {
-  "NEARUSDT": {
-    "symbol": "NEARUSDT",
-    "signal": "SELL",
-    "entry": 1.39618,
-    "stop": 1.4014,
-    "tp1": 1.3893,
-    "tp2": 1.3858,
-    "qty": 24810,
-    "qty_tp1": 12400,
-    "qty_tp2": 12410,
-    "risk_usd": 1309.15,
-    "balance_at_open": 174552.87,
-    "risk_mult": 0.75,
-    "order_ids": {
-      "entry": "USDC-200551823868",
-      "stop_loss": "USDC-SLTB-19033"
-    },
-    "opened_at": "2026-04-25T14:09:56.033553+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 61.2,
-    "score": 3,
-    "reasons": [
-      "Conf (61%)",
-      "Strong ADX 47",
-      "EMA bearish"
-    ],
-    "tier": "\u26a1 High-Liquidity L1s",
-    "exchange": "deribit_testnet"
-  },
   "BNBUSDT": {
     "symbol": "BNBUSDT",
     "signal": "SELL",
@@ -58,39 +27,6 @@
       "Strong ADX 62",
       "EMA bearish",
       "1h confirms"
-    ],
-    "tier": "\ud83d\udc51 Big Three",
-    "exchange": "deribit_testnet"
-  },
-  "ETHUSDT": {
-    "symbol": "ETHUSDT",
-    "signal": "SELL",
-    "entry": 2320.6375,
-    "stop": 2327.65,
-    "tp1": 2311.25,
-    "tp2": 2306.55,
-    "qty": 15.12,
-    "qty_tp1": 7.559,
-    "qty_tp2": 7.561,
-    "risk_usd": 1754.63,
-    "balance_at_open": 175462.65,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "entry": "USDC-201068333320",
-      "stop_loss": "USDC-SLTB-19186",
-      "tp1": "USDC-201068339540",
-      "tp2": "USDC-201068339611"
-    },
-    "opened_at": "2026-04-27T10:49:00.577904+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 72.6,
-    "score": 3,
-    "reasons": [
-      "High conf (73%)",
-      "Strong ADX 41",
-      "EMA bearish"
     ],
     "tier": "\ud83d\udc51 Big Three",
     "exchange": "deribit_testnet"
