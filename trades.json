@@ -29,5 +29,70 @@
     ],
     "tier": "\u26a1 High-Liquidity L1s",
     "exchange": "deribit_testnet"
+  },
+  "BNBUSDT": {
+    "symbol": "BNBUSDT",
+    "signal": "SELL",
+    "entry": 626.082,
+    "stop": 628.34,
+    "tp1": 623.07,
+    "tp2": 621.57,
+    "qty": 56.24,
+    "qty_tp1": 28.12,
+    "qty_tp2": 28.12,
+    "risk_usd": 1762.43,
+    "balance_at_open": 176243.33,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-201044423062",
+      "stop_loss": "USDC-SLTB-19184"
+    },
+    "opened_at": "2026-04-27T08:42:41.401179+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 73.0,
+    "score": 4,
+    "reasons": [
+      "High conf (73%)",
+      "Strong ADX 62",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet"
+  },
+  "SOLUSDT": {
+    "symbol": "SOLUSDT",
+    "signal": "SELL",
+    "entry": 85.20128571,
+    "stop": 85.63,
+    "tp1": 84.63,
+    "tp2": 84.344,
+    "qty": 413.5,
+    "qty_tp1": 206.7,
+    "qty_tp2": 206.8,
+    "risk_usd": 1762.43,
+    "balance_at_open": 176243.33,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-201044446847",
+      "stop_loss": "USDC-SLTB-19185",
+      "tp1": "USDC-201044452427",
+      "tp2": "USDC-201044452594"
+    },
+    "opened_at": "2026-04-27T08:42:48.952873+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 69.5,
+    "score": 3,
+    "reasons": [
+      "Conf (70%)",
+      "Strong ADX 72",
+      "EMA bearish"
+    ],
+    "tier": "\u26a1 High-Liquidity L1s",
+    "exchange": "deribit_testnet"
   }
 }
