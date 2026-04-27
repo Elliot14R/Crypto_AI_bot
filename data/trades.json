@@ -1,37 +1,4 @@
 {
-  "LTCUSDT": {
-    "symbol": "LTCUSDT",
-    "signal": "SELL",
-    "entry": 56.13625,
-    "stop": 56.13625,
-    "tp1": 55.83,
-    "tp2": 55.68,
-    "qty": 622.5,
-    "qty_tp1": 311.2,
-    "qty_tp2": 311.3,
-    "risk_usd": 1748.99,
-    "balance_at_open": 174899.48,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "entry": "USDC-200267391661",
-      "stop_loss": "USDC-SLTB-19068",
-      "tp1": "USDC-200267397856",
-      "tp2": "USDC-200267398199"
-    },
-    "opened_at": "2026-04-24T14:10:08.792203+00:00",
-    "tp1_hit": true,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 61.1,
-    "score": 3,
-    "reasons": [
-      "Conf (61%)",
-      "ADX 21",
-      "RSI bearish (50)"
-    ],
-    "tier": "\ud83c\udfdb Institutional Alts",
-    "exchange": "deribit_testnet"
-  },
   "NEARUSDT": {
     "symbol": "NEARUSDT",
     "signal": "SELL",
@@ -61,74 +28,6 @@
       "EMA bearish"
     ],
     "tier": "\u26a1 High-Liquidity L1s",
-    "exchange": "deribit_testnet"
-  },
-  "BNBUSDT": {
-    "symbol": "BNBUSDT",
-    "signal": "SELL",
-    "entry": 628.82111111,
-    "stop": 630.65,
-    "tp1": 626.38,
-    "tp2": 625.16,
-    "qty": 55.46,
-    "qty_tp1": 27.73,
-    "qty_tp2": 27.73,
-    "risk_usd": 1309.04,
-    "balance_at_open": 174539.02,
-    "risk_mult": 0.75,
-    "order_ids": {
-      "entry": "USDC-200583327947",
-      "stop_loss": "USDC-SLTB-19036",
-      "tp1": "USDC-200583334062",
-      "tp2": "USDC-200583334682"
-    },
-    "opened_at": "2026-04-25T16:52:04.100305+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 63.3,
-    "score": 4,
-    "reasons": [
-      "Conf (63%)",
-      "Strong ADX 63",
-      "EMA bearish",
-      "1h confirms"
-    ],
-    "tier": "\ud83d\udc51 Big Three",
-    "exchange": "deribit_testnet"
-  },
-  "BCHUSDT": {
-    "symbol": "BCHUSDT",
-    "signal": "SELL",
-    "entry": 451.7008,
-    "stop": 452.682,
-    "tp1": 450.393,
-    "tp2": 449.739,
-    "qty": 77.32,
-    "qty_tp1": 38.64,
-    "qty_tp2": 38.68,
-    "risk_usd": 1313.43,
-    "balance_at_open": 175123.43,
-    "risk_mult": 0.75,
-    "order_ids": {
-      "entry": "USDC-200602118473",
-      "stop_loss": "USDC-SLTB-19037",
-      "tp1": "USDC-200602123720",
-      "tp2": "USDC-200602124018"
-    },
-    "opened_at": "2026-04-25T18:29:01.499362+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 63.8,
-    "score": 4,
-    "reasons": [
-      "Conf (64%)",
-      "Strong ADX 42",
-      "EMA bearish",
-      "1h confirms"
-    ],
-    "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
   }
 }
