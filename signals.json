@@ -1238,5 +1238,76 @@
     "exchange": "deribit_testnet",
     "type": "executed",
     "generated_at": "2026-04-27T08:42:48.953851+00:00"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "signal": "SELL",
+    "entry": 2320.6375,
+    "stop": 2327.65,
+    "tp1": 2311.25,
+    "tp2": 2306.55,
+    "qty": 15.12,
+    "qty_tp1": 7.559,
+    "qty_tp2": 7.561,
+    "risk_usd": 1754.63,
+    "balance_at_open": 175462.65,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-201068333320",
+      "stop_loss": "USDC-SLTB-19186",
+      "tp1": "USDC-201068339540",
+      "tp2": "USDC-201068339611"
+    },
+    "opened_at": "2026-04-27T10:49:00.577904+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 72.6,
+    "score": 3,
+    "reasons": [
+      "High conf (73%)",
+      "Strong ADX 41",
+      "EMA bearish"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "type": "executed",
+    "generated_at": "2026-04-27T10:49:00.578970+00:00"
+  },
+  {
+    "symbol": "SOLUSDT",
+    "signal": "SELL",
+    "entry": 85.19985714,
+    "stop": 85.574,
+    "tp1": 84.701,
+    "tp2": 84.451,
+    "qty": 411.8,
+    "qty_tp1": 205.9,
+    "qty_tp2": 205.9,
+    "risk_usd": 1754.63,
+    "balance_at_open": 175462.65,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-201068360222",
+      "stop_loss": "USDC-SLTB-19187",
+      "tp1": "USDC-201068365801",
+      "tp2": "USDC-201068366366"
+    },
+    "opened_at": "2026-04-27T10:49:09.067771+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 64.5,
+    "score": 4,
+    "reasons": [
+      "Conf (64%)",
+      "Strong ADX 53",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\u26a1 High-Liquidity L1s",
+    "exchange": "deribit_testnet",
+    "type": "executed",
+    "generated_at": "2026-04-27T10:49:09.069742+00:00"
   }
 ]
