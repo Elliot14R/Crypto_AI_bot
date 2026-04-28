@@ -1415,5 +1415,39 @@
     "exchange": "deribit_testnet",
     "type": "executed",
     "generated_at": "2026-04-27T18:58:04.444635+00:00"
+  },
+  {
+    "symbol": "BCHUSDT",
+    "signal": "SELL",
+    "entry": 446.0546,
+    "stop": 447.294,
+    "tp1": 444.402,
+    "tp2": 443.576,
+    "qty": 78.72,
+    "qty_tp1": 39.36,
+    "qty_tp2": 39.36,
+    "risk_usd": 1760.18,
+    "balance_at_open": 176017.98,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-201323867322",
+      "stop_loss": "USDC-SLTB-19265"
+    },
+    "opened_at": "2026-04-28T09:11:49.096460+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 64.8,
+    "score": 4,
+    "reasons": [
+      "Conf (65%)",
+      "ADX 21",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\ud83c\udfdb Institutional Alts",
+    "exchange": "deribit_testnet",
+    "type": "executed",
+    "generated_at": "2026-04-28T09:11:49.097641+00:00"
   }
 ]
