@@ -94,40 +94,5 @@
     ],
     "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
-  },
-  "BTCUSDT": {
-    "symbol": "BTCUSDT",
-    "signal": "SELL",
-    "entry": 76178.5,
-    "stop": 76394.0,
-    "tp1": 75891.0,
-    "tp2": 75747.5,
-    "qty": 0.4616,
-    "qty_tp1": 0.2308,
-    "qty_tp2": 0.2308,
-    "risk_usd": 1758.31,
-    "balance_at_open": 175830.55,
-    "risk_mult": 1.0,
-    "order_ids": {
-      "entry": "USDC-201438687717",
-      "stop_loss": "USDC-SLTB-19317",
-      "tp1": "USDC-201438693390",
-      "tp2": "USDC-201438693738"
-    },
-    "opened_at": "2026-04-28T18:53:38.875388+00:00",
-    "tp1_hit": false,
-    "tp2_hit": false,
-    "closed": false,
-    "confidence": 63.4,
-    "score": 5,
-    "reasons": [
-      "Conf (63%)",
-      "Strong ADX 28",
-      "RSI bearish (50)",
-      "EMA bearish",
-      "1h confirms"
-    ],
-    "tier": "\ud83d\udc51 Big Three",
-    "exchange": "deribit_testnet"
   }
 }
