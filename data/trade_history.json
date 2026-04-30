@@ -1576,5 +1576,43 @@
     "pnl": 129.7493,
     "closed_at": "2026-04-29T18:50:04.467187+00:00",
     "close_reason": "TP2 hit"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "signal": "SELL",
+    "entry": 75861.0,
+    "stop": 76206.0,
+    "tp1": 75401.0,
+    "tp2": 75171.0,
+    "qty": 0.4611,
+    "qty_tp1": 0.2305,
+    "qty_tp2": 0.2306,
+    "risk_usd": 874.6,
+    "balance_at_open": 174919.22,
+    "risk_mult": 0.5,
+    "order_ids": {
+      "entry": "USDC-201647687256",
+      "stop_loss": "USDC-SLTB-19379",
+      "tp1": "USDC-201647692753",
+      "tp2": "USDC-201647693206"
+    },
+    "opened_at": "2026-04-29T21:20:35.919498+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": true,
+    "confidence": 76.8,
+    "score": 4,
+    "reasons": [
+      "High conf (77%)",
+      "ADX 24",
+      "EMA bearish",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "close_price": 76205.21,
+    "pnl": -158.7152,
+    "closed_at": "2026-04-30T01:18:23.954997+00:00",
+    "close_reason": "STOPPED OUT \u274c"
   }
 ]
