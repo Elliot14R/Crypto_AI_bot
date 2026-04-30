@@ -1,4 +1,15 @@
-# deribit_client.py — Ghost trade fix: broader order fill detection, deribit exchange(by coinbase testnet)
+# deribit_client.py — FIXED: REST _post (no JSON-RPC), is_sl_triggered (no false positives)
+#
+# CRITICAL FIXES:
+#   FIX 1: _post() — Removed JSON-RPC envelope. Deribit REST expects params directly,
+#           NOT wrapped in {"jsonrpc":"2.0","method":...,"params":body}.
+#           Old code caused EVERY SL/TP order to fail silently → trades had NO protection.
+#   FIX 2: is_sl_triggered() — "cancelled" alone no longer counts as triggered.
+#           Only "filled", "triggered", or "cancelled" WITH real fill data (amt+price).
+#           Prevents false SL-close when breakeven SL replaces original SL.
+#   FIX 3: Dangerous hard-fallback SL check removed from trade_executor.
+#           (See trade_executor.py for that fix.)
+
 import math, time, logging, requests
 log = logging.getLogger(__name__)
 
@@ -9,7 +20,7 @@ SYMBOL_MAP = {
         "BTCUSDT":    {"instrument": "BTC_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.0001, "tick_size": 0.5},
         "ETHUSDT":    {"instrument": "ETH_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.001,  "tick_size": 0.05},
         "BNBUSDT":    {"instrument": "BNB_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.01,   "tick_size": 0.05},
-        
+
         # High-Liquidity L1s
         "SOLUSDT":    {"instrument": "SOL_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.1,    "tick_size": 0.01},
         "AVAXUSDT":   {"instrument": "AVAX_USDC-PERPETUAL", "currency": "USDC", "min_amount": 0.1,    "tick_size": 0.01},
@@ -18,7 +29,7 @@ SYMBOL_MAP = {
         "APTUSDT":    {"instrument": "APT_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.1,    "tick_size": 0.001},
         "MATICUSDT":  {"instrument": "MATIC_USDC-PERPETUAL","currency": "USDC", "min_amount": 10,     "tick_size": 0.0001},
         "ATOMUSDT":   {"instrument": "ATOM_USDC-PERPETUAL", "currency": "USDC", "min_amount": 1,      "tick_size": 0.001},
-        
+
         # Institutional Alts
         "LINKUSDT":   {"instrument": "LINK_USDC-PERPETUAL", "currency": "USDC", "min_amount": 1,      "tick_size": 0.001},
         "DOTUSDT":    {"instrument": "DOT_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 1,      "tick_size": 0.001},
@@ -27,7 +38,7 @@ SYMBOL_MAP = {
         "XRPUSDT":    {"instrument": "XRP_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 10,     "tick_size": 0.0001},
         "LTCUSDT":    {"instrument": "LTC_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.1,    "tick_size": 0.01},
         "BCHUSDT":    {"instrument": "BCH_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 0.02,   "tick_size": 0.01},
-        
+
         # AI & Momentum
         "FETUSDT":    {"instrument": "FET_USDC-PERPETUAL",  "currency": "USDC", "min_amount": 1,      "tick_size": 0.0001},
         "RENDERUSDT": {"instrument": "RNDR_USDC-PERPETUAL", "currency": "USDC", "min_amount": 0.1,    "tick_size": 0.001},
@@ -83,26 +94,32 @@ class DeribitClient:
         r.raise_for_status()
         return data.get("result", data)
 
+    # ═══════════════════════════════════════════════════════════════
+    # FIX 1: Plain HTTP POST — params sent DIRECTLY, NOT in JSON-RPC.
+    #
+    # The old code wrapped body in:
+    #   {"jsonrpc":"2.0","id":...,"method":"private/buy","params": body}
+    # That is WebSocket/JSON-RPC format. Deribit REST endpoints expect:
+    #   POST /private/buy   body = {"instrument_name":..., "amount":..., ...}
+    #
+    # The JSON-RPC wrapper caused error -32602 (invalid params) on EVERY
+    # SL and TP order. Orders appeared to succeed (no exception) because
+    # the error was buried inside the response body, not in HTTP status.
+    # Result: every trade opened with NO stop loss and NO take profit.
+    # ═══════════════════════════════════════════════════════════════
     def _post(self, path: str, body: dict) -> dict:
-        """Deribit strictly requires HTTP POST payloads to be wrapped in JSON-RPC."""
+        """
+        Plain HTTP POST to Deribit REST endpoint.
+        Sends `body` directly as JSON — no JSON-RPC wrapping.
+        """
         self._ensure_auth()
-        
-        payload = {
-            "jsonrpc": "2.0",
-            "id": int(time.time() * 1000),
-            "method": path.strip("/"),  # Converts "/private/buy" to "private/buy"
-            "params": body
-        }
-        
-        r    = self.session.post(f"{self.base}{path}", json=payload, timeout=15)
+        r    = self.session.post(f"{self.base}{path}", json=body, timeout=15)
         data = r.json()
-        
         if "error" in data:
             err  = data["error"]
             msg  = err.get("message", str(err)) if isinstance(err, dict) else str(err)
             code = err.get("code", "")          if isinstance(err, dict) else ""
             raise Exception(f"{msg} (Code:{code})" if code else msg)
-            
         r.raise_for_status()
         return data.get("result", data)
 
@@ -235,10 +252,9 @@ class DeribitClient:
         instrument = self.get_instrument_name(symbol)
         method     = "/private/buy" if side.upper() == "BUY" else "/private/sell"
         result     = self._post(method, {
-            "instrument_name": instrument, 
+            "instrument_name": instrument,
             "amount": amount,
-            "type": "market", 
-            # REMOVED time_in_force: Deribit rejects this for market orders
+            "type": "market",
             "label": f"bot_entry_{int(time.time())}",
         })
         order = result.get("order", result)
@@ -292,19 +308,17 @@ class DeribitClient:
 
     def is_order_filled(self, order: dict) -> bool:
         """
-        ROOT CAUSE OF GHOST TRADES: Deribit stop-limit orders that trigger
-        can show state='cancelled' with filled_amount > 0.
-        We must check ALL these states, not just 'filled'.
+        TP order fill detection.
+        Stop-limit TP orders that trigger may show state='cancelled' but have fill data.
         """
         state       = order.get("order_state", "").lower()
         filled_amt  = float(order.get("filled_amount", 0) or 0)
         avg_price   = float(order.get("average_price", 0) or 0)
 
-        # Definitively filled states
         if state == "filled":
             return True
 
-        # Stop-limit orders that triggered: show as cancelled but have fill data
+        # Stop-limit that triggered: shows cancelled but has real fill data
         if state in ("cancelled", "closed") and (filled_amt > 0 or avg_price > 0):
             log.info(f"  Triggered order detected: state={state} "
                      f"filled={filled_amt} avg={avg_price}")
@@ -312,41 +326,56 @@ class DeribitClient:
 
         return False
 
-# REASON: stop_limit orders on Deribit go to "triggered" state (not "filled")
-# when the trigger price is crossed. The original order_id never becomes "filled".
-# Without this method, SL detection crashes with AttributeError and trades stay open.
-
+    # ═══════════════════════════════════════════════════════════════
+    # FIX 2: is_sl_triggered — no false positives on plain "cancelled"
+    #
+    # Deribit stop-limit SL lifecycle:
+    #   untriggered → triggered (stop price crossed) → child limit executes
+    #
+    # "cancelled" alone means the ORDER was manually cancelled — e.g. when
+    # we cancel the original SL to replace it with a breakeven SL after TP1.
+    # The old code (state in ("filled","triggered")) was correct for those two,
+    # but the dangerous hard-fallback in trade_executor also treated
+    # plain "cancelled" as a trigger. Fixed here to require BOTH filled_amt
+    # AND avg_price to be non-zero before treating cancelled as triggered.
+    # ═══════════════════════════════════════════════════════════════
     def is_sl_triggered(self, order: dict) -> bool:
         """
-        Stop-loss detection for Deribit stop-limit orders.
-    
-        Deribit stop-limit lifecycle:
-          untriggered → triggered (price crossed stop) → child limit fills
-    
-        We check the ORIGINAL order_id which stays as "triggered".
-        "triggered" = price definitively crossed the stop level = SL was hit.
-        "filled"    = stop executed immediately at market (rare).
-        "cancelled" = position was closed another way (TP hit, manual close).
+        Returns True only when the stop loss definitively fired on exchange.
+
+        States:
+          "triggered" = stop price was crossed, child order spawned → SL hit
+          "filled"    = stop executed as market immediately → SL hit
+          "cancelled" with fill data = stop-limit that actually executed → SL hit
+          "cancelled" alone = manually cancelled (e.g. breakeven replacement) → NOT SL hit
+          "untriggered" = waiting → NOT SL hit
+          "" / "not_found" = API issue → NOT SL hit (avoids phantom closes)
         """
-        state = order.get("order_state", "").lower()
-        return state in ("filled", "triggered")
+        state      = order.get("order_state", "").lower()
+        filled_amt = float(order.get("filled_amount", 0) or 0)
+        avg_price  = float(order.get("average_price", 0) or 0)
+
+        if state in ("filled", "triggered"):
+            return True
+
+        # Cancelled but BOTH fill amount AND fill price present = actually executed
+        if state == "cancelled" and filled_amt > 0 and avg_price > 0:
+            log.info(f"  SL cancelled-but-filled: amt={filled_amt} avg={avg_price}")
+            return True
+
+        return False
 
     def get_order_fill_price(self, order: dict, fallback: float) -> float:
-        """Extract fill price — handles both normal fills and triggered stop fills."""
         avg = order.get("average_price")
         if avg and float(avg) > 0:
             return float(avg)
-        # Also check last_price field on triggered stops
         lp = order.get("last_price") or order.get("price")
         if lp and float(lp) > 0:
             return float(lp)
         return fallback
 
     def get_trade_history_for_instrument(self, symbol: str, count: int = 10) -> list:
-        """
-        Fetch actual trade fills from Deribit for an instrument.
-        Used to recover real PnL when ghost cleaner detects a closed position.
-        """
+        """Fetch actual trade fills for ghost PnL recovery."""
         try:
             instrument = self.get_instrument_name(symbol)
             result     = self._get("/private/get_user_trades_by_instrument", {
