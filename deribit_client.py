@@ -257,7 +257,6 @@ class DeribitClient:
             "instrument_name": instrument,
             "amount":          amount,
             "type":            "market",
-            "time_in_force":   "immediate_or_cancel",  # required for market orders on testnet
             "label":           f"bot_entry_{int(time.time())}",
         })
         order = result.get("order", result)
