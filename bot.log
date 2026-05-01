@@ -29764,3 +29764,116 @@ SCAN — 2026-05-01 10:44 UTC
 ════════════════════════════════════════════════════════
 DONE — 0 signal(s) | $174323.52
 ════════════════════════════════════════════════════════
+2026-05-01 11:44:35,876 
+════════════════════════════════════════════════════════
+SCAN — 2026-05-01 11:44 UTC
+════════════════════════════════════════════════════════
+2026-05-01 11:44:36,811   ACTIVE HOURS | conf≥60% | score≥1 | ADX≥15 | ✓ Normal vol — BTC ATR 0.16%
+2026-05-01 11:44:37,017 ✓ Deribit testnet authenticated
+2026-05-01 11:44:37,126 ✓ Tradeable: 22 — ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'AVAXUSDT', 'NEARUSDT', 'SUIUSDT', 'APTUSDT', 'ATOMUSDT', 'LINKUSDT', 'DOTUSDT', 'UNIUSDT', 'AAVEUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'FETUSDT', 'ADAUSDT', 'INJUSDT', 'ARBUSDT', 'OPUSDT', 'SEIUSDT']
+2026-05-01 11:44:37,578 ✅ Deribit OK — $174388.01 | 22 symbols
+2026-05-01 11:44:38,015   ACTIVE HOURS | conf≥60% | score≥1 | ADX≥15 | risk:1.00
+2026-05-01 11:44:38,015 
+[0] Balance...
+2026-05-01 11:44:39,210   Balance: $174388.76 | upnl:-52.28 | positions:3
+2026-05-01 11:44:39,210 
+[1] Monitor trades...
+2026-05-01 11:44:39,210   Monitoring 2 trade(s)
+2026-05-01 11:44:39,951 
+[2] Stale trade check...
+2026-05-01 11:44:39,951   ⏰ AVAXUSDT: 48h — time-based exit
+2026-05-01 11:44:40,058   Deribit error: order_not_found | Code:10004 | Data: | Path:/private/cancel | Params:{'order_id': 'USDC-SLTS-19363'}
+2026-05-01 11:44:40,058   cancel USDC-SLTS-19363: order_not_found (Code:10004)
+2026-05-01 11:44:40,163   Deribit error: order_not_found | Code:10004 | Data: | Path:/private/cancel | Params:{'order_id': 'USDC-201531928336'}
+2026-05-01 11:44:40,163   cancel USDC-201531928336: order_not_found (Code:10004)
+2026-05-01 11:44:40,268   Deribit error: order_not_found | Code:10004 | Data: | Path:/private/cancel | Params:{'order_id': 'USDC-201531928861'}
+2026-05-01 11:44:40,268   cancel USDC-201531928861: order_not_found (Code:10004)
+2026-05-01 11:44:41,068   ⏰ LINKUSDT: 48h — time-based exit
+2026-05-01 11:44:41,175   Deribit error: order_not_found | Code:10004 | Data: | Path:/private/cancel | Params:{'order_id': 'USDC-SLTS-19364'}
+2026-05-01 11:44:41,175   cancel USDC-SLTS-19364: order_not_found (Code:10004)
+2026-05-01 11:44:41,281   Deribit error: order_not_found | Code:10004 | Data: | Path:/private/cancel | Params:{'order_id': 'USDC-201531976268'}
+2026-05-01 11:44:41,281   cancel USDC-201531976268: order_not_found (Code:10004)
+2026-05-01 11:44:41,385   Deribit error: order_not_found | Code:10004 | Data: | Path:/private/cancel | Params:{'order_id': 'USDC-201531976784'}
+2026-05-01 11:44:41,386   cancel USDC-201531976784: order_not_found (Code:10004)
+2026-05-01 11:44:42,097 
+[3] Ghost trade recovery...
+2026-05-01 11:44:43,295   Balance: $174389.50 | upnl:-51.54 | positions:3
+2026-05-01 11:44:43,296 
+[4] Scanning 24 coins | Open:0/4
+2026-05-01 11:44:43,296 
+  ── BTCUSDT (👑 Big Three) ──
+2026-05-01 11:44:45,212     ML: NO_TRADE 43.7% (need ≥60%)
+2026-05-01 11:44:45,413 
+  ── ETHUSDT (👑 Big Three) ──
+2026-05-01 11:44:47,328     ML: SELL 41.5% (need ≥60%)
+2026-05-01 11:44:47,528 
+  ── BNBUSDT (👑 Big Three) ──
+2026-05-01 11:44:49,174     ML: SELL 49.2% (need ≥60%)
+2026-05-01 11:44:49,374 
+  ── SOLUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:44:50,935     ML: SELL 54.6% (need ≥60%)
+2026-05-01 11:44:51,135 
+  ── AVAXUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:44:52,753     ML: SELL 47.4% (need ≥60%)
+2026-05-01 11:44:52,953 
+  ── NEARUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:44:54,249     ML: NO_TRADE 35.0% (need ≥60%)
+2026-05-01 11:44:54,449 
+  ── SUIUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:44:55,867     ML: SELL 44.8% (need ≥60%)
+2026-05-01 11:44:56,067 
+  ── APTUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:44:57,519     ML: SELL 37.1% (need ≥60%)
+2026-05-01 11:44:57,720 
+  ── MATICUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:44:59,133     ML: SELL 46.7% (need ≥60%)
+2026-05-01 11:44:59,333 
+  ── ATOMUSDT (⚡ High-Liquidity L1s) ──
+2026-05-01 11:45:00,659     ML: NO_TRADE 50.8% (need ≥60%)
+2026-05-01 11:45:00,859 
+  ── LINKUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:02,782     ML: SELL 39.2% (need ≥60%)
+2026-05-01 11:45:02,982 
+  ── DOTUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:04,489     ML: SELL 41.5% (need ≥60%)
+2026-05-01 11:45:04,690 
+  ── UNIUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:06,387     ML: SELL 40.3% (need ≥60%)
+2026-05-01 11:45:06,587 
+  ── AAVEUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:08,075     ML: SELL 49.3% (need ≥60%)
+2026-05-01 11:45:08,275 
+  ── XRPUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:09,850     ML: BUY 42.6% (need ≥60%)
+2026-05-01 11:45:10,050 
+  ── LTCUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:11,688     ML: SELL 45.0% (need ≥60%)
+2026-05-01 11:45:11,889 
+  ── BCHUSDT (🏛 Institutional Alts) ──
+2026-05-01 11:45:13,177     ML: SELL 52.5% (need ≥60%)
+2026-05-01 11:45:13,378 
+  ── FETUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:14,856     ML: BUY 38.8% (need ≥60%)
+2026-05-01 11:45:15,056 
+  ── RENDERUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:16,374     ML: SELL 43.9% (need ≥60%)
+2026-05-01 11:45:16,574 
+  ── ADAUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:18,011     ML: SELL 51.7% (need ≥60%)
+2026-05-01 11:45:18,211 
+  ── INJUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:19,662     ML: SELL 36.4% (need ≥60%)
+2026-05-01 11:45:19,863 
+  ── ARBUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:21,172     ML: NO_TRADE 36.9% (need ≥60%)
+2026-05-01 11:45:21,373 
+  ── OPUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:22,839     ML: SELL 35.9% (need ≥60%)
+2026-05-01 11:45:23,040 
+  ── SEIUSDT (🤖 AI & Momentum) ──
+2026-05-01 11:45:24,457     ML: NO_TRADE 38.4% (need ≥60%)
+2026-05-01 11:45:25,862   Balance: $174398.46 | upnl:-42.58 | positions:3
+2026-05-01 11:45:25,862 
+════════════════════════════════════════════════════════
+DONE — 0 signal(s) | $174388.76
+════════════════════════════════════════════════════════
