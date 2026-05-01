@@ -252,8 +252,11 @@ def execute_trade(deribit: DeribitClient, sig: dict, risk_mult: float, balance: 
             tp1 =deribit.round_price(symbol,actual_entry-atr*ATR_TARGET1_MULT)
             tp2 =deribit.round_price(symbol,actual_entry-atr*ATR_TARGET2_MULT)
 
+        tick = deribit.get_tick_size(symbol)
+        sl_limit = deribit.round_price(symbol, stop - tick if signal=="BUY" else stop + tick)
+
         for label, qty, price, sl_p, key in [
-            ("SL",  total_q, stop, stop, "stop_loss"),
+            ("SL",  total_q, sl_limit, stop, "stop_loss"),
             ("TP1", qty_tp1, tp1,  None, "tp1"),
             ("TP2", qty_tp2, tp2,  None, "tp2"),
         ]:
@@ -294,6 +297,70 @@ def execute_trade(deribit: DeribitClient, sig: dict, risk_mult: float, balance: 
 
 # ════════════ MONITOR OPEN TRADES ════════════════════════════════════
 
+def _replace_missing_orders(deribit: DeribitClient, symbol: str, trade: dict):
+    """Re-place any SL or TP orders that are missing from an open trade."""
+    oids   = trade.get("order_ids", {})
+    signal = trade["signal"]
+    entry  = float(trade["entry"])
+    stop   = float(trade.get("stop", 0))
+    tp1    = float(trade.get("tp1", 0))
+    tp2    = float(trade.get("tp2", 0))
+    qty    = float(trade.get("qty", 0))
+    qty_t1 = float(trade.get("qty_tp1", 0))
+    qty_t2 = float(trade.get("qty_tp2", 0))
+    dec    = 4 if entry < 10 else 2
+    sl_side = "SELL" if signal == "BUY" else "BUY"
+    tp_side = "SELL" if signal == "BUY" else "BUY"
+    changed = False
+
+    # Re-place SL
+    sl_oid = str(oids.get("stop_loss", ""))
+    if stop > 0 and qty > 0 and (not sl_oid or sl_oid in ("", "None")):
+        try:
+            # Use limit price slightly worse than trigger to guarantee fill
+            tick = deribit.get_tick_size(symbol)
+            sl_limit = deribit.round_price(symbol, stop - tick if signal == "BUY" else stop + tick)
+            res = deribit.place_limit_order(symbol, sl_side, qty, sl_limit, stop_price=stop)
+            o   = res.get("order", res)
+            oid = str(o.get("order_id", ""))
+            if oid:
+                trade["order_ids"]["stop_loss"] = oid
+                log.info(f"  🛠 Re-placed SL for {symbol} @ limit {sl_limit:.{dec}f} / trigger {stop:.{dec}f} id:{oid}")
+                changed = True
+        except Exception as e:
+            log.warning(f"  SL re-place {symbol}: {e}")
+
+    # Re-place TP1
+    tp1_oid = str(oids.get("tp1", ""))
+    if tp1 > 0 and qty_t1 > 0 and not trade.get("tp1_hit") and (not tp1_oid or tp1_oid in ("", "None")):
+        try:
+            res = deribit.place_limit_order(symbol, tp_side, qty_t1, tp1)
+            o   = res.get("order", res)
+            oid = str(o.get("order_id", ""))
+            if oid:
+                trade["order_ids"]["tp1"] = oid
+                log.info(f"  🛠 Re-placed TP1 for {symbol} @ {tp1:.{dec}f} id:{oid}")
+                changed = True
+        except Exception as e:
+            log.warning(f"  TP1 re-place {symbol}: {e}")
+
+    # Re-place TP2
+    tp2_oid = str(oids.get("tp2", ""))
+    if tp2 > 0 and qty_t2 > 0 and not trade.get("tp2_hit") and (not tp2_oid or tp2_oid in ("", "None")):
+        try:
+            res = deribit.place_limit_order(symbol, tp_side, qty_t2, tp2)
+            o   = res.get("order", res)
+            oid = str(o.get("order_id", ""))
+            if oid:
+                trade["order_ids"]["tp2"] = oid
+                log.info(f"  🛠 Re-placed TP2 for {symbol} @ {tp2:.{dec}f} id:{oid}")
+                changed = True
+        except Exception as e:
+            log.warning(f"  TP2 re-place {symbol}: {e}")
+
+    return changed
+
+
 def fp(o, fb):
     p = float(o.get("average_price") or o.get("last_price") or o.get("price") or 0)
     return p if p > 0 else fb
@@ -325,6 +392,11 @@ def check_open_trades(deribit: DeribitClient):
 
     for symbol, trade in list(trades.items()):
         if trade.get("closed"): to_remove.append(symbol); continue
+
+        # Re-place any missing SL/TP orders before monitoring
+        if _replace_missing_orders(deribit, symbol, trade):
+            save_trades(trades)  # persist new order IDs immediately
+
         oids  = trade.get("order_ids", {})
         entry = float(trade["entry"])
         dec   = 4 if entry < 10 else 2
