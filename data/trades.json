@@ -29,5 +29,65 @@
     ],
     "tier": "\ud83c\udfdb Institutional Alts",
     "exchange": "deribit_testnet"
+  },
+  "BNBUSDT": {
+    "symbol": "BNBUSDT",
+    "signal": "SELL",
+    "entry": 619.35,
+    "stop": 620.86,
+    "tp1": 617.34,
+    "tp2": 616.34,
+    "qty": 14.1,
+    "qty_tp1": 7.05,
+    "qty_tp2": 7.05,
+    "risk_usd": 1747.06,
+    "balance_at_open": 174705.67,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-202206277630"
+    },
+    "opened_at": "2026-05-01T19:40:46.827821+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 61.8,
+    "score": 3,
+    "reasons": [
+      "Conf (62%)",
+      "ADX 24",
+      "1h confirms"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet"
+  },
+  "LTCUSDT": {
+    "symbol": "LTCUSDT",
+    "signal": "SELL",
+    "entry": 55.72,
+    "stop": 55.97,
+    "tp1": 55.38,
+    "tp2": 55.22,
+    "qty": 156.6,
+    "qty_tp1": 78.2,
+    "qty_tp2": 78.4,
+    "risk_usd": 1747.06,
+    "balance_at_open": 174705.67,
+    "risk_mult": 1.0,
+    "order_ids": {
+      "entry": "USDC-202206364012"
+    },
+    "opened_at": "2026-05-01T19:41:13.738444+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 65.1,
+    "score": 3,
+    "reasons": [
+      "Conf (65%)",
+      "Strong ADX 38",
+      "RSI bearish (53)"
+    ],
+    "tier": "\ud83c\udfdb Institutional Alts",
+    "exchange": "deribit_testnet"
   }
 }
