@@ -1764,5 +1764,36 @@
     "exchange": "deribit_testnet",
     "type": "executed",
     "generated_at": "2026-05-01T19:41:13.739732+00:00"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "signal": "SELL",
+    "entry": 2298.7,
+    "stop": 2306.05,
+    "tp1": 2288.9,
+    "tp2": 2283.95,
+    "qty": 3.798,
+    "qty_tp1": 1.899,
+    "qty_tp2": 1.899,
+    "risk_usd": 873.27,
+    "balance_at_open": 174653.59,
+    "risk_mult": 0.5,
+    "order_ids": {
+      "entry": "USDC-202217035916"
+    },
+    "opened_at": "2026-05-01T20:35:38.918754+00:00",
+    "tp1_hit": false,
+    "tp2_hit": false,
+    "closed": false,
+    "confidence": 66.7,
+    "score": 2,
+    "reasons": [
+      "Conf (67%)",
+      "Strong ADX 28"
+    ],
+    "tier": "\ud83d\udc51 Big Three",
+    "exchange": "deribit_testnet",
+    "type": "executed",
+    "generated_at": "2026-05-01T20:35:38.920111+00:00"
   }
 ]
