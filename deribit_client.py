@@ -341,7 +341,7 @@ class DeribitClient:
     # plain "cancelled" as a trigger. Fixed here to require BOTH filled_amt
     # AND avg_price to be non-zero before treating cancelled as triggered.
     # ═══════════════════════════════════════════════════════════════
-   def is_sl_triggered(self, order: dict) -> bool:
+    def is_sl_triggered(self, order: dict) -> bool:
         """
         Returns True only when the stop loss definitively fired on exchange.
 
