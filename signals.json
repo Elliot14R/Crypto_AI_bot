@@ -1795,5 +1795,18 @@
     "exchange": "deribit_testnet",
     "type": "executed",
     "generated_at": "2026-05-01T20:35:38.920111+00:00"
+  },
+  {
+    "symbol": "BCHUSDT",
+    "signal": "SELL",
+    "confidence": 72.0,
+    "score": 2,
+    "reasons": [
+      "High conf (72%)",
+      "Strong ADX 40"
+    ],
+    "rejected": true,
+    "reject_reason": "score 2<3",
+    "generated_at": "2026-05-02T04:31:11.031947+00:00"
   }
 ]
